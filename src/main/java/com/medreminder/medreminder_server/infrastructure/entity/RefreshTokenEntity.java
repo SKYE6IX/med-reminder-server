@@ -14,7 +14,7 @@ public class RefreshTokenEntity {
     @UuidGenerator
     private String id;
 
-    @Column(name = "hash_token")
+    @Column(name = "hash_token", unique = true, nullable = false)
     private String hashToken;
 
     @Column(name = "expired_at")
@@ -29,11 +29,15 @@ public class RefreshTokenEntity {
     public RefreshTokenEntity() {
     }
 
-    public RefreshTokenEntity(String id, String hashToken, Instant expiredAt, boolean revoked) {
+    public RefreshTokenEntity(String id,
+                              String hashToken,
+                              Instant expiredAt,
+                              boolean revoked, UserEntity user) {
         this.id = id;
         this.hashToken = hashToken;
         this.expiredAt = expiredAt;
         this.revoked = revoked;
+        this.user = user;
     }
 
     public String getId() {
@@ -50,5 +54,9 @@ public class RefreshTokenEntity {
 
     public boolean isRevoked() {
         return revoked;
+    }
+
+    public UserEntity getUser() {
+        return user;
     }
 }

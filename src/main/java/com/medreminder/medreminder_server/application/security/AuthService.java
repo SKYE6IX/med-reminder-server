@@ -6,8 +6,10 @@ import com.medreminder.medreminder_server.application.dtos.user.LoginRequest;
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
 import com.medreminder.medreminder_server.domain.UserService;
 import com.medreminder.medreminder_server.domain.model.User;
+import com.medreminder.medreminder_server.infrastructure.entity.RefreshTokenEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.mapper.UserMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,10 +22,15 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 
 @Service
 public class AuthService {
+
+    @Value("${jwt.refresh-expiry-days}")
+    private int refreshExpiryDays;
 
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
@@ -61,14 +68,25 @@ public class AuthService {
 
         User newUser = userService.createUser(request);
 
-//        Generate token for user
+        //Generate token for user
         String token = jwtUtil.generateToken(newUser.getEmail());
 
+        String refreshToken = generateRandomToken();
+
+        RefreshTokenEntity refreshTokenEntity = createRefreshTokenEntity(refreshToken,userMapper.toEntity(newUser));
+
+
+//        Create a user with entity
+//        Create access token and a new Refresh Token.
+//        We need to send the raw access token and refresh token to User
+//        We need to save the hash of refresh token into database.
+//
+
+
+
 //        Generate refreshToken
-//        String refreshToken = jwtUtil.generateRefreshToken();
 
 //        return new AuthResponse(newUser.getId(),newUser.getEmail(),token,refreshToken);
-
         return null;
     }
 
@@ -105,15 +123,29 @@ public class AuthService {
         return null;
     }
 
-    private static String generateRefreshToken() {
+
+    private RefreshTokenEntity createRefreshTokenEntity(String rawToken, UserEntity userEntity) {
+        String hashToken = hashRefreshToken(rawToken);;
+
+        Instant expiryTime = Instant.now().plus(refreshExpiryDays, ChronoUnit.DAYS);
+
+        return new RefreshTokenEntity(null,hashToken,expiryTime,false,userEntity);
+    }
+
+    private static String generateRandomToken() {
         byte[] randomBytes = new byte[32];
         secureRandom.nextBytes(randomBytes);
         return base64Encoder.encodeToString(randomBytes);
     }
 
-    private static String hashRefreshToken(String refreshToken) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(refreshToken.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(hash);
+    private static String hashRefreshToken(String refreshToken) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(refreshToken.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hash);
+        }  catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
+
 }
