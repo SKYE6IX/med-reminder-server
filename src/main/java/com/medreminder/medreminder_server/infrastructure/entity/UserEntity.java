@@ -17,10 +17,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-
 @Entity(name = "USERS")
 public class UserEntity implements UserDetails {
-
     @Id
     @GeneratedValue()
     @UuidGenerator
@@ -95,9 +93,9 @@ public class UserEntity implements UserDetails {
         return updatedAt;
     }
 
-    public RefreshTokenEntity getRefreshToken() {
-        return refreshToken;
-    }
+//    public RefreshTokenEntity getRefreshToken() {
+//        return refreshToken;
+//    }
 
     public void setRefreshToken(RefreshTokenEntity refreshToken) {
         this.refreshToken = refreshToken;

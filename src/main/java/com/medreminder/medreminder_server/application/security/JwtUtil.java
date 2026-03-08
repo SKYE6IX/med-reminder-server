@@ -32,7 +32,7 @@ public class JwtUtil {
                 .subject(email)
                 .claim("token_type","access")
                 .issuedAt(new Date(now))
-                .expiration(new Date(now + 1000 * 60 * 60))
+                .expiration(new Date(now + 1000 * 60 * 30))
                 .signWith(getSigningKey(),Jwts.SIG.HS256)
                 .compact();
     }
@@ -82,20 +82,6 @@ public class JwtUtil {
             return false;
         }
     }
-
-//    public synchronized String getValidAccessToken(String email, String refreshToken) {
-//        if (accessToken != null && isTokenExpired(accessToken)
-//                && isTokenValid(accessToken, email, "access")) {
-//            return accessToken;
-//        }
-//        // Use refresh token to generate new access token
-//        if (isTokenValid(refreshToken, email, "refresh")) {
-//            accessToken = generateToken(email);
-//            return accessToken;
-//        } else {
-//            throw new IllegalStateException("Refresh token invalid or expired. Please re-generate.");
-//        }
-//    }
 }
 
 

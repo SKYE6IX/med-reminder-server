@@ -2,9 +2,10 @@ package com.medreminder.medreminder_server.infrastructure.entity;
 
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.*;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity(name = "REFRESH_TOKEN")
 public class RefreshTokenEntity {
@@ -24,7 +25,16 @@ public class RefreshTokenEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private UserEntity user;
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     public RefreshTokenEntity() {
     }
@@ -58,5 +68,17 @@ public class RefreshTokenEntity {
 
     public UserEntity getUser() {
         return user;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setRevoked(boolean revoked) {
+        this.revoked = revoked;
     }
 }

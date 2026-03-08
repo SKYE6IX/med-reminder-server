@@ -30,7 +30,6 @@ public class AuthController {
         return  ResponseEntity.ok(response);
     }
 
-
     @PostMapping(value = "/login")
     ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
 

@@ -4,4 +4,8 @@ import com.medreminder.medreminder_server.infrastructure.entity.RefreshTokenEnti
 import org.springframework.data.repository.CrudRepository;
 
 public interface JpaRefreshTokenRepository extends CrudRepository<RefreshTokenEntity, String> {
+
+    RefreshTokenEntity findByHashToken(String hashToken);
+
+    RefreshTokenEntity findByUserId(String userId);
 }
