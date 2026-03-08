@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.Environment;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,7 +28,7 @@ public class JwtUtilUnitTest {
 
     @BeforeEach
     void setUp() {
-        when(environment.getProperty("med.reminder.jwt.key")).thenReturn(TEST_SECRET);
+        when(environment.getProperty(any(String.class))).thenReturn(TEST_SECRET);
         jwtUtil = new JwtUtil(environment);
     }
 
@@ -58,24 +59,5 @@ public class JwtUtilUnitTest {
         String claimType = jwtUtil.extractClaim(token, "token_type");
 
         assertThat(claimType).isEqualTo("access");
-    }
-
-    @Test
-    void generateRefreshToken_ShouldReturnNonNullToken(){
-
-        String token = jwtUtil.generateRefreshToken("testUser@mail.com");
-
-        assertThat(token).isNotNull().isNotEmpty();
-    }
-
-    @Test
-    void generateRefreshToken_ShouldHaveAccessTokenType() {
-        String email = "testUser@mail.com";
-
-        String token = jwtUtil.generateRefreshToken(email);
-
-        String claimType = jwtUtil.extractClaim(token, "token_type");
-
-        assertThat(claimType).isEqualTo("refresh");
     }
 }

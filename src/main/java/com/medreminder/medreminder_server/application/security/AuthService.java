@@ -16,6 +16,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
+
 @Service
 public class AuthService {
 
@@ -24,6 +30,9 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UserMapper userMapper;
+
+    private static final SecureRandom secureRandom = new SecureRandom();
+    private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder().withoutPadding();
 
 
     public AuthService(AuthenticationManager authenticationManager,
@@ -56,9 +65,11 @@ public class AuthService {
         String token = jwtUtil.generateToken(newUser.getEmail());
 
 //        Generate refreshToken
-        String refreshToken = jwtUtil.generateRefreshToken(newUser.getEmail());
+//        String refreshToken = jwtUtil.generateRefreshToken();
 
-        return new AuthResponse(newUser.getId(),newUser.getEmail(),token,refreshToken);
+//        return new AuthResponse(newUser.getId(),newUser.getEmail(),token,refreshToken);
+
+        return null;
     }
 
 
@@ -88,8 +99,21 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(user.getEmail());
 
-        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+//        String refreshToken = jwtUtil.generateRefreshToken();
 
-        return new AuthResponse(user.getId(), user.getEmail(), token, refreshToken);
+//        return new AuthResponse(user.getId(), user.getEmail(), token, refreshToken);
+        return null;
+    }
+
+    private static String generateRefreshToken() {
+        byte[] randomBytes = new byte[32];
+        secureRandom.nextBytes(randomBytes);
+        return base64Encoder.encodeToString(randomBytes);
+    }
+
+    private static String hashRefreshToken(String refreshToken) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(refreshToken.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(hash);
     }
 }

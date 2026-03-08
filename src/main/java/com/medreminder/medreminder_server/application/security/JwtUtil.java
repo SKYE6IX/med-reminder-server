@@ -37,17 +37,6 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String generateRefreshToken(String email) {
-        long now = System.currentTimeMillis();
-        return Jwts.builder()
-                .subject(email)
-                .claim("token_type", "refresh")
-                .issuedAt(new Date(now))
-                .expiration(new Date(now + 1000L * 60 * 60 * 24 * 365))
-                .signWith(getSigningKey(),Jwts.SIG.HS256)
-                .compact();
-    }
-
     public String extractClaim(String token, String claimKey) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -65,7 +54,6 @@ public class JwtUtil {
                 .getPayload()
                 .getSubject();
     }
-
 
     public boolean isTokenExpired(String token){
         try {
@@ -95,9 +83,7 @@ public class JwtUtil {
         }
     }
 
-
 //    public synchronized String getValidAccessToken(String email, String refreshToken) {
-//
 //        if (accessToken != null && isTokenExpired(accessToken)
 //                && isTokenValid(accessToken, email, "access")) {
 //            return accessToken;

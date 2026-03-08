@@ -47,6 +47,13 @@ public class UserEntity implements UserDetails {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @OneToOne(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private RefreshTokenEntity refreshToken;
+
     public UserEntity() {}
 
     public UserEntity(String id, String email, String name, String hashPassword) {
@@ -86,6 +93,14 @@ public class UserEntity implements UserDetails {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public RefreshTokenEntity getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(RefreshTokenEntity refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     @Override
