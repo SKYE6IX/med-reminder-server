@@ -1,6 +1,6 @@
 package com.medreminder.medreminder_server.domain;
 
-import com.medreminder.medreminder_server.infrastructure.entity.UserEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 
 import java.util.Optional;
 

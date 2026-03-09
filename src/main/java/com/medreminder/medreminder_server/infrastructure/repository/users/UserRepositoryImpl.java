@@ -1,7 +1,7 @@
-package com.medreminder.medreminder_server.infrastructure.repository;
+package com.medreminder.medreminder_server.infrastructure.repository.users;
 
 import com.medreminder.medreminder_server.domain.UserRepository;
-import com.medreminder.medreminder_server.infrastructure.entity.UserEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

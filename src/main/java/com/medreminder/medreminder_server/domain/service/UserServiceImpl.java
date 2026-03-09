@@ -5,7 +5,7 @@ import com.medreminder.medreminder_server.application.dtos.user.UpdateUserComman
 import com.medreminder.medreminder_server.domain.UserRepository;
 import com.medreminder.medreminder_server.domain.UserService;
 import com.medreminder.medreminder_server.domain.model.User;
-import com.medreminder.medreminder_server.infrastructure.entity.UserEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.mapper.UserMapper;
 
 public class UserServiceImpl implements UserService {

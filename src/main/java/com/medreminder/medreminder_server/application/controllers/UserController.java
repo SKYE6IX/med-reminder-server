@@ -12,14 +12,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserService userService;
-
     @Autowired
     public UserController(UserService userService) {
-        this.userService = userService;
     }
 
-    @GetMapping(value = "/profile")
+    @GetMapping()
     public ResponseEntity<?> getUser(@AuthenticationPrincipal UserDetails userDetails) {
 
         return  ResponseEntity.ok(userDetails);

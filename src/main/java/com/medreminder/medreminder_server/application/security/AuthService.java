@@ -6,10 +6,10 @@ import com.medreminder.medreminder_server.application.dtos.user.LoginRequest;
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
 import com.medreminder.medreminder_server.domain.UserService;
 import com.medreminder.medreminder_server.domain.model.User;
-import com.medreminder.medreminder_server.infrastructure.entity.RefreshTokenEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.UserEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.users.RefreshTokenEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.mapper.UserMapper;
-import com.medreminder.medreminder_server.infrastructure.repository.JpaRefreshTokenRepository;
+import com.medreminder.medreminder_server.infrastructure.repository.users.JpaRefreshTokenRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,7 +26,6 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
-import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -124,6 +123,8 @@ public class AuthService {
 
         return new AuthResponse(user.getId(), user.getEmail(), token, refreshToken);
     }
+
+
 
     public AuthResponse refreshToken(String token) {
 

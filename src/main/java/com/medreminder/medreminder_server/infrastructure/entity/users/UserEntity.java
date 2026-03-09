@@ -1,4 +1,4 @@
-package com.medreminder.medreminder_server.infrastructure.entity;
+package com.medreminder.medreminder_server.infrastructure.entity.users;
 
 
 import jakarta.persistence.*;

@@ -5,8 +5,7 @@ import com.medreminder.medreminder_server.application.dtos.user.UpdateUserComman
 import com.medreminder.medreminder_server.domain.UserRepository;
 import com.medreminder.medreminder_server.domain.model.User;
 import com.medreminder.medreminder_server.domain.service.UserServiceImpl;
-import com.medreminder.medreminder_server.infrastructure.entity.UserEntity;
-import com.medreminder.medreminder_server.infrastructure.repository.UserRepositoryImpl;
+import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
