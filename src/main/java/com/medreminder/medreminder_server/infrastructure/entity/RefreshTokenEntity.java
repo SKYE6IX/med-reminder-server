@@ -6,6 +6,7 @@ import org.hibernate.annotations.*;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity(name = "REFRESH_TOKEN")
 public class RefreshTokenEntity {
@@ -23,7 +24,7 @@ public class RefreshTokenEntity {
 
     private boolean revoked;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "user_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private UserEntity user;
@@ -80,5 +81,25 @@ public class RefreshTokenEntity {
 
     public void setRevoked(boolean revoked) {
         this.revoked = revoked;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if ( this == obj ) {
+            return true;
+        }
+
+        if ( obj == null || getClass() != obj.getClass() ) {
+            return false;
+        }
+
+        RefreshTokenEntity rte = (RefreshTokenEntity) obj;
+
+        return Objects.equals( hashToken, rte.hashToken);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash( id );
     }
 }

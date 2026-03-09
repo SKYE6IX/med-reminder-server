@@ -6,10 +6,7 @@ import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequ
 import com.medreminder.medreminder_server.application.security.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -35,6 +32,12 @@ public class AuthController {
 
         AuthResponse response = authService.loginUserWithEmail(loginRequest);
 
+        return  ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/refresh/{refreshToken}")
+    ResponseEntity<?> refreshToken(@PathVariable String refreshToken) {
+        AuthResponse response = authService.refreshToken(refreshToken);
         return  ResponseEntity.ok(response);
     }
 }

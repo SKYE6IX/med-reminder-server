@@ -26,6 +26,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -89,6 +90,7 @@ public class AuthService {
     public AuthResponse loginUserWithEmail(LoginRequest loginRequest){
 
         String email = loginRequest.email();
+
         String password = loginRequest.password();
 
         User existingUser = userService.findUserByEmail(email);
@@ -99,17 +101,16 @@ public class AuthService {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
         );
+
         if(!auth.isAuthenticated()){
             throw new BadCredentialsException("Email or password is invalid");
         }
 
         User user = userMapper.toDomain((UserEntity) auth.getPrincipal());
 
-//        Get user refresh token and revoke it and create a new one for them.
-        RefreshTokenEntity existingRefreshToken = jpaRefreshTokenRepository.findByUserId(user.getId());
-
-//      Revoke the token.
-        revokeRefreshToken(existingRefreshToken);
+        jpaRefreshTokenRepository
+                .findByUserIdAndRevokedFalse(user.getId())
+                .ifPresent(this::revokeRefreshToken);
 
 //      Generate new token
         String token = jwtUtil.generateToken(user.getEmail());
@@ -124,13 +125,41 @@ public class AuthService {
         return new AuthResponse(user.getId(), user.getEmail(), token, refreshToken);
     }
 
+    public AuthResponse refreshToken(String token) {
+
+        String hashToken = hashRefreshToken(token);
+
+        RefreshTokenEntity existingRefreshToken = jpaRefreshTokenRepository.findByHashToken(hashToken);
+
+        if (existingRefreshToken == null) {
+            throw new BadCredentialsException("Invalid refresh token!");
+        } else if (existingRefreshToken.isRevoked()) {
+            throw new BadCredentialsException("Invalid refresh token!");
+        }
+
+        existingRefreshToken.setRevoked(true);
+
+        jpaRefreshTokenRepository.save(existingRefreshToken);
+
+        UserEntity userEntity = existingRefreshToken.getUser();
+
+        String accessToken = jwtUtil.generateToken(userEntity.getEmail());
+
+        String refreshToken = generateRandomToken();
+
+        RefreshTokenEntity refreshTokenEntity = createRefreshTokenEntity(refreshToken, userEntity);
+
+        jpaRefreshTokenRepository.save(refreshTokenEntity);
+
+        return new AuthResponse(userEntity.getId(), userEntity.getEmail(), accessToken, refreshToken);
+    }
 
     private RefreshTokenEntity createRefreshTokenEntity(String rawToken, UserEntity userEntity) {
         String hashToken = hashRefreshToken(rawToken);;
 
         Instant expiryTime = Instant.now().plus(refreshExpiryDays, ChronoUnit.DAYS);
 
-        return new RefreshTokenEntity(null,hashToken,expiryTime,false,userEntity);
+        return new RefreshTokenEntity(null, hashToken, expiryTime,false, userEntity);
     }
 
     private void revokeRefreshToken(RefreshTokenEntity refreshTokenEntity){

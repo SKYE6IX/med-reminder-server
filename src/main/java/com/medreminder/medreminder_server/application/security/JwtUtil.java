@@ -65,7 +65,7 @@ public class JwtUtil {
                     .getExpiration();
             return !expiration.before(new Date());
         } catch (Exception e) {
-            return false; // Treat invalid tokens as expired
+            return false;
         }
     }
 
@@ -77,7 +77,6 @@ public class JwtUtil {
             return (emailFromToken.equals(email) &&
                     (Objects.equals(tokenType, expectedType))
                     && isTokenExpired(token));
-
         } catch (Exception e) {
             return false;
         }

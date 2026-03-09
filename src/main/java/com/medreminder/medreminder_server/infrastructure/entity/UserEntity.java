@@ -13,9 +13,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 @Entity(name = "USERS")
 public class UserEntity implements UserDetails {
@@ -45,12 +45,12 @@ public class UserEntity implements UserDetails {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToOne(
+    @OneToMany(
             mappedBy = "user",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private RefreshTokenEntity refreshToken;
+    private List<RefreshTokenEntity> refreshTokens = new ArrayList<>();
 
     public UserEntity() {}
 
@@ -91,14 +91,6 @@ public class UserEntity implements UserDetails {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
-    }
-
-//    public RefreshTokenEntity getRefreshToken() {
-//        return refreshToken;
-//    }
-
-    public void setRefreshToken(RefreshTokenEntity refreshToken) {
-        this.refreshToken = refreshToken;
     }
 
     @Override
