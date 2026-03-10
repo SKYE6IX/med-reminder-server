@@ -5,7 +5,7 @@ import com.medreminder.medreminder_server.application.dtos.user.AuthResponse;
 import com.medreminder.medreminder_server.application.dtos.user.LoginRequest;
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
 import com.medreminder.medreminder_server.domain.UserService;
-import com.medreminder.medreminder_server.domain.model.User;
+import com.medreminder.medreminder_server.domain.models.User;
 import com.medreminder.medreminder_server.infrastructure.entity.users.RefreshTokenEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.mapper.UserMapper;

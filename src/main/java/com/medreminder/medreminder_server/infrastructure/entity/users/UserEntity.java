@@ -52,13 +52,23 @@ public class UserEntity implements UserDetails {
     )
     private List<RefreshTokenEntity> refreshTokens = new ArrayList<>();
 
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<ProfileEntity> profiles = new ArrayList<>();
+
     public UserEntity() {}
 
-    public UserEntity(String id, String email, String name, String hashPassword) {
+    public UserEntity(String id, String email, String name, String hashPassword,
+                      List<ProfileEntity> profiles) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.hashPassword = hashPassword;
+        this.profiles = profiles;
+
     }
 
     public String getId() {

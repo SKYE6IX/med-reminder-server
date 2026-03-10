@@ -2,9 +2,7 @@ package com.medreminder.medreminder_server.domain;
 
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
 import com.medreminder.medreminder_server.application.dtos.user.UpdateUserCommand;
-import com.medreminder.medreminder_server.domain.model.User;
-
-import java.util.UUID;
+import com.medreminder.medreminder_server.domain.models.User;
 
 public interface UserService {
 

@@ -1,13 +1,10 @@
-package com.medreminder.medreminder_server.domain.model;
+package com.medreminder.medreminder_server.domain.models;
 
 import com.medreminder.medreminder_server.application.dtos.user.UpdateUserCommand;
-import org.jspecify.annotations.Nullable;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,11 +17,12 @@ public class User  {
     private String gender;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private final List<Profile> profiles = new ArrayList<>();
 
     public User() {
     }
 
-    public User(String id, String email, String name, String hashPassword) {
+    public User( String id, String email, String name, String hashPassword ) {
         this.id = id;
         this.email = Objects.requireNonNull(email, "Email cannot be null");
         this.name = Objects.requireNonNull(name, "Name cannot be null");
@@ -69,6 +67,10 @@ public class User  {
         return gender;
     }
 
+    public List<Profile> getProfiles() {
+        return profiles;
+    }
+
     public void changeName(String newName) {
         if(newName == null || newName.isEmpty()){
             throw new IllegalArgumentException("Name cannot be empty");
@@ -97,4 +99,9 @@ public class User  {
         command.getDateOfBirth().ifPresent(dob -> this.dateOfBirth = dob);
         command.getGender().ifPresent(gender -> this.gender = gender);
     }
+
+    public void addProfiles(Profile profile) {
+        this.profiles.add(profile);
+    }
+
 }

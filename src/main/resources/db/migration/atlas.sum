@@ -1,4 +1,4 @@
-h1:AnaHWxbsH9QCvd9mCgsZ+KHxcD6gihG+BDsAatyztoM=
+h1:H1z4DGpEpuvLkm5SoBSrglCUPgFYQ4lXagWjGe2B/p0=
 V20260228073530__init.sql h1:piXArQxcJfIl7pYmCksBYrIt7/wLOZlA2GLKur4R25o=
 V20260302125020__update_id_field.sql h1:WNMv2fnX/SKEPIp1ozI+J8iZgdamH5XD3O7KwXP7vvE=
 V20260303101307__update_email_field.sql h1:YdfzWuxYWKQQQOrDqVr+gIM2EgxMwuyTfe/bg+GzTso=
@@ -6,3 +6,4 @@ V20260307112834__update_user_entity_fields.sql h1:PE00K/wo7G9nqzKMz2nUp5mZKddFd2
 V20260308104155__added_refresh_token_entity.sql h1:rh0cOmO828gDR/d8ZX4e7MiKrb9zcLT/pIjR6kW97Yk=
 V20260308115405__update_refresh_token.sql h1:31gi9/RS1+L/gSd3nEedvcnz10WpKgZvG98ZDBLGU/8=
 V20260308122659__update_refresh_token.sql h1:Se/AGSdSZOq/538gl6y33Gmqmt9fZb75lasveSjxPpU=
+V20260310073755__added_profile_entity.sql h1:3GhIJCxb5aEBRvHHChqAYhPLkvygBjzUHdjKh8QIMEI=
