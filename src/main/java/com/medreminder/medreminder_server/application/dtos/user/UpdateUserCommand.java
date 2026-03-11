@@ -7,7 +7,6 @@ public class UpdateUserCommand {
 
     private String email;
     private String name;
-    private String hashPassword;
     private LocalDate dateOfBirth;
     private String gender;
 
@@ -15,10 +14,9 @@ public class UpdateUserCommand {
     }
 
     public UpdateUserCommand(String email, String name,
-                             String hashPassword, LocalDate dateOfBirth, String gender) {
+                             LocalDate dateOfBirth, String gender) {
         this.email = email;
         this.name = name;
-        this.hashPassword = hashPassword;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
     }
@@ -29,10 +27,6 @@ public class UpdateUserCommand {
 
     public Optional<String> getName() {
         return Optional.ofNullable(name);
-    }
-
-    public Optional<String> getHashPassword() {
-        return Optional.ofNullable(hashPassword);
     }
 
     public Optional<LocalDate> getDateOfBirth() {

@@ -24,7 +24,6 @@ public class UserRepositoryImpl implements UserRepository {
         if(userEntity != null){
             return Optional.of(userEntity);
         }
-
         return Optional.empty();
     }
 

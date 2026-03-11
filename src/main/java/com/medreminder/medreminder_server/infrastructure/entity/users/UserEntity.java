@@ -61,14 +61,11 @@ public class UserEntity implements UserDetails {
 
     public UserEntity() {}
 
-    public UserEntity(String id, String email, String name, String hashPassword,
-                      List<ProfileEntity> profiles) {
-        this.id = id;
-        this.email = email;
-        this.name = name;
-        this.hashPassword = hashPassword;
-        this.profiles = profiles;
-
+    public UserEntity(Builder builder) {
+        this.id = builder.id;
+        this.email = builder.email;
+        this.name = builder.name;
+        this.hashPassword = builder.hashPassword;
     }
 
     public String getId() {
@@ -103,6 +100,14 @@ public class UserEntity implements UserDetails {
         return updatedAt;
     }
 
+    public List<ProfileEntity> getProfiles() {
+        return profiles;
+    }
+
+    void setProfiles(List<ProfileEntity> profiles) {
+        this.profiles = profiles;
+    }
+
     @Override
     @NonNull
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -118,5 +123,42 @@ public class UserEntity implements UserDetails {
     @NonNull
     public String getUsername() {
         return email;
+    }
+
+    public static class Builder {
+        private String id;
+        private String email;
+        private String name;
+        private String hashPassword;
+        private LocalDate dateOfBirth;
+        private String gender;
+
+        public Builder withId(String id) {
+            this.id = id;
+            return this;
+        }
+        public Builder withEmail(String email) {
+            this.email = email;
+            return this;
+        }
+        public Builder withHashPassword(String hashPassword) {
+            this.hashPassword = hashPassword;
+            return this;
+        }
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+        public Builder withDateOfBirth(LocalDate dateOfBirth) {
+            this.dateOfBirth = dateOfBirth;
+            return this;
+        }
+        public Builder withGender(String gender) {
+            this.gender = gender;
+            return this;
+        }
+        public UserEntity build() {
+            return new UserEntity(this);
+        }
     }
 }

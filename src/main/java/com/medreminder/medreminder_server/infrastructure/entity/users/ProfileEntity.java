@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity(name = "PROFILES")
 public class ProfileEntity {
@@ -37,11 +38,13 @@ public class ProfileEntity {
     public ProfileEntity() {
     }
 
-    public ProfileEntity(String id, String name, String relation, boolean isSelf) {
+    public ProfileEntity(String id, String name, String relation, boolean isSelf,
+                         UserEntity user) {
         this.id = id;
         this.name = name;
         this.relation = relation;
         this.isSelf = isSelf;
+        this.user = user;
     }
 
     public String getId() {
@@ -59,4 +62,5 @@ public class ProfileEntity {
     public boolean isSelf() {
         return isSelf;
     }
+
 }

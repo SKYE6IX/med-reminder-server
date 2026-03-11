@@ -1,4 +1,4 @@
-package com.medreminder.medreminder_server.domain.models;
+package com.medreminder.medreminder_server.domain.models.users;
 
 import com.medreminder.medreminder_server.application.dtos.user.UpdateUserCommand;
 
@@ -30,7 +30,8 @@ public class User  {
     }
 
     public User(String id, String email, String hashPassword,
-                String name, LocalDate dateOfBirth, String gender) {
+                String name, LocalDate dateOfBirth,
+                String gender) {
         this.id = id;
         this.email = email;
         this.hashPassword = hashPassword;
@@ -86,7 +87,7 @@ public class User  {
     }
 
     public void changePassword(String newPassword) {
-        if(newPassword == null || newPassword.isEmpty()){
+        if( newPassword == null || newPassword.isEmpty()) {
             throw new IllegalArgumentException("Password cannot be empty");
         }
         this.hashPassword = newPassword;
@@ -94,7 +95,6 @@ public class User  {
 
     public void updateUser(UpdateUserCommand command) {
         command.getEmail().ifPresent(this::changeEmail);
-        command.getHashPassword().ifPresent(this::changePassword);
         command.getName().ifPresent(this::changeName);
         command.getDateOfBirth().ifPresent(dob -> this.dateOfBirth = dob);
         command.getGender().ifPresent(gender -> this.gender = gender);
@@ -102,6 +102,11 @@ public class User  {
 
     public void addProfiles(Profile profile) {
         this.profiles.add(profile);
+        profile.setUser(this);
     }
 
+    public void removeProfiles(Profile profile) {
+        this.profiles.remove(profile);
+        profile.setUser(null);
+    }
 }
