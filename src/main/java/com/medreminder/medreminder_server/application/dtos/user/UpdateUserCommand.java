@@ -7,14 +7,14 @@ public class UpdateUserCommand {
 
     private String email;
     private String name;
-    private LocalDate dateOfBirth;
+    private String dateOfBirth;
     private String gender;
 
     public UpdateUserCommand() {
     }
 
     public UpdateUserCommand(String email, String name,
-                             LocalDate dateOfBirth, String gender) {
+                             String dateOfBirth, String gender) {
         this.email = email;
         this.name = name;
         this.dateOfBirth = dateOfBirth;
@@ -29,7 +29,7 @@ public class UpdateUserCommand {
         return Optional.ofNullable(name);
     }
 
-    public Optional<LocalDate> getDateOfBirth() {
+    public Optional<String> getDateOfBirth() {
         return Optional.ofNullable(dateOfBirth);
     }
 

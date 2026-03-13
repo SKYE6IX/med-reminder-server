@@ -39,19 +39,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(String userId, UpdateUserCommand updateUserCommand) {
 
-//        user.updateUser(updateUserCommand);
-//
-//        userRepository.save(userMapper.toEntity(user));
-//
-//        return user;
-        return null;
+        UserEntity userEntity = getUserEntity(userId);
+
+        User domainUser = userMapper.toDomain(userEntity);
+
+        domainUser.updateUser(updateUserCommand);
+
+        userRepository.saveUser(userMapper.toManagedEntity(domainUser, userEntity));
+
+        return domainUser;
     }
 
     @Override
     public Profile createProfile(String userId, ProfileRequest profileRequest) {
 
-        UserEntity userEntity = userRepository.findUserById(userId)
-                .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
+        UserEntity userEntity = getUserEntity(userId);
 
         User domainUser = userMapper.toDomain(userEntity);
 
@@ -79,8 +81,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Profile deleteProfile(String userId, String id) {
 
-        UserEntity userEntity = userRepository.findUserById(userId)
-                .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
+        UserEntity userEntity = getUserEntity(userId);
 
         User domainUser = userMapper.toDomain(userEntity);
 
@@ -99,5 +100,10 @@ public class UserServiceImpl implements UserService {
         userRepository.saveUser(userMapper.toManagedEntity(domainUser, userEntity));
 
         return profileToDelete;
+    }
+
+    private UserEntity getUserEntity(String userId) {
+        return userRepository.findUserById(userId)
+                .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
     }
 }

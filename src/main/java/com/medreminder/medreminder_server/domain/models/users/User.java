@@ -4,6 +4,7 @@ import com.medreminder.medreminder_server.application.dtos.user.UpdateUserComman
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -96,7 +97,7 @@ public class User  {
     public void updateUser(UpdateUserCommand command) {
         command.getEmail().ifPresent(this::changeEmail);
         command.getName().ifPresent(this::changeName);
-        command.getDateOfBirth().ifPresent(dob -> this.dateOfBirth = dob);
+        command.getDateOfBirth().ifPresent(dob -> this.dateOfBirth = LocalDate.parse(dob));
         command.getGender().ifPresent(gender -> this.gender = gender);
     }
 

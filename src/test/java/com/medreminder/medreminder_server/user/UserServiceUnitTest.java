@@ -76,15 +76,16 @@ public class UserServiceUnitTest {
         RegisterUserRequest registerUserRequest = new RegisterUserRequest("test@mail.com",
                 "test user", "12345678");
 
-        User user = new User(userId.toString(), registerUserRequest.getEmail(),
+        User testUser = new User(userId.toString(), registerUserRequest.getEmail(),
                 registerUserRequest.getName(), registerUserRequest.getPassword());
 
-        user.addProfiles(new Profile(null, registerUserRequest.getName(), Relation.SELF, true));
-
         UpdateUserCommand updateUserCommand = new UpdateUserCommand("updatetest@mail.com",
-                null, null, "Male");
+                null, "1992-07-27", "Male");
 
-        User updateUser = userService.updateUser(user.getId(), updateUserCommand);
+        when(userRepository.findUserById(any(String.class)))
+                .thenReturn(Optional.of(userMapper.toEntity(testUser)));
+
+        User updateUser = userService.updateUser(testUser.getId(), updateUserCommand);
 
         verify(userRepository, times(1)).saveUser(any(UserEntity.class));
 
@@ -92,7 +93,9 @@ public class UserServiceUnitTest {
 
         assertThat(updateUser.getEmail()).isEqualTo("updatetest@mail.com");
 
-        assertThat(updateUser.getGender()).isNotNull();
+        assertThat(updateUser.getGender()).isNotNull().isEqualTo("Male");
+
+        assertThat(updateUser.getDateOfBirth().getYear()).isEqualTo(1992);
     }
 
     @Test

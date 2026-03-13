@@ -1,7 +1,7 @@
 package com.medreminder.medreminder_server.application.controllers;
 
 
-import com.medreminder.medreminder_server.application.AppErrorResponse;
+import com.medreminder.medreminder_server.application.dtos.error.AppErrorResponse;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileRequest;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
 import com.medreminder.medreminder_server.application.dtos.user.UpdateUserCommand;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-
 
     private final UserService userService;
     private final UserRepository userRepository;
@@ -50,19 +49,18 @@ public class UserController {
     }
 
     @PutMapping()
-    public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetails userDetails,
+    public ResponseEntity<UserResponse> updateUser(@AuthenticationPrincipal UserDetails userDetails,
                                         @RequestBody UpdateUserCommand cmd) {
 
-//        TODO:
-//        1. Verify Data being passed and reject if unwanted data passed.
-//        2. Provide error for when thing go wrong.
-//        User user = userMapper.toDomain((UserEntity) userDetails);
-//
-//        var response = userService.updateUser(, user, cmd);
-//
-//        return ResponseEntity.ok(response);
+        var principal = getPrincipal(userDetails);
 
-        return null;
+        var response = userService.updateUser(principal.getId(), cmd);
+
+        return ResponseEntity.ok(
+                new UserResponse(response.getId(),
+                        response.getEmail(), response.getName(),
+                        response.getDateOfBirth(), response.getGender())
+        );
     }
 
     @PostMapping(value = "/profiles")
@@ -91,7 +89,6 @@ public class UserController {
                     .body(new AppErrorResponse(HttpStatus.NOT_FOUND.value(),
                             "Profile not found!"));
         }
-
         return ResponseEntity.noContent().build();
     }
 
