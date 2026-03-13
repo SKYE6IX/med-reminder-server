@@ -7,6 +7,8 @@ import com.medreminder.medreminder_server.domain.models.users.User;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class UserMapper {
@@ -16,10 +18,11 @@ public class UserMapper {
         if (userEntity == null) return null;
 
       User user = new User(userEntity.getId(),
-               userEntity.getEmail(), userEntity.getHashPassword(),
-               userEntity.getName(), userEntity.getDateOfBirth(),
+               userEntity.getEmail(),
+              userEntity.getHashPassword(),
+               userEntity.getName(),
+              userEntity.getDateOfBirth(),
                userEntity.getGender());
-
       userEntity.getProfiles().forEach(profile -> {
           user.addProfiles(toDomianProfile(profile));
       });
@@ -31,39 +34,57 @@ public class UserMapper {
 
         if(user == null) return null;
 
-        UserEntity userEntity = new UserEntity.Builder()
-                .withId(user.getId())
-                .withEmail(user.getEmail())
-                .withHashPassword(user.getHashPassword())
-                .withName(user.getName())
-                .withDateOfBirth(user.getDateOfBirth())
-                .withGender(user.getGender())
-                .build();
+        UserEntity userEntity = new UserEntity(user.getId(),
+                user.getEmail(), user.getName(),
+                user.getHashPassword());
 
-        List<ProfileEntity> profileEntities = user.getProfiles().
-                stream().map(pe-> toEntityProfile(pe, userEntity)).toList();
+       List<ProfileEntity> profileEntities = user.getProfiles().
+                stream().map(pe-> toEntityProfile(pe, userEntity))
+               .toList();
 
-        userEntity.setProfiles(profileEntities);
+       userEntity.getProfiles().addAll(profileEntities);
 
-        return userEntity;
+       return userEntity;
     }
 
+    public UserEntity toManagedEntity(User domainUser, UserEntity managedEntity) {
 
-    public Profile toDomianProfile(ProfileEntity profileEntity){
+        managedEntity.syncWithDomain(domainUser);
+
+        syncProfiles(domainUser.getProfiles(), managedEntity);
+
+        return managedEntity;
+    }
+
+    public Profile toDomianProfile(ProfileEntity profileEntity) {
         if (profileEntity == null) return null;
 
         return new Profile(profileEntity.getId(),
                 profileEntity.getName(),
-                Relation.valueOf(profileEntity.getRelation()), profileEntity.isSelf());
+                Relation.valueOf(profileEntity.getRelation()),
+                profileEntity.isSelf());
     }
 
     public ProfileEntity toEntityProfile(Profile profile, UserEntity userEntity) {
-
         if (profile == null) return null;
 
         return new ProfileEntity(profile.getId(),
-                profile.getName(), profile.getRelation().name(),
+                profile.getName(),
+                profile.getRelation().name(),
                 profile.isSelf(), userEntity);
+    }
 
+    private void syncProfiles(List<Profile> domainProfiles, UserEntity managedEntity) {
+
+        Map<String, ProfileEntity> existingProfiles = managedEntity.getProfiles()
+                .stream().collect(Collectors.toMap(ProfileEntity::getId, p -> p));
+
+        List<ProfileEntity>  syncedProfiles = domainProfiles.stream()
+                .map(p -> existingProfiles
+                        .getOrDefault(p.getId(), toEntityProfile(p,managedEntity)))
+                .toList();
+
+        managedEntity.getProfiles().clear();
+        managedEntity.getProfiles().addAll(syncedProfiles);
     }
 }

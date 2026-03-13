@@ -3,20 +3,20 @@ package com.medreminder.medreminder_server.user;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileRequest;
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
 import com.medreminder.medreminder_server.application.dtos.user.UpdateUserCommand;
-import com.medreminder.medreminder_server.domain.UserRepository;
+import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
-import com.medreminder.medreminder_server.domain.services.UserServiceImpl;
+import com.medreminder.medreminder_server.domain.services.users.UserServiceImpl;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
-import com.medreminder.medreminder_server.infrastructure.repository.users.JpaProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -54,7 +54,8 @@ public class UserServiceUnitTest {
 
         testUser.addProfiles(new Profile(null, registerUserRequest.getName(), Relation.SELF, true));
 
-        when(userRepository.save(any(UserEntity.class))).thenReturn(userMapper.toEntity(testUser));
+        when(userRepository.saveUser(any(UserEntity.class)))
+                .thenReturn(userMapper.toEntity(testUser));
 
         User user = userService.createUser(registerUserRequest);
 
@@ -83,9 +84,9 @@ public class UserServiceUnitTest {
         UpdateUserCommand updateUserCommand = new UpdateUserCommand("updatetest@mail.com",
                 null, null, "Male");
 
-        User updateUser = userService.updateUser(user, updateUserCommand);
+        User updateUser = userService.updateUser(user.getId(), updateUserCommand);
 
-        verify(userRepository, times(1)).save(any(UserEntity.class));
+        verify(userRepository, times(1)).saveUser(any(UserEntity.class));
 
         assertThat(updateUser.getId()).isNotNull().isEqualTo(userId.toString());
 
@@ -110,14 +111,46 @@ public class UserServiceUnitTest {
 
         testUser.addProfiles(testProfile);
 
-        when(userRepository.save(any(UserEntity.class))).thenReturn(userMapper.toEntity(testUser));
+        when(userRepository.findUserById(any(String.class)))
+                .thenReturn(Optional.of(userMapper.toEntity(testUser)));
 
-        Profile profile = userService.createProfile(testUser, profileRequest);
+        when(userRepository.saveUser(any(UserEntity.class)))
+                .thenReturn(userMapper.toEntity(testUser));
+
+        Profile profile = userService.createProfile(testUser.getId(), profileRequest);
 
         assertThat(profile.getId()).isNotNull().isEqualTo(profileId.toString());
 
         assertThat(profile.getName()).isEqualTo(profileRequest.fullName());
 
         assertThat(profile.getRelation()).isEqualTo(Relation.BROTHER);
+    }
+
+
+    @Test
+    void shouldDeleteProfile_thenSaveIt(){
+        UUID userId = UUID.randomUUID();
+
+        UUID profileId = UUID.randomUUID();
+
+        User testUser = new User(userId.toString(), "test@email.com",
+                "test user", "testhashpassword");
+
+        ProfileRequest profileRequest = new ProfileRequest("James","BROTHER");
+
+        Profile testProfile = new Profile(profileId.toString(),
+                profileRequest.fullName(),Relation.valueOf(profileRequest.relation()), false);
+
+        testUser.addProfiles(testProfile);
+
+        when(userRepository.findUserById(any(String.class)))
+                .thenReturn(Optional.of(userMapper.toEntity(testUser)));
+
+
+        Profile deletedProfile = userService.deleteProfile(testUser.getId(), testProfile.getId());
+
+        verify(userRepository, times(1)).saveUser(any(UserEntity.class));
+
+        assertThat(deletedProfile.getId()).isNotNull().isEqualTo(profileId.toString());
     }
 }

@@ -4,8 +4,9 @@ package com.medreminder.medreminder_server.application.security;
 import com.medreminder.medreminder_server.application.dtos.user.AuthResponse;
 import com.medreminder.medreminder_server.application.dtos.user.LoginRequest;
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
-import com.medreminder.medreminder_server.domain.UserService;
 import com.medreminder.medreminder_server.domain.models.users.User;
+import com.medreminder.medreminder_server.domain.services.users.UserRepository;
+import com.medreminder.medreminder_server.domain.services.users.UserService;
 import com.medreminder.medreminder_server.infrastructure.entity.users.RefreshTokenEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
@@ -39,6 +40,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final UserMapper userMapper;
     private final JpaRefreshTokenRepository jpaRefreshTokenRepository;
+    private final UserRepository userRepository;
 
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder().withoutPadding();
@@ -48,18 +50,21 @@ public class AuthService {
                        PasswordEncoder passwordEncoder,
                        JwtUtil jwtUtil,
                        UserMapper userMapper,
-                       JpaRefreshTokenRepository jpaRefreshTokenRepository) {
+                       JpaRefreshTokenRepository jpaRefreshTokenRepository,
+                       UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.userMapper = userMapper;
         this.jpaRefreshTokenRepository = jpaRefreshTokenRepository;
+        this.userRepository = userRepository;
     }
 
     public AuthResponse registerUserWithEmail(RegisterUserRequest request){
 
-        User existingUser = userService.findUserByEmail(request.getEmail());
+        UserEntity existingUser = userRepository.findUserByEmail(request.getEmail())
+                .orElse(null);
 
         if( existingUser != null ){
            throw new UserAlreadyExistsException(existingUser.getEmail());
@@ -71,10 +76,10 @@ public class AuthService {
 
         User newUser = userService.createUser(request);
 
-        // Generate access token for user
-        String token = jwtUtil.generateToken(newUser.getEmail());
+//      Generate access token for user
+        String token = jwtUtil.generateToken(newUser.getEmail(), newUser.getId());
 
-        // Generate refresh token for user
+//       Generate refresh token for user
         String refreshToken = generateRandomToken();
 
         RefreshTokenEntity refreshTokenEntity = createRefreshTokenEntity(refreshToken,
@@ -92,39 +97,37 @@ public class AuthService {
 
         String password = loginRequest.password();
 
-        User existingUser = userService.findUserByEmail(email);
+        UserEntity existingUser = userRepository.findUserByEmail(loginRequest.email())
+                .orElse(null);
+
         if (existingUser == null){
-            throw new UsernameNotFoundException("Invalid email or password");
+            throw new UsernameNotFoundException("Invalid email or password!");
         }
 
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
         );
 
-        if(!auth.isAuthenticated()){
+        if (!auth.isAuthenticated()) {
             throw new BadCredentialsException("Email or password is invalid");
         }
 
-        User user = userMapper.toDomain((UserEntity) auth.getPrincipal());
-
         jpaRefreshTokenRepository
-                .findByUserIdAndRevokedFalse(user.getId())
+                .findByUserIdAndRevokedFalse(existingUser.getId())
                 .ifPresent(this::revokeRefreshToken);
 
-//      Generate new token
-        String token = jwtUtil.generateToken(user.getEmail());
+//     Generate new token
+        String token = jwtUtil.generateToken(existingUser.getEmail(), existingUser.getId());
 
         String refreshToken = generateRandomToken();
 
         RefreshTokenEntity refreshTokenEntity = createRefreshTokenEntity(refreshToken,
-                userMapper.toEntity(user));
+                existingUser);
 
         jpaRefreshTokenRepository.save(refreshTokenEntity);
 
-        return new AuthResponse(user.getId(), user.getEmail(), token, refreshToken);
+        return new AuthResponse(existingUser.getId(), existingUser.getEmail(), token, refreshToken);
     }
-
-
 
     public AuthResponse refreshToken(String token) {
 
@@ -144,7 +147,7 @@ public class AuthService {
 
         UserEntity userEntity = existingRefreshToken.getUser();
 
-        String accessToken = jwtUtil.generateToken(userEntity.getEmail());
+        String accessToken = jwtUtil.generateToken(userEntity.getEmail(), userEntity.getId());
 
         String refreshToken = generateRandomToken();
 

@@ -1,6 +1,7 @@
 package com.medreminder.medreminder_server.infrastructure.entity.users;
 
 
+import com.medreminder.medreminder_server.domain.models.users.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -18,7 +19,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity(name = "USERS")
-public class UserEntity implements UserDetails {
+public class UserEntity {
     @Id
     @GeneratedValue()
     @UuidGenerator
@@ -47,8 +48,7 @@ public class UserEntity implements UserDetails {
 
     @OneToMany(
             mappedBy = "user",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            cascade = CascadeType.PERSIST
     )
     private List<RefreshTokenEntity> refreshTokens = new ArrayList<>();
 
@@ -61,11 +61,11 @@ public class UserEntity implements UserDetails {
 
     public UserEntity() {}
 
-    public UserEntity(Builder builder) {
-        this.id = builder.id;
-        this.email = builder.email;
-        this.name = builder.name;
-        this.hashPassword = builder.hashPassword;
+    public UserEntity(String id, String email, String name, String hashPassword) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        this.hashPassword = hashPassword;
     }
 
     public String getId() {
@@ -104,61 +104,11 @@ public class UserEntity implements UserDetails {
         return profiles;
     }
 
-    void setProfiles(List<ProfileEntity> profiles) {
-        this.profiles = profiles;
-    }
-
-    @Override
-    @NonNull
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
-    }
-
-    @Override
-    public @Nullable String getPassword() {
-        return hashPassword;
-    }
-
-    @Override
-    @NonNull
-    public String getUsername() {
-        return email;
-    }
-
-    public static class Builder {
-        private String id;
-        private String email;
-        private String name;
-        private String hashPassword;
-        private LocalDate dateOfBirth;
-        private String gender;
-
-        public Builder withId(String id) {
-            this.id = id;
-            return this;
-        }
-        public Builder withEmail(String email) {
-            this.email = email;
-            return this;
-        }
-        public Builder withHashPassword(String hashPassword) {
-            this.hashPassword = hashPassword;
-            return this;
-        }
-        public Builder withName(String name) {
-            this.name = name;
-            return this;
-        }
-        public Builder withDateOfBirth(LocalDate dateOfBirth) {
-            this.dateOfBirth = dateOfBirth;
-            return this;
-        }
-        public Builder withGender(String gender) {
-            this.gender = gender;
-            return this;
-        }
-        public UserEntity build() {
-            return new UserEntity(this);
-        }
+    void syncWithDomain(User domain){
+        this.email = domain.getEmail();
+        this.hashPassword = domain.getHashPassword();
+        this.name = domain.getName();
+        this.dateOfBirth = domain.getDateOfBirth();
+        this.gender = domain.getGender();
     }
 }

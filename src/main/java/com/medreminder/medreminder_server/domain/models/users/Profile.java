@@ -50,7 +50,7 @@ public class Profile {
             return false;
         }
         Profile that = (Profile) obj;
-        return Objects.equals(id,that.id);
+        return Objects.equals(id, that.id);
     }
 
     @Override

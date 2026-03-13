@@ -82,24 +82,4 @@ public class RefreshTokenEntity {
     public void setRevoked(boolean revoked) {
         this.revoked = revoked;
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if ( this == obj ) {
-            return true;
-        }
-
-        if ( obj == null || getClass() != obj.getClass() ) {
-            return false;
-        }
-
-        RefreshTokenEntity rte = (RefreshTokenEntity) obj;
-
-        return Objects.equals( hashToken, rte.hashToken);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash( id );
-    }
 }

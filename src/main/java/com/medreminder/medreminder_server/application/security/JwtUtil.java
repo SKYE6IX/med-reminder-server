@@ -26,10 +26,11 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String email){
+    public String generateToken(String email, String userId){
         long now = System.currentTimeMillis();
         return Jwts.builder()
                 .subject(email)
+                .claim("user_id", userId)
                 .claim("token_type","access")
                 .issuedAt(new Date(now))
                 .expiration(new Date(now + 1000 * 60 * 30))

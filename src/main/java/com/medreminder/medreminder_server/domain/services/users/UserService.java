@@ -1,4 +1,4 @@
-package com.medreminder.medreminder_server.domain;
+package com.medreminder.medreminder_server.domain.services.users;
 
 import com.medreminder.medreminder_server.application.dtos.user.ProfileRequest;
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
@@ -10,13 +10,11 @@ public interface UserService {
 
     public User createUser(RegisterUserRequest registerUserRequest);
 
-    public User updateUser(User user, UpdateUserCommand updateUserCommand);
-
-    public User findUserByEmail(String email);
+    public User updateUser(String userId, UpdateUserCommand updateUserCommand);
 
     public void deleteUser(String id);
 
-    public Profile createProfile(User user, ProfileRequest profileRequest);
+    public Profile createProfile(String userId, ProfileRequest profileRequest);
 
-    public void deleteProfile(User user, String id);
+    public Profile deleteProfile(String userId, String id);
 }

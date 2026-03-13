@@ -35,7 +35,7 @@ public class JwtUtilUnitTest {
     @Test
     void generateToken_ShouldReturnNonNullToken(){
 
-        String token = jwtUtil.generateToken("testUser@mail.com");
+        String token = jwtUtil.generateToken("testUser@mail.com", "123456789");
 
         assertThat(token).isNotNull().isNotEmpty();
     }
@@ -43,7 +43,7 @@ public class JwtUtilUnitTest {
     @Test
     void generateToken_ShouldContainCorrectSubject() {
         String email = "testUser@mail.com";
-        String token = jwtUtil.generateToken(email);
+        String token = jwtUtil.generateToken(email, "123456789");
 
         String subject = jwtUtil.extractEmail(token);
 
@@ -54,7 +54,7 @@ public class JwtUtilUnitTest {
     void generateToken_ShouldHaveAccessTokenType() {
         String email = "testUser@mail.com";
 
-        String token = jwtUtil.generateToken(email);
+        String token = jwtUtil.generateToken(email, "123456789");
 
         String claimType = jwtUtil.extractClaim(token, "token_type");
 

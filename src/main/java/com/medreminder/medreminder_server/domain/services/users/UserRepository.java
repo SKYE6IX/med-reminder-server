@@ -1,4 +1,4 @@
-package com.medreminder.medreminder_server.domain;
+package com.medreminder.medreminder_server.domain.services.users;
 
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 
@@ -6,10 +6,9 @@ import java.util.Optional;
 
 public interface UserRepository {
 
-    Optional<UserEntity> findById(String id);
+    Optional<UserEntity> findUserById(String id);
 
     Optional <UserEntity> findUserByEmail(String email);
 
-    UserEntity save(UserEntity userEntity);
-
+    UserEntity saveUser(UserEntity userEntity);
 }

@@ -1,6 +1,7 @@
 package com.medreminder.medreminder_server.application.security;
 
-import com.medreminder.medreminder_server.domain.UserRepository;
+import com.medreminder.medreminder_server.domain.services.users.UserRepository;
+import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,7 +23,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @NonNull
     public UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
 
-        return userRepository.findUserByEmail(email).
+        UserEntity userEntity = userRepository.findUserByEmail(email).
                 orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+
+        return new UserPrincipal(userEntity.getId(),
+                userEntity.getEmail(), userEntity.getHashPassword());
     }
 }

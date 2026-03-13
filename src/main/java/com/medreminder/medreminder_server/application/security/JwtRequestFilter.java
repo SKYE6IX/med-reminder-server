@@ -21,12 +21,10 @@ import java.io.IOException;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailService;
 
     @Autowired
-    public JwtRequestFilter(JwtUtil jwtUtil, UserDetailsService userDetailService) {
+    public JwtRequestFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
-        this.userDetailService = userDetailService;
     }
 
     @Override
@@ -40,7 +38,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if(authHeader != null && authHeader.startsWith("Bearer ")){
             token = authHeader.substring(7);
-            try{
+            try {
                 email = jwtUtil.extractEmail(token);
 
             } catch (ExpiredJwtException ex){
@@ -52,7 +50,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if(email != null && jwtUtil.isTokenValid(token, email,"access") &&
                 SecurityContextHolder.getContext().getAuthentication() == null ) {
 
-            UserDetails userDetails = userDetailService.loadUserByUsername(email);
+            String userId = jwtUtil.extractClaim(token, "user_id");
+
+            UserDetails userDetails = new UserPrincipal(userId,email, null);
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
                     null, userDetails.getAuthorities());
@@ -61,7 +61,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
-
         filterChain.doFilter(request,response);
     }
 }

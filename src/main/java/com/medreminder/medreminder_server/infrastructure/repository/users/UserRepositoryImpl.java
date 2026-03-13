@@ -1,6 +1,6 @@
 package com.medreminder.medreminder_server.infrastructure.repository.users;
 
-import com.medreminder.medreminder_server.domain.UserRepository;
+import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import org.springframework.stereotype.Repository;
 
@@ -17,11 +17,14 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<UserEntity> findById(String id) {
+    public Optional<UserEntity> findUserById(String id) {
 
         UserEntity userEntity = jpaUserRepository.findById(id).orElse(null);
 
         if(userEntity != null){
+
+            System.out.println(userEntity.getProfiles());
+
             return Optional.of(userEntity);
         }
         return Optional.empty();
@@ -40,7 +43,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public UserEntity save(UserEntity userEntity) {
+    public UserEntity saveUser(UserEntity userEntity) {
 
        return  jpaUserRepository.save(userEntity);
 
