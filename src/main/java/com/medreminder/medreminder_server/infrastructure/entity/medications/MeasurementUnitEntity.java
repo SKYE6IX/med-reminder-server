@@ -1,10 +1,9 @@
 package com.medreminder.medreminder_server.infrastructure.entity.medications;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import org.hibernate.annotations.UuidGenerator;
+import jakarta.persistence.*;
+import org.hibernate.annotations.*;
+
+import java.time.LocalDateTime;
 
 
 @Entity(name = "MEASUREMENT_UNITS")
@@ -21,6 +20,19 @@ public class MeasurementUnitEntity {
 
     @Column(name = "is_liquid")
     private boolean isLiquid;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medication_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private MedicationEntity medication;
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     public MeasurementUnitEntity() {
     }

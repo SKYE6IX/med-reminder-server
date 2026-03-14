@@ -1,11 +1,11 @@
 package com.medreminder.medreminder_server.infrastructure.entity.medications;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import org.hibernate.annotations.UuidGenerator;
+import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import org.hibernate.annotations.*;
+
+import java.time.LocalDateTime;
 
 @Entity(name = "MEDICATIONS")
 public class MedicationEntity {
@@ -19,6 +19,26 @@ public class MedicationEntity {
 
     @Column(name = "unit_type")
     private String unitType;
+
+    @OneToOne(
+            mappedBy = "medication",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private MeasurementUnitEntity measurementUnit;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medication_profile_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private MedicationProfileEntity medicationProfile;
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     public MedicationEntity() {
     }
@@ -38,5 +58,9 @@ public class MedicationEntity {
 
     public String getUnitType() {
         return unitType;
+    }
+
+    public MeasurementUnitEntity getMeasurementUnit() {
+        return measurementUnit;
     }
 }

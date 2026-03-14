@@ -1,10 +1,13 @@
 package com.medreminder.medreminder_server.infrastructure.entity.users;
 
 
+import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "PROFILES")
@@ -22,10 +25,17 @@ public class ProfileEntity {
     @Column(name = "is_self")
     private boolean isSelf;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private UserEntity user;
+
+    @OneToMany(
+            mappedBy = "profile",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<MedicationProfileEntity> medicationProfile;
 
     @Column(name = "created_at")
     @CreationTimestamp

@@ -1,10 +1,7 @@
 package com.medreminder.medreminder_server.infrastructure.entity.medications;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import org.hibernate.annotations.UuidGenerator;
+import jakarta.persistence.*;
+import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
 
@@ -25,5 +22,16 @@ public class MedicationScheduleEntity {
     @Column(name = "start_at")
     private LocalDateTime startAt;
 
-//    private MedicationProfile medicationProfile;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medication_profile_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private MedicationProfileEntity medicationProfile;
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
