@@ -34,4 +34,33 @@ public class MedicationScheduleEntity {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public MedicationScheduleEntity() {
+    }
+
+    public MedicationScheduleEntity(String id,
+                                    double doseQuantity,
+                                    String recurrenceRule,
+                                    LocalDateTime startAt) {
+        this.id = id;
+        this.doseQuantity = doseQuantity;
+        this.recurrenceRule = recurrenceRule;
+        this.startAt = startAt;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public double getDoseQuantity() {
+        return doseQuantity;
+    }
+
+    public String getRecurrenceRule() {
+        return recurrenceRule;
+    }
+
+    public LocalDateTime getStartAt() {
+        return startAt;
+    }
 }

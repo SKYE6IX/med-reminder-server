@@ -18,13 +18,11 @@ public class MedicationProfile {
                              boolean isActive,
                              LocalDateTime startAt,
                              String note,
-                             Profile profile,
                              Medication medication) {
         this.id = id;
         this.isActive = isActive;
         this.startAt = startAt;
         this.note = note;
-        this.profile = profile;
         this.medication = medication;
     }
 
@@ -50,5 +48,9 @@ public class MedicationProfile {
 
     public Medication getMedication() {
         return medication;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 }

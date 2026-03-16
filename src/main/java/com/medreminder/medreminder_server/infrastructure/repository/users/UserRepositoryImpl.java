@@ -23,8 +23,6 @@ public class UserRepositoryImpl implements UserRepository {
 
         if(userEntity != null){
 
-            System.out.println(userEntity.getProfiles());
-
             return Optional.of(userEntity);
         }
         return Optional.empty();

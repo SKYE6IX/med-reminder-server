@@ -7,23 +7,17 @@ public class MedicationPack {
     private String id;
     private double totalQuantity;
     private double currentQuantity;
-    private double totalAmount;
+    private String notifyRule;
     private LocalDateTime addedAt;
 
-    private MedicationProfile medicationProfile;
-
-
-    public MedicationPack(String id, double totalQuantity,
-                          double currentQuantity,
-                          double totalAmount,
-                          LocalDateTime addedAt,
-                          MedicationProfile medicationProfile) {
+    public MedicationPack(String id,
+                          double totalQuantity,
+                          String notifyRule,
+                          LocalDateTime addedAt) {
         this.id = id;
         this.totalQuantity = totalQuantity;
-        this.currentQuantity = currentQuantity;
-        this.totalAmount = totalAmount;
+        this.notifyRule = notifyRule;
         this.addedAt = addedAt;
-        this.medicationProfile = medicationProfile;
     }
 
     public String getId() {
@@ -38,15 +32,12 @@ public class MedicationPack {
         return currentQuantity;
     }
 
-    public double getTotalAmount() {
-        return totalAmount;
+    public String getNotifyRule() {
+        return notifyRule;
     }
 
     public LocalDateTime getAddedAt() {
         return addedAt;
     }
 
-    public MedicationProfile getMedicationProfile() {
-        return medicationProfile;
-    }
 }

@@ -18,9 +18,6 @@ public class MeasurementUnitEntity {
 
     private String symbol;
 
-    @Column(name = "is_liquid")
-    private boolean isLiquid;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medication_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -37,14 +34,10 @@ public class MeasurementUnitEntity {
     public MeasurementUnitEntity() {
     }
 
-    public MeasurementUnitEntity(String id,
-                                 String name,
-                                 String symbol,
-                                 boolean isLiquid) {
+    public MeasurementUnitEntity(String id, String name, String symbol) {
         this.id = id;
         this.name = name;
         this.symbol = symbol;
-        this.isLiquid = isLiquid;
     }
 
     public String getId() {
@@ -57,9 +50,5 @@ public class MeasurementUnitEntity {
 
     public String getSymbol() {
         return symbol;
-    }
-
-    public boolean isLiquid() {
-        return isLiquid;
     }
 }

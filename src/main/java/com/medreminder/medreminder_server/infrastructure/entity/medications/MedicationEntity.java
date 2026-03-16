@@ -43,9 +43,14 @@ public class MedicationEntity {
     public MedicationEntity() {
     }
 
-    public MedicationEntity(String name, String unitType) {
+    public MedicationEntity(String id,
+                            String name,
+                            String unitType,
+                            MeasurementUnitEntity measurementUnit) {
+        this.id = id;
         this.name = name;
         this.unitType = unitType;
+        this.measurementUnit = measurementUnit;
     }
 
     public String getId() {

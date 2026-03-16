@@ -19,8 +19,8 @@ public class MedicationPackEntity {
     @Column(name = "current_quantity")
     private double currentQuantity;
 
-    @Column(name = "total_amount")
-    private double totalAmount;
+    @Column(name = "notify_rule")
+    private String notifyRule;
 
     @Column(name = "added_at")
     private LocalDateTime addedAt;
@@ -37,4 +37,37 @@ public class MedicationPackEntity {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public MedicationPackEntity() {
+    }
+
+    public MedicationPackEntity(String id,
+                                double totalQuantity,
+                                String notifyRule,
+                                LocalDateTime addedAt) {
+        this.id = id;
+        this.totalQuantity = totalQuantity;
+        this.notifyRule = notifyRule;
+        this.addedAt = addedAt;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public double getTotalQuantity() {
+        return totalQuantity;
+    }
+
+    public double getCurrentQuantity() {
+        return currentQuantity;
+    }
+
+    public String getNotifyRule() {
+        return notifyRule;
+    }
+
+    public LocalDateTime getAddedAt() {
+        return addedAt;
+    }
 }

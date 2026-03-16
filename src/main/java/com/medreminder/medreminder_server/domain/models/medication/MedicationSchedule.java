@@ -9,18 +9,14 @@ public class MedicationSchedule {
     private String recurrenceRule;
     private LocalDateTime startAt;
 
-    private MedicationProfile medicationProfile;
-
     public MedicationSchedule(String id,
                               double doseQuantity,
                               String recurrenceRule,
-                              LocalDateTime startAt,
-                              MedicationProfile medicationProfile) {
+                              LocalDateTime startAt) {
         this.id = id;
         this.doseQuantity = doseQuantity;
         this.recurrenceRule = recurrenceRule;
         this.startAt = startAt;
-        this.medicationProfile = medicationProfile;
     }
 
     public String getId() {
@@ -37,9 +33,5 @@ public class MedicationSchedule {
 
     public LocalDateTime getStartAt() {
         return startAt;
-    }
-
-    public MedicationProfile getMedicationProfile() {
-        return medicationProfile;
     }
 }
