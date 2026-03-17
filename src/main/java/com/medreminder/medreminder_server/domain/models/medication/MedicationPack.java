@@ -20,6 +20,18 @@ public class MedicationPack {
         this.addedAt = addedAt;
     }
 
+    public MedicationPack(String id,
+                          double totalQuantity,
+                          double currentQuantity,
+                          String notifyRule,
+                          LocalDateTime addedAt) {
+        this.id = id;
+        this.totalQuantity = totalQuantity;
+        this.currentQuantity = currentQuantity;
+        this.notifyRule = notifyRule;
+        this.addedAt = addedAt;
+    }
+
     public String getId() {
         return id;
     }
@@ -39,5 +51,4 @@ public class MedicationPack {
     public LocalDateTime getAddedAt() {
         return addedAt;
     }
-
 }

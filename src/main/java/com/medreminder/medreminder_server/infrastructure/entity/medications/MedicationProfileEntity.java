@@ -1,14 +1,13 @@
 package com.medreminder.medreminder_server.infrastructure.entity.medications;
 
 
-import com.medreminder.medreminder_server.domain.models.medication.Medication;
-import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Entity(name = "MEDICATION_PROFILES")
 public class MedicationProfileEntity {
@@ -20,9 +19,6 @@ public class MedicationProfileEntity {
 
     @Column(name = "is_active")
     private boolean isActive;
-
-    @Column(name = "start_at")
-    private LocalDateTime startAt;
 
     private String note;
 
@@ -43,14 +39,14 @@ public class MedicationProfileEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private MedicationPackEntity medicationPack;
+    private MedicationScheduleEntity medicationSchedule;
 
     @OneToOne(
             mappedBy = "medicationProfile",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private MedicationScheduleEntity medicationSchedule;
+    private MedicationPackEntity medicationPack;
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -65,11 +61,16 @@ public class MedicationProfileEntity {
 
     public MedicationProfileEntity(String id,
                                    boolean isActive,
-                                   LocalDateTime startAt, String note) {
+                                   String note,
+                                   MedicationEntity medication,
+                                   MedicationScheduleEntity medicationSchedule,
+                                   MedicationPackEntity medicationPack) {
         this.id = id;
         this.isActive = isActive;
-        this.startAt = startAt;
         this.note = note;
+        this.medication = medication;
+        this.medicationSchedule = medicationSchedule;
+        this.medicationPack = medicationPack;
     }
 
     public String getId() {
@@ -80,11 +81,28 @@ public class MedicationProfileEntity {
         return isActive;
     }
 
-    public LocalDateTime getStartAt() {
-        return startAt;
-    }
-
     public String getNote() {
         return note;
+    }
+
+    public MedicationEntity getMedication() { return medication; }
+
+    public MedicationScheduleEntity getMedicationSchedule() {
+        return medicationSchedule;
+    }
+
+    public MedicationPackEntity getMedicationPack() {
+        return medicationPack;
+    }
+
+    public void setProfile(ProfileEntity profile) {
+        this.profile = profile;
+    }
+
+    public Optional<LocalDateTime> getCreatedAt() {
+       if (createdAt == null) {
+           return Optional.empty();
+       }
+       return Optional.of(createdAt);
     }
 }

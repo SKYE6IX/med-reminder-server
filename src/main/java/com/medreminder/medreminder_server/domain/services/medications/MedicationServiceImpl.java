@@ -1,17 +1,17 @@
 package com.medreminder.medreminder_server.domain.services.medications;
 
-import com.medreminder.medreminder_server.application.dtos.medication.CreateMedPack;
-import com.medreminder.medreminder_server.application.dtos.medication.CreateMedSchedule;
-import com.medreminder.medreminder_server.application.dtos.medication.CreateMedicationCommand;
+import com.medreminder.medreminder_server.application.dtos.medication.*;
+import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
 import com.medreminder.medreminder_server.domain.models.medication.*;
 import com.medreminder.medreminder_server.domain.services.users.ProfileRepository;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationPackEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.*;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
+import org.jspecify.annotations.NonNull;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class MedicationServiceImpl implements MedicationService {
 
@@ -20,57 +20,94 @@ public class MedicationServiceImpl implements MedicationService {
     private final MedicationMapper medicationMapper;
 
     public MedicationServiceImpl(MedicationRepository medicationRepository,
-                                 ProfileRepository profileRepository) {
+                                 ProfileRepository profileRepository,
+                                 MedicationMapper medicationMapper) {
         this.medicationRepository = medicationRepository;
         this.profileRepository = profileRepository;
-        this.medicationMapper = new MedicationMapper();
+        this.medicationMapper = medicationMapper;
     }
 
     @Override
-    public void createMedication(String profileId, CreateMedicationCommand cmd) {
+    public MedicationProfileResponse createMedication(String profileId, CreateMedicationCommand cmd) {
 
-        ProfileEntity profileEntity = profileRepository.findProfileById(profileId).orElse(null);
+        ProfileEntity profileEntity = profileRepository.findProfileById(profileId)
+                .orElse(null);
 
         if (profileEntity == null) {
-            return;
+            return null;
         }
 
-//        We need to delegate the creation of new medicine to a private method ✅
-//        Then we also do the same thing to schedule creation too ✅
-//        And last the packs, if the value of the pack was included. For this
-//        we need to make the return getMedPacks to be optional. and run some
-//        function is they are present.
+        Medication medication = createMedication(cmd);
+        MedicationSchedule medicationSchedule = createMedicationSchedule(cmd.getSchedule());
+        MedicationPack medicationPack = createMedicationPack(cmd.getMedicationPack()).orElse(null);
+
+        MedicationProfile medicationProfile = new MedicationProfile(null,
+                true, cmd.getMedicationNote(), medication,
+                medicationSchedule, medicationPack);
+
+        var medicationProfileEntity = medicationMapper.toEntity(medicationProfile);
+
+        medicationProfileEntity.setProfile(profileEntity);
+
+        MedicationProfileEntity smp = medicationRepository.saveMedicationProfile(medicationProfileEntity);
+
+        return getResponse(smp, profileEntity);
     }
 
-
-    private MedicationEntity createMedicationEntity(CreateMedicationCommand cmd) {
+    private Medication createMedication(CreateMedicationCommand cmd) {
 
         MeasurementUnit measurementUnit = new MeasurementUnit(null,
                 Measurement.valueOf(cmd.getMedicationMeasurement()));
 
-        Medication medication = new Medication(null, cmd.getMedicationName(),
-                Unit.valueOf(cmd.getMedicationUnit()), measurementUnit);
-
-        return medicationRepository.saveMedication(medicationMapper.toEntity(medication));
+        return new Medication(null,
+                cmd.getMedicationName(),
+                Unit.valueOf(cmd.getMedicationUnit()),
+                measurementUnit);
     }
 
-    private MedicationScheduleEntity createMedicationScheduleEntity(CreateMedSchedule schedule) {
+    private MedicationSchedule createMedicationSchedule(CreateMedSchedule schedule) {
 
-        MedicationSchedule medicationSchedule = new MedicationSchedule(null,
-                schedule.dosage(), schedule.recurrenceRule(), LocalDateTime.parse(schedule.startAt()));
-
-        return medicationRepository.saveMedicationSchedule(medicationMapper.toEntity(medicationSchedule));
+        return new MedicationSchedule(null,
+                schedule.dosage(), schedule.recurrenceRule(),
+                LocalDateTime.parse(schedule.startTime()),
+                LocalDate.parse(schedule.startDate()));
     }
 
-    private MedicationPackEntity createMedicationPack (CreateMedPack pack) {
-
-        if(pack == null) {
-            return null;
+    private Optional<MedicationPack> createMedicationPack(CreateMedPack pack) {
+        if( pack == null) {
+            return Optional.empty();
         }
 
         MedicationPack medicationPack = new MedicationPack(null,
                 pack.totalQuantity(), pack.notifyRule(), LocalDateTime.now());
 
-        return null;
+        return Optional.of(medicationPack);
+    }
+
+
+    private static @NonNull MedicationProfileResponse getResponse(MedicationProfileEntity smp,
+                                                                  ProfileEntity profileEntity) {
+
+        String status = smp.isActive() ? "active" : "in_active";
+        String createdAt = smp.getCreatedAt().isPresent() ? smp.getCreatedAt().get().toString() : "";
+
+        MedicationProfileResponse response = new MedicationProfileResponse(smp.getId(),
+                smp.getMedication().getName(),
+                smp.getMedication().getUnitType(),
+                status, smp.getNote(),
+                createdAt);
+
+        response.setProfile(new ProfileResponse(profileEntity.getId(),
+                profileEntity.getName(), profileEntity.getRelation(), profileEntity.isSelf()));
+
+        MedicationScheduleEntity schedule = smp.getMedicationSchedule();
+
+        response.setSchedule(new MedScheduleResponse(schedule.getId(),
+                schedule.getDoseQuantity(),
+                smp.getMedication().getMeasurementUnit().getSymbol(),
+                schedule.getRecurrenceRule(),
+                schedule.getStartTime().toString(), schedule.getStartDate().toString()));
+
+        return response;
     }
 }

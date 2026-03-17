@@ -17,11 +17,6 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     }
 
     @Override
-    public void saveProfile(ProfileEntity profileEntity) {
-        jpaProfileRepository.save(profileEntity);
-    }
-
-    @Override
     public Optional<ProfileEntity> findProfileById(String id) {
 
         ProfileEntity profileEntity = jpaProfileRepository.findById(id).orElse(null);

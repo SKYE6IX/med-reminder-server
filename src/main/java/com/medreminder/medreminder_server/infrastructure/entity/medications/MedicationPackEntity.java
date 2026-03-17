@@ -63,9 +63,7 @@ public class MedicationPackEntity {
         return currentQuantity;
     }
 
-    public String getNotifyRule() {
-        return notifyRule;
-    }
+    public String getNotifyRule() { return notifyRule; }
 
     public LocalDateTime getAddedAt() {
         return addedAt;

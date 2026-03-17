@@ -13,7 +13,6 @@ public class Profile {
     private final Relation relation;
     private final boolean isSelf;
     private User user;
-
     private List<MedicationProfile> medicationProfiles = new ArrayList<>();
 
     public Profile(String id, String name, Relation relation, boolean isSelf) {

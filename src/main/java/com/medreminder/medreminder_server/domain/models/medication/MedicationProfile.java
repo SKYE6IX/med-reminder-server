@@ -3,27 +3,39 @@ package com.medreminder.medreminder_server.domain.models.medication;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class MedicationProfile {
 
     private String id;
+
     private boolean isActive;
-    private LocalDateTime startAt;
+
     private String note;
 
     private Profile  profile;
+
     private Medication medication;
+
+    private MedicationSchedule medicationSchedule;
+
+    private MedicationPack medicationPack;
+
+    public MedicationProfile() {
+    }
 
     public MedicationProfile(String id,
                              boolean isActive,
-                             LocalDateTime startAt,
                              String note,
-                             Medication medication) {
+                             Medication medication,
+                             MedicationSchedule medicationSchedule,
+                             MedicationPack medicationPack) {
         this.id = id;
         this.isActive = isActive;
-        this.startAt = startAt;
         this.note = note;
         this.medication = medication;
+        this.medicationSchedule = medicationSchedule;
+        this.medicationPack = medicationPack;
     }
 
     public String getId() {
@@ -32,10 +44,6 @@ public class MedicationProfile {
 
     public boolean isActive() {
         return isActive;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startAt;
     }
 
     public String getNote() {
@@ -50,7 +58,34 @@ public class MedicationProfile {
         return medication;
     }
 
+    public MedicationSchedule getMedicationSchedule() {
+        return medicationSchedule;
+    }
+
+    public MedicationPack getMedicationPack() {
+        return medicationPack;
+    }
+
     public void setProfile(Profile profile) {
         this.profile = profile;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj){
+            return true;
+        }
+
+        if(obj == null || getClass() != obj.getClass()){
+            return false;
+        }
+
+        MedicationProfile that = (MedicationProfile) obj;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

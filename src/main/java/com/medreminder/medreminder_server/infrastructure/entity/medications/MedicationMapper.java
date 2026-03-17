@@ -1,13 +1,24 @@
 package com.medreminder.medreminder_server.infrastructure.entity.medications;
 
 
-import com.medreminder.medreminder_server.domain.models.medication.Medication;
-import com.medreminder.medreminder_server.domain.models.medication.MedicationPack;
-import com.medreminder.medreminder_server.domain.models.medication.MedicationSchedule;
+import com.medreminder.medreminder_server.domain.models.medication.*;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MedicationMapper {
+
+    public MedicationProfileEntity toEntity(MedicationProfile medicationProfile) {
+
+        if(medicationProfile == null) return null;
+
+        return new MedicationProfileEntity(medicationProfile.getId(),
+                medicationProfile.isActive(),
+                medicationProfile.getNote(),
+                toEntity(medicationProfile.getMedication()),
+                toEntity(medicationProfile.getMedicationSchedule()),
+                toEntity(medicationProfile.getMedicationPack()));
+    }
+
 
     public MedicationEntity toEntity(Medication medication){
 
@@ -31,7 +42,8 @@ public class MedicationMapper {
         return new MedicationScheduleEntity(medicationSchedule.getId(),
                 medicationSchedule.getDoseQuantity(),
                 medicationSchedule.getRecurrenceRule(),
-                medicationSchedule.getStartAt());
+                medicationSchedule.getStartTime(),
+                medicationSchedule.getStartDate());
     }
 
     public MedicationPackEntity toEntity(MedicationPack medicationPack) {
@@ -40,6 +52,50 @@ public class MedicationMapper {
 
         return new MedicationPackEntity(medicationPack.getId(),
                 medicationPack.getTotalQuantity(),
+                medicationPack.getNotifyRule(),
+                medicationPack.getAddedAt());
+    }
+
+    public MedicationProfile toDomain(MedicationProfileEntity mpe) {
+        if( mpe == null) return null;
+
+        return new MedicationProfile(mpe.getId(),
+                mpe.isActive(),
+                mpe.getNote(),
+                toDomain(mpe.getMedication()),
+                toDomain(mpe.getMedicationSchedule()),
+                toDomain(mpe.getMedicationPack()));
+    }
+
+    public Medication toDomain(MedicationEntity medicationEntity){
+
+        if(medicationEntity == null) return null;
+
+        MeasurementUnit measurementUnit = new MeasurementUnit(medicationEntity.getMeasurementUnit().getId(),
+                Measurement.valueOf(medicationEntity.getMeasurementUnit().getName()));
+
+        return new Medication(medicationEntity.getId(),
+                medicationEntity.getName(),
+                Unit.valueOf(medicationEntity.getUnitType()), measurementUnit);
+    }
+
+    public MedicationSchedule toDomain(MedicationScheduleEntity mse){
+
+        if(mse == null) return null;
+
+        return new MedicationSchedule(mse.getId(),
+                mse.getDoseQuantity(),
+                mse.getRecurrenceRule(),
+                mse.getStartTime(),
+                mse.getStartDate());
+    }
+
+    public MedicationPack toDomain(MedicationPackEntity medicationPack) {
+        if(medicationPack == null) return null;
+
+        return new MedicationPack(medicationPack.getId(),
+                medicationPack.getTotalQuantity(),
+                medicationPack.getCurrentQuantity(),
                 medicationPack.getNotifyRule(),
                 medicationPack.getAddedAt());
     }

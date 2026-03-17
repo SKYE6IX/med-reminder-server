@@ -1,5 +1,6 @@
 package com.medreminder.medreminder_server.domain.models.medication;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class MedicationSchedule {
@@ -7,16 +8,21 @@ public class MedicationSchedule {
     private String id;
     private double doseQuantity;
     private String recurrenceRule;
-    private LocalDateTime startAt;
+    private LocalDateTime startTime;
+    private LocalDate startDate;
+
+
 
     public MedicationSchedule(String id,
                               double doseQuantity,
                               String recurrenceRule,
-                              LocalDateTime startAt) {
+                              LocalDateTime startTime,
+                              LocalDate startDate) {
         this.id = id;
         this.doseQuantity = doseQuantity;
         this.recurrenceRule = recurrenceRule;
-        this.startAt = startAt;
+        this.startTime = startTime;
+        this.startDate = startDate;
     }
 
     public String getId() {
@@ -31,7 +37,11 @@ public class MedicationSchedule {
         return recurrenceRule;
     }
 
-    public LocalDateTime getStartAt() {
-        return startAt;
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
     }
 }

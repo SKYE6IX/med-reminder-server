@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository;
 public class MedicationRepositoryImpl implements MedicationRepository {
 
 
-    private final JpaMedicationRepository jpaMedicationRepository;
     private final JpaMedicationProfileRepository jpaMedicationProfileRepository;
+    private final JpaMedicationRepository jpaMedicationRepository;
     private final JpaMedicationScheduleRepository jpaMedicationScheduleRepository;
     private final JpaMedicationPackRepository jpaMedicationPackRepository;
 
@@ -47,6 +47,7 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
     @Override
     public MedicationPackEntity saveMedicationPack(MedicationPackEntity medicationPackEntity) {
-        return null;
+
+        return jpaMedicationPackRepository.save(medicationPackEntity);
     }
 }

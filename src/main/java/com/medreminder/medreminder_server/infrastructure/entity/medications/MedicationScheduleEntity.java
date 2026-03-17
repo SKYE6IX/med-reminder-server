@@ -3,6 +3,7 @@ package com.medreminder.medreminder_server.infrastructure.entity.medications;
 import jakarta.persistence.*;
 import org.hibernate.annotations.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity(name = "MEDICATION_SCHEDULES")
@@ -19,8 +20,11 @@ public class MedicationScheduleEntity {
     @Column(name = "recurrence_rule")
     private String recurrenceRule;
 
-    @Column(name = "start_at")
-    private LocalDateTime startAt;
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medication_profile_id")
@@ -41,11 +45,13 @@ public class MedicationScheduleEntity {
     public MedicationScheduleEntity(String id,
                                     double doseQuantity,
                                     String recurrenceRule,
-                                    LocalDateTime startAt) {
+                                    LocalDateTime startTime,
+                                    LocalDate startDate) {
         this.id = id;
         this.doseQuantity = doseQuantity;
         this.recurrenceRule = recurrenceRule;
-        this.startAt = startAt;
+        this.startTime = startTime;
+        this.startDate = startDate;
     }
 
     public String getId() {
@@ -60,7 +66,11 @@ public class MedicationScheduleEntity {
         return recurrenceRule;
     }
 
-    public LocalDateTime getStartAt() {
-        return startAt;
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
     }
 }

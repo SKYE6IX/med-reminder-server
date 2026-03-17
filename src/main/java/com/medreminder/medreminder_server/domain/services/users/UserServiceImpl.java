@@ -13,11 +13,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
+    private final UserMapper userMapper = new UserMapper();
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.userMapper = new UserMapper();
     }
 
     @Override
@@ -45,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
         domainUser.updateUser(updateUserCommand);
 
-        userRepository.saveUser(userMapper.toManagedEntity(domainUser, userEntity));
+        userRepository.saveUser(userMapper.toEntity(domainUser, userEntity));
 
         return domainUser;
     }
@@ -63,14 +62,14 @@ public class UserServiceImpl implements UserService {
         domainUser.addProfiles(profile);
 
         return userRepository
-                .saveUser(userMapper.toManagedEntity(domainUser, userEntity))
+                .saveUser(userMapper.toEntity(domainUser, userEntity))
                 .getProfiles()
                 .stream()
                 .filter(pe ->
                         pe.getName().equals(profile.getName())
                         && Relation.valueOf(pe.getRelation()) == profile.getRelation())
                 .findFirst()
-                .map(userMapper::toDomianProfile)
+                .map(userMapper::toDomain)
                 .orElseThrow(()-> new RuntimeException("Profile not found!"));
     }
 
@@ -97,7 +96,7 @@ public class UserServiceImpl implements UserService {
 
         domainUser.removeProfiles(profileToDelete);
 
-        userRepository.saveUser(userMapper.toManagedEntity(domainUser, userEntity));
+        userRepository.saveUser(userMapper.toEntity(domainUser, userEntity));
 
         return profileToDelete;
     }

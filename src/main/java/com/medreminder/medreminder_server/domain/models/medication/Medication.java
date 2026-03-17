@@ -7,7 +7,8 @@ public class Medication {
     private final Unit unitType;
     private final MeasurementUnit measurementUnit;
 
-    public Medication(String id, String name,
+    public Medication(String id,
+                      String name,
                       Unit unitType,
                       MeasurementUnit measurementUnit) {
         this.id = id;

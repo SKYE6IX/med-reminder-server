@@ -73,4 +73,7 @@ public class ProfileEntity {
         return isSelf;
     }
 
+    public List<MedicationProfileEntity> getMedicationProfile() {
+        return medicationProfile;
+    }
 }
