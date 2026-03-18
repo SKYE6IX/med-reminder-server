@@ -11,6 +11,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 public class MedicationServiceImpl implements MedicationService {
@@ -66,11 +67,13 @@ public class MedicationServiceImpl implements MedicationService {
     }
 
     private MedicationSchedule createMedicationSchedule(CreateMedSchedule schedule) {
+        DateTimeFormatter dtf= DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        DateTimeFormatter df = DateTimeFormatter.ISO_LOCAL_DATE;
 
         return new MedicationSchedule(null,
                 schedule.dosage(), schedule.recurrenceRule(),
-                LocalDateTime.parse(schedule.startTime()),
-                LocalDate.parse(schedule.startDate()));
+                LocalDateTime.parse(schedule.startTime(),dtf),
+                LocalDate.parse(schedule.startDate(), df));
     }
 
     private Optional<MedicationPack> createMedicationPack(CreateMedPack pack) {
@@ -83,7 +86,6 @@ public class MedicationServiceImpl implements MedicationService {
 
         return Optional.of(medicationPack);
     }
-
 
     private static @NonNull MedicationProfileResponse getResponse(MedicationProfileEntity smp,
                                                                   ProfileEntity profileEntity) {

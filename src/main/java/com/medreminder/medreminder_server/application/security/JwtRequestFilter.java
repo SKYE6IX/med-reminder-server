@@ -52,7 +52,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             String userId = jwtUtil.extractClaim(token, "user_id");
 
-            UserDetails userDetails = new UserPrincipal(userId,email, null);
+            UserDetails userDetails = new UserPrincipal(userId, email, null);
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
                     null, userDetails.getAuthorities());

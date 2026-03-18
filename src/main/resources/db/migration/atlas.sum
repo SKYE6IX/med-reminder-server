@@ -1,4 +1,4 @@
-h1:X6RxyPsD5ED205CYCqqmVZ/RVWQPDznqT+YXJo/bLtI=
+h1:s1g3kq/OeStVcxNnZygJDjMc2GUBSuQij5wh636E2hQ=
 V20260228073530__init.sql h1:piXArQxcJfIl7pYmCksBYrIt7/wLOZlA2GLKur4R25o=
 V20260302125020__update_id_field.sql h1:WNMv2fnX/SKEPIp1ozI+J8iZgdamH5XD3O7KwXP7vvE=
 V20260303101307__update_email_field.sql h1:YdfzWuxYWKQQQOrDqVr+gIM2EgxMwuyTfe/bg+GzTso=
@@ -11,3 +11,4 @@ V20260314102625__added_medications_entities.sql h1:m+fZHttUuf5ZP3YUYyrWer3Ko1ziy
 V20260316082942__added_field_to_meidication_pack.sql h1:bMbSsfmCgZnwsnhPnH29BmnyPkGM/FE4frw3eZeIftY=
 V20260316094635__remove_field_from_meidication_measurement.sql h1:ehFSe6TQvLFa3VCMDDFQFqX34tv4uLPz/sR+ebNj750=
 V20260316125121__remove_field_from_meidication_pack.sql h1:Wv1BR3FK+66rHi1q6VPiyS3ZGAyYSTnPS18Ll8YoTiA=
+V20260318101506__update_fields.sql h1:kH2c9/skYGlgtInl9cTYDcQcx98UpzJuGgbgyGZtkyw=

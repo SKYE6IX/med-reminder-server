@@ -61,16 +61,10 @@ public class MedicationProfileEntity {
 
     public MedicationProfileEntity(String id,
                                    boolean isActive,
-                                   String note,
-                                   MedicationEntity medication,
-                                   MedicationScheduleEntity medicationSchedule,
-                                   MedicationPackEntity medicationPack) {
+                                   String note) {
         this.id = id;
         this.isActive = isActive;
         this.note = note;
-        this.medication = medication;
-        this.medicationSchedule = medicationSchedule;
-        this.medicationPack = medicationPack;
     }
 
     public String getId() {
@@ -104,5 +98,20 @@ public class MedicationProfileEntity {
            return Optional.empty();
        }
        return Optional.of(createdAt);
+    }
+
+    public void addMedication(MedicationEntity medication) {
+        this.medication = medication;
+        medication.addMedicationProfile(this);
+    }
+
+    public void addMedicationSchedule(MedicationScheduleEntity medicationSchedule) {
+        this.medicationSchedule = medicationSchedule;
+        medicationSchedule.addMedicationProfile(this);
+    }
+
+    public void addMedicationPack(MedicationPackEntity medicationPack) {
+        this.medicationPack = medicationPack;
+        medicationPack.addMedicationProfile(this);
     }
 }

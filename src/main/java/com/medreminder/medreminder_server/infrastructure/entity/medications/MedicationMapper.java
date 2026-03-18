@@ -4,6 +4,8 @@ package com.medreminder.medreminder_server.infrastructure.entity.medications;
 import com.medreminder.medreminder_server.domain.models.medication.*;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class MedicationMapper {
 
@@ -11,28 +13,33 @@ public class MedicationMapper {
 
         if(medicationProfile == null) return null;
 
-        return new MedicationProfileEntity(medicationProfile.getId(),
-                medicationProfile.isActive(),
-                medicationProfile.getNote(),
-                toEntity(medicationProfile.getMedication()),
-                toEntity(medicationProfile.getMedicationSchedule()),
-                toEntity(medicationProfile.getMedicationPack()));
+        MedicationProfileEntity medicationProfileEntity = new MedicationProfileEntity(medicationProfile.getId(),
+                medicationProfile.isActive(), medicationProfile.getNote());
+
+        medicationProfileEntity.addMedication(toEntity(medicationProfile.getMedication()));
+        medicationProfileEntity.addMedicationSchedule(toEntity(medicationProfile.getMedicationSchedule()));
+        toEntity(medicationProfile.getMedicationPack()).ifPresent(medicationProfileEntity::addMedicationPack);
+
+        return medicationProfileEntity;
     }
 
 
     public MedicationEntity toEntity(Medication medication){
 
-        if(medication == null) return null;
+        if( medication == null ) return null;
 
         MeasurementUnitEntity measurementUnitEntity =
                 new MeasurementUnitEntity(medication.getMeasurementUnit().getId(),
                         medication.getMeasurementUnit().getName().name(),
                         medication.getMeasurementUnit().getSymbol());
 
-        return new MedicationEntity(medication.getId(),
+       MedicationEntity medicationEntity = new MedicationEntity(medication.getId(),
                 medication.getName(),
-                medication.getUnitType().name(),
-                measurementUnitEntity);
+                medication.getUnitType().name());
+
+       medicationEntity.addMeasurementUnit(measurementUnitEntity);
+
+        return medicationEntity;
     }
 
     public MedicationScheduleEntity toEntity(MedicationSchedule medicationSchedule){
@@ -46,14 +53,16 @@ public class MedicationMapper {
                 medicationSchedule.getStartDate());
     }
 
-    public MedicationPackEntity toEntity(MedicationPack medicationPack) {
+    public Optional<MedicationPackEntity> toEntity(MedicationPack medicationPack) {
 
-        if(medicationPack == null) return null;
+        if(medicationPack == null) return Optional.empty();
 
-        return new MedicationPackEntity(medicationPack.getId(),
+        MedicationPackEntity medicationPackEntity =  new MedicationPackEntity(medicationPack.getId(),
                 medicationPack.getTotalQuantity(),
                 medicationPack.getNotifyRule(),
                 medicationPack.getAddedAt());
+
+        return Optional.of(medicationPackEntity);
     }
 
     public MedicationProfile toDomain(MedicationProfileEntity mpe) {

@@ -68,4 +68,8 @@ public class MedicationPackEntity {
     public LocalDateTime getAddedAt() {
         return addedAt;
     }
+
+    public void addMedicationProfile(MedicationProfileEntity medicationProfile){
+        this.medicationProfile = medicationProfile;
+    }
 }

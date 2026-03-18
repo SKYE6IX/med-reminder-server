@@ -57,7 +57,6 @@ public class MedicationServiceUnitTest {
                 new ProfileEntity(profileId.toString(),"test profile","BROTHER", true, null);
 
         CreateMedicationCommand cmd = new CreateMedicationCommand.Builder()
-                .profileId(snubProfileEntity.getId())
                 .medicationName("Paracetamol")
                 .medicationUnit("TABLET")
                 .medicationMeasurement("CAPSULE")
@@ -80,8 +79,11 @@ public class MedicationServiceUnitTest {
 
         MedicationProfileEntity snubMedicationProfileEntity =
                 new MedicationProfileEntity(medicationId.toString(),
-                true, cmd.getMedicationNote(), medicationMapper.toEntity(medication),
-                        medicationMapper.toEntity(schedule), null);
+                true, cmd.getMedicationNote());
+
+        snubMedicationProfileEntity.setProfile(snubProfileEntity);
+        snubMedicationProfileEntity.addMedication(medicationMapper.toEntity(medication));
+        snubMedicationProfileEntity.addMedicationSchedule(medicationMapper.toEntity(schedule));
 
 
         when(profileRepository.findProfileById(any(String.class)))

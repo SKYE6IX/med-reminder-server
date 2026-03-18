@@ -73,4 +73,8 @@ public class MedicationScheduleEntity {
     public LocalDate getStartDate() {
         return startDate;
     }
+
+    public void addMedicationProfile(MedicationProfileEntity medicationProfile){
+        this.medicationProfile = medicationProfile;
+    }
 }

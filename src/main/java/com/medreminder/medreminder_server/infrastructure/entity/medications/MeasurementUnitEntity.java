@@ -51,4 +51,8 @@ public class MeasurementUnitEntity {
     public String getSymbol() {
         return symbol;
     }
+
+    public void addMedication(MedicationEntity medication) {
+        this.medication = medication;
+    }
 }
