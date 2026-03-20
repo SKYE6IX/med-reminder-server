@@ -11,6 +11,7 @@ import com.medreminder.medreminder_server.domain.services.medications.Medication
 import com.medreminder.medreminder_server.domain.services.users.ProfileRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,8 +63,8 @@ public class MedicationServiceUnitTest {
                 .medicationUnit("TABLET")
                 .medicationMeasurement("CAPSULE")
                 .medicationNote("Take on time")
-                .schedule(new CreateMedSchedule(1.2,"every 3 days",
-                        "2024-07-15T15:00:00","2024-07-15"))
+                .schedule(new CreateMedSchedule(1.2,"FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0",
+                        "2024-07-15T15:00:00","2024-07-15T15:00:00", "Europe/Moscow"))
                 .medicationPack(null)
                 .build();
 
@@ -75,7 +77,8 @@ public class MedicationServiceUnitTest {
         MedicationSchedule schedule = new MedicationSchedule(null, cmd.getSchedule().dosage(),
                 cmd.getSchedule().recurrenceRule(),
                 LocalDateTime.parse(cmd.getSchedule().startTime(), formatter),
-                LocalDate.parse(cmd.getSchedule().startDate()));
+                LocalDateTime.parse(cmd.getSchedule().startDate()),
+                cmd.getSchedule().timeZone());
 
         MedicationProfileEntity snubMedicationProfileEntity =
                 new MedicationProfileEntity(medicationId.toString(),
@@ -93,6 +96,8 @@ public class MedicationServiceUnitTest {
                 .thenReturn(snubMedicationProfileEntity);
 
         MedicationProfileResponse response = medicationService.createMedication(snubProfileEntity.getId(), cmd);
+
+        verify(medicationRepository).saveMedicationSchedule(any(MedicationScheduleEntity.class));
 
         assertThat(response).isNotNull();
         assertThat(response.getId()).isNotNull().isEqualTo(snubMedicationProfileEntity.getId());

@@ -12,27 +12,14 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
 
     private final JpaMedicationProfileRepository jpaMedicationProfileRepository;
-    private final JpaMedicationRepository jpaMedicationRepository;
     private final JpaMedicationScheduleRepository jpaMedicationScheduleRepository;
-    private final JpaMedicationPackRepository jpaMedicationPackRepository;
 
-    public MedicationRepositoryImpl(JpaMedicationRepository jpaMedicationRepository,
-                                    JpaMedicationProfileRepository jpaMedicationProfileRepository,
-                                    JpaMedicationScheduleRepository jpaMedicationScheduleRepository,
-                                    JpaMedicationPackRepository jpaMedicationPackRepository) {
-        this.jpaMedicationRepository = jpaMedicationRepository;
+    public MedicationRepositoryImpl(JpaMedicationProfileRepository jpaMedicationProfileRepository,
+                                    JpaMedicationScheduleRepository jpaMedicationScheduleRepository) {
         this.jpaMedicationProfileRepository = jpaMedicationProfileRepository;
         this.jpaMedicationScheduleRepository = jpaMedicationScheduleRepository;
-        this.jpaMedicationPackRepository = jpaMedicationPackRepository;
     }
 
-
-    @Override
-    public MedicationEntity saveMedication(MedicationEntity medicationEntity) {
-
-        return jpaMedicationRepository.save(medicationEntity);
-
-    }
 
     @Override
     public MedicationProfileEntity saveMedicationProfile(MedicationProfileEntity medicationProfileEntity) {
@@ -40,14 +27,9 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     }
 
     @Override
-    public MedicationScheduleEntity saveMedicationSchedule(MedicationScheduleEntity medicationScheduleEntity) {
+    public void saveMedicationSchedule(MedicationScheduleEntity medicationScheduleEntity) {
 
-        return jpaMedicationScheduleRepository.save(medicationScheduleEntity);
+        jpaMedicationScheduleRepository.save(medicationScheduleEntity);
     }
 
-    @Override
-    public MedicationPackEntity saveMedicationPack(MedicationPackEntity medicationPackEntity) {
-
-        return jpaMedicationPackRepository.save(medicationPackEntity);
-    }
 }

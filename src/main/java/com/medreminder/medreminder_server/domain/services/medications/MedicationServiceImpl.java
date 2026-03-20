@@ -6,7 +6,6 @@ import com.medreminder.medreminder_server.domain.models.medication.*;
 import com.medreminder.medreminder_server.domain.services.users.ProfileRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.*;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import org.jspecify.annotations.NonNull;
 
 import java.time.LocalDate;
@@ -26,6 +25,7 @@ public class MedicationServiceImpl implements MedicationService {
         this.medicationRepository = medicationRepository;
         this.profileRepository = profileRepository;
         this.medicationMapper = medicationMapper;
+
     }
 
     @Override
@@ -52,6 +52,10 @@ public class MedicationServiceImpl implements MedicationService {
 
         MedicationProfileEntity smp = medicationRepository.saveMedicationProfile(medicationProfileEntity);
 
+        ScheduleEventHelper scheduleHelper = new ScheduleEventHelper(medicationRepository, medicationMapper);
+
+        scheduleHelper.createScheduleEvent(smp.getMedicationSchedule());
+
         return getResponse(smp, profileEntity);
     }
 
@@ -68,13 +72,14 @@ public class MedicationServiceImpl implements MedicationService {
 
     private MedicationSchedule createMedicationSchedule(CreateMedSchedule schedule) {
         DateTimeFormatter dtf= DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        DateTimeFormatter df = DateTimeFormatter.ISO_LOCAL_DATE;
 
         return new MedicationSchedule(null,
                 schedule.dosage(), schedule.recurrenceRule(),
                 LocalDateTime.parse(schedule.startTime(),dtf),
-                LocalDate.parse(schedule.startDate(), df));
+                LocalDateTime.parse(schedule.startDate(), dtf),
+                schedule.timeZone());
     }
+
 
     private Optional<MedicationPack> createMedicationPack(CreateMedPack pack) {
         if( pack == null) {

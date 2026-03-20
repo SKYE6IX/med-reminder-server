@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/medications")
 public class MedicationController {
 
-
     MedicationService medicationService;
 
     public MedicationController(MedicationService medicationService) {

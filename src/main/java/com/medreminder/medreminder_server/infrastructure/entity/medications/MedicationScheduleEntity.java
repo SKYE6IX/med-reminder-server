@@ -1,10 +1,13 @@
 package com.medreminder.medreminder_server.infrastructure.entity.medications;
 
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity(name = "MEDICATION_SCHEDULES")
 public class MedicationScheduleEntity {
@@ -24,12 +27,25 @@ public class MedicationScheduleEntity {
     private LocalDateTime startTime;
 
     @Column(name = "start_date")
-    private LocalDate startDate;
+    private LocalDateTime startDate;
+
+    @Column(name = "last_expanded_until")
+    private LocalDateTime lastExpandedUntil;
+
+    @Column(name = "time_zone")
+    private String timeZone;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medication_profile_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private MedicationProfileEntity medicationProfile;
+
+    @OneToMany(
+            mappedBy = "medicationSchedule",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private final List<ScheduleEventEntity > scheduleEvents = new ArrayList<>();
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -46,12 +62,14 @@ public class MedicationScheduleEntity {
                                     double doseQuantity,
                                     String recurrenceRule,
                                     LocalDateTime startTime,
-                                    LocalDate startDate) {
+                                    LocalDateTime startDate,
+                                    String timeZone) {
         this.id = id;
         this.doseQuantity = doseQuantity;
         this.recurrenceRule = recurrenceRule;
         this.startTime = startTime;
         this.startDate = startDate;
+        this.timeZone = timeZone;
     }
 
     public String getId() {
@@ -70,11 +88,24 @@ public class MedicationScheduleEntity {
         return startTime;
     }
 
-    public LocalDate getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
+    }
+
+    public LocalDateTime getLastExpandedUntil() {
+        return lastExpandedUntil;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
     }
 
     public void addMedicationProfile(MedicationProfileEntity medicationProfile){
         this.medicationProfile = medicationProfile;
+    }
+
+    public void addScheduleEvent(ScheduleEventEntity scheduleEvent){
+        this.scheduleEvents.add(scheduleEvent);
+        scheduleEvent.addMedicationSchedule(this);
     }
 }

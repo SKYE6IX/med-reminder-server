@@ -50,7 +50,8 @@ public class MedicationMapper {
                 medicationSchedule.getDoseQuantity(),
                 medicationSchedule.getRecurrenceRule(),
                 medicationSchedule.getStartTime(),
-                medicationSchedule.getStartDate());
+                medicationSchedule.getStartDate(),
+                medicationSchedule.getTimeZone());
     }
 
     public Optional<MedicationPackEntity> toEntity(MedicationPack medicationPack) {
@@ -63,6 +64,16 @@ public class MedicationMapper {
                 medicationPack.getAddedAt());
 
         return Optional.of(medicationPackEntity);
+    }
+
+    public ScheduleEventEntity toEntity(ScheduleEvent scheduleEvent) {
+
+        if(scheduleEvent == null) return null;
+
+        return new ScheduleEventEntity(scheduleEvent.getId(),
+                scheduleEvent.getDosage(),
+                scheduleEvent.getStatus(),
+                scheduleEvent.getScheduleAt());
     }
 
     public MedicationProfile toDomain(MedicationProfileEntity mpe) {
@@ -96,7 +107,8 @@ public class MedicationMapper {
                 mse.getDoseQuantity(),
                 mse.getRecurrenceRule(),
                 mse.getStartTime(),
-                mse.getStartDate());
+                mse.getStartDate(),
+                mse.getTimeZone());
     }
 
     public MedicationPack toDomain(MedicationPackEntity medicationPack) {

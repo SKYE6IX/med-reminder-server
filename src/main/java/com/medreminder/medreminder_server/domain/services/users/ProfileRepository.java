@@ -5,6 +5,5 @@ import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEnt
 import java.util.Optional;
 
 public interface ProfileRepository {
-
     Optional<ProfileEntity> findProfileById(String id);
 }

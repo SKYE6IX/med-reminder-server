@@ -7,11 +7,7 @@ import com.medreminder.medreminder_server.infrastructure.entity.medications.Medi
 
 public interface MedicationRepository {
 
-    MedicationEntity saveMedication(MedicationEntity medicationEntity);
-
     MedicationProfileEntity saveMedicationProfile(MedicationProfileEntity medicationProfileEntity);
 
-    MedicationScheduleEntity saveMedicationSchedule(MedicationScheduleEntity medicationScheduleEntity);
-
-    MedicationPackEntity saveMedicationPack(MedicationPackEntity medicationPackEntity);
+    void saveMedicationSchedule(MedicationScheduleEntity medicationScheduleEntity);
 }

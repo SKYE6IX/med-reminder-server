@@ -9,20 +9,22 @@ public class MedicationSchedule {
     private double doseQuantity;
     private String recurrenceRule;
     private LocalDateTime startTime;
-    private LocalDate startDate;
-
-
+    private LocalDateTime startDate;
+    private LocalDateTime lastExpandedUntil;
+    private String timeZone;
 
     public MedicationSchedule(String id,
                               double doseQuantity,
                               String recurrenceRule,
                               LocalDateTime startTime,
-                              LocalDate startDate) {
+                              LocalDateTime startDate,
+                              String timeZone) {
         this.id = id;
         this.doseQuantity = doseQuantity;
         this.recurrenceRule = recurrenceRule;
         this.startTime = startTime;
         this.startDate = startDate;
+        this.timeZone = timeZone;
     }
 
     public String getId() {
@@ -41,7 +43,15 @@ public class MedicationSchedule {
         return startTime;
     }
 
-    public LocalDate getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
+    }
+
+    public LocalDateTime getLastExpandedUntil() {
+        return lastExpandedUntil;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
     }
 }
