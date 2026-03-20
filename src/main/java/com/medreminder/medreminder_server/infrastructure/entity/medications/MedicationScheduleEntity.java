@@ -100,6 +100,10 @@ public class MedicationScheduleEntity {
         return timeZone;
     }
 
+    public MedicationProfileEntity getMedicationProfile() {
+        return medicationProfile;
+    }
+
     public void addMedicationProfile(MedicationProfileEntity medicationProfile){
         this.medicationProfile = medicationProfile;
     }

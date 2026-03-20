@@ -11,7 +11,6 @@ public class ScheduleEvent {
     private LocalDateTime takenAt;
     private MedicationSchedule medicationSchedule;
 
-
     public ScheduleEvent(String id,
                          double dosage,
                          LocalDateTime scheduleAt) {

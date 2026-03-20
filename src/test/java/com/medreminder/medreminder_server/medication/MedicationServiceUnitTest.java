@@ -59,6 +59,7 @@ public class MedicationServiceUnitTest {
                 new ProfileEntity(profileId.toString(),"test profile","BROTHER", true, null);
 
         CreateMedicationCommand cmd = new CreateMedicationCommand.Builder()
+                .profileId(snubProfileEntity.getId())
                 .medicationName("Paracetamol")
                 .medicationUnit("TABLET")
                 .medicationMeasurement("CAPSULE")
@@ -95,7 +96,7 @@ public class MedicationServiceUnitTest {
         when(medicationRepository.saveMedicationProfile(any(MedicationProfileEntity.class)))
                 .thenReturn(snubMedicationProfileEntity);
 
-        MedicationProfileResponse response = medicationService.createMedication(snubProfileEntity.getId(), cmd);
+        MedicationProfileResponse response = medicationService.createMedication(cmd);
 
         verify(medicationRepository).saveMedicationSchedule(any(MedicationScheduleEntity.class));
 

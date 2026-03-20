@@ -10,8 +10,12 @@ import org.jspecify.annotations.NonNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MedicationServiceImpl implements MedicationService {
 
@@ -29,16 +33,16 @@ public class MedicationServiceImpl implements MedicationService {
     }
 
     @Override
-    public MedicationProfileResponse createMedication(String profileId, CreateMedicationCommand cmd) {
+    public MedicationProfileResponse createMedication(CreateMedicationCommand cmd) {
 
-        ProfileEntity profileEntity = profileRepository.findProfileById(profileId)
+        ProfileEntity profileEntity = profileRepository.findProfileById(cmd.getProfileId())
                 .orElse(null);
 
         if (profileEntity == null) {
             return null;
         }
 
-        Medication medication = createMedication(cmd);
+        Medication medication = createMedicationInstance(cmd);
         MedicationSchedule medicationSchedule = createMedicationSchedule(cmd.getSchedule());
         MedicationPack medicationPack = createMedicationPack(cmd.getMedicationPack()).orElse(null);
 
@@ -52,14 +56,43 @@ public class MedicationServiceImpl implements MedicationService {
 
         MedicationProfileEntity smp = medicationRepository.saveMedicationProfile(medicationProfileEntity);
 
-        ScheduleEventHelper scheduleHelper = new ScheduleEventHelper(medicationRepository, medicationMapper);
+        ScheduleEventHandler scheduleHandler = new ScheduleEventHandler(medicationRepository, medicationMapper);
 
-        scheduleHelper.createScheduleEvent(smp.getMedicationSchedule());
+        scheduleHandler.createScheduleEvent(smp.getMedicationSchedule());
 
         return getResponse(smp, profileEntity);
     }
 
-    private Medication createMedication(CreateMedicationCommand cmd) {
+    @Override
+    public List<ScheduleEventResponse> getMedicationScheduleEvents(String userId, String eventDate) {
+
+        LocalDateTime startOfDay = LocalDate.parse(eventDate).atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.parse(eventDate).atTime(LocalTime.MAX);
+
+        List<ScheduleEventEntity> scheduleEvents =
+                medicationRepository.getMedicationScheduleByUserAndDate(userId, startOfDay, endOfDay);
+
+        return scheduleEvents.stream()
+                .map(event -> {
+                    ScheduleEventResponse ser = new ScheduleEventResponse(
+                            event.getId(),
+                            event.getStatus(),
+                            event.getMedicationSchedule().getMedicationProfile().getMedication().getName(),
+                            "",
+                            event.getDosage(),
+                            event.getMedicationSchedule().getMedicationProfile().getMedication().getMeasurementUnit().getSymbol(),
+                            event.getScheduleAt().toString());
+
+                    ProfileEntity profile = event.getMedicationSchedule().getMedicationProfile().getProfile();
+                    ser.setProfile(new ProfileResponse(profile.getId(),
+                            profile.getName(),
+                            profile.getRelation(), profile.isSelf()));
+
+                    return ser;
+                }).toList();
+    }
+
+    private Medication createMedicationInstance(CreateMedicationCommand cmd) {
 
         MeasurementUnit measurementUnit = new MeasurementUnit(null,
                 Measurement.valueOf(cmd.getMedicationMeasurement()));
@@ -80,7 +113,6 @@ public class MedicationServiceImpl implements MedicationService {
                 schedule.timeZone());
     }
 
-
     private Optional<MedicationPack> createMedicationPack(CreateMedPack pack) {
         if( pack == null) {
             return Optional.empty();
@@ -94,7 +126,6 @@ public class MedicationServiceImpl implements MedicationService {
 
     private static @NonNull MedicationProfileResponse getResponse(MedicationProfileEntity smp,
                                                                   ProfileEntity profileEntity) {
-
         String status = smp.isActive() ? "active" : "in_active";
         String createdAt = smp.getCreatedAt().isPresent() ? smp.getCreatedAt().get().toString() : "";
 

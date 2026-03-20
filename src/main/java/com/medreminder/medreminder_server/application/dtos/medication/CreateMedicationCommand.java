@@ -5,6 +5,7 @@ import tools.jackson.databind.annotation.JsonPOJOBuilder;
 
 @JsonDeserialize(builder = CreateMedicationCommand.Builder.class)
 public class CreateMedicationCommand {
+    private String profileId;
     private String medicationName;
     private String medicationUnit;
     private String medicationMeasurement;
@@ -16,12 +17,17 @@ public class CreateMedicationCommand {
     }
 
     public CreateMedicationCommand(Builder builder) {
+        this.profileId = builder.profileId;
         this.medicationName = builder.medicationName;
         this.medicationUnit = builder.medicationUnit;
         this.medicationMeasurement = builder.medicationMeasurement;
         this.medicationNote = builder.medicationNote;
         this.schedule = builder.schedule;
         this.medicationPack = builder.medicationPack;
+    }
+
+    public String getProfileId() {
+        return profileId;
     }
 
     public String getMedicationName() {
@@ -50,12 +56,19 @@ public class CreateMedicationCommand {
 
     @JsonPOJOBuilder(withPrefix = "" )
     public static class Builder {
+        private String profileId;
         private String medicationName;
         private String medicationUnit;
         private String medicationMeasurement;
         private String medicationNote;
         private CreateMedSchedule schedule;
         private CreateMedPack medicationPack;
+
+
+        public Builder profileId(String profileId) {
+            this.profileId = profileId;
+            return this;
+        }
 
         public Builder medicationName(String medicationName) {
             this.medicationName = medicationName;

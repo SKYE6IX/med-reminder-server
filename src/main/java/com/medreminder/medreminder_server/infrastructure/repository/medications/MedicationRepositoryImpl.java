@@ -1,11 +1,11 @@
 package com.medreminder.medreminder_server.infrastructure.repository.medications;
 
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationPackEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.*;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public class MedicationRepositoryImpl implements MedicationRepository {
@@ -13,13 +13,15 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
     private final JpaMedicationProfileRepository jpaMedicationProfileRepository;
     private final JpaMedicationScheduleRepository jpaMedicationScheduleRepository;
+    private final JpaScheduleEventRepository jpaScheduleEventRepository;
 
     public MedicationRepositoryImpl(JpaMedicationProfileRepository jpaMedicationProfileRepository,
-                                    JpaMedicationScheduleRepository jpaMedicationScheduleRepository) {
+                                    JpaMedicationScheduleRepository jpaMedicationScheduleRepository,
+                                    JpaScheduleEventRepository jpaScheduleEventRepository) {
         this.jpaMedicationProfileRepository = jpaMedicationProfileRepository;
         this.jpaMedicationScheduleRepository = jpaMedicationScheduleRepository;
+        this.jpaScheduleEventRepository = jpaScheduleEventRepository;
     }
-
 
     @Override
     public MedicationProfileEntity saveMedicationProfile(MedicationProfileEntity medicationProfileEntity) {
@@ -30,6 +32,14 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     public void saveMedicationSchedule(MedicationScheduleEntity medicationScheduleEntity) {
 
         jpaMedicationScheduleRepository.save(medicationScheduleEntity);
+    }
+
+    @Override
+    public List<ScheduleEventEntity> getMedicationScheduleByUserAndDate(String userId,
+                                                                        LocalDateTime startOfDay,
+                                                                        LocalDateTime endOfDay) {
+
+        return  jpaScheduleEventRepository.findByUserAndDate(userId, startOfDay, endOfDay);
     }
 
 }

@@ -89,6 +89,10 @@ public class MedicationProfileEntity {
         return medicationPack;
     }
 
+    public ProfileEntity getProfile() {
+        return profile;
+    }
+
     public void setProfile(ProfileEntity profile) {
         this.profile = profile;
     }
