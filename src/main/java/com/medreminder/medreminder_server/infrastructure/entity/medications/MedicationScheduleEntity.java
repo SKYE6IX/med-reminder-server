@@ -1,5 +1,6 @@
 package com.medreminder.medreminder_server.infrastructure.entity.medications;
 
+import com.medreminder.medreminder_server.domain.models.medication.MedicationSchedule;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import org.hibernate.annotations.*;
@@ -45,6 +46,7 @@ public class MedicationScheduleEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Fetch(FetchMode.JOIN)
     private final List<ScheduleEventEntity > scheduleEvents = new ArrayList<>();
 
     @Column(name = "created_at")
@@ -104,6 +106,10 @@ public class MedicationScheduleEntity {
         return medicationProfile;
     }
 
+    public List<ScheduleEventEntity> getScheduleEvents() {
+        return scheduleEvents;
+    }
+
     public void addMedicationProfile(MedicationProfileEntity medicationProfile){
         this.medicationProfile = medicationProfile;
     }
@@ -111,5 +117,11 @@ public class MedicationScheduleEntity {
     public void addScheduleEvent(ScheduleEventEntity scheduleEvent){
         this.scheduleEvents.add(scheduleEvent);
         scheduleEvent.addMedicationSchedule(this);
+    }
+
+    public void updateMedicationSchedule(MedicationSchedule medicationSchedule){
+        this.doseQuantity = medicationSchedule.getDoseQuantity();
+        this.recurrenceRule = medicationSchedule.getRecurrenceRule();
+        this.startTime = medicationSchedule.getStartTime();
     }
 }

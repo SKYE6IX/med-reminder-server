@@ -74,14 +74,14 @@ public class ScheduleEventEntity {
         return medicationSchedule;
     }
 
-    public void updateEvent(ScheduleEvent scheduleEvent) {
+    public void addMedicationSchedule(MedicationScheduleEntity medicationSchedule) {
+        this.medicationSchedule = medicationSchedule;
+    }
+
+    public void updateScheduleEvent(ScheduleEvent scheduleEvent) {
         this.dosage = scheduleEvent.getDosage();
         this.status = scheduleEvent.getStatus();
         this.scheduleAt = scheduleEvent.getScheduleAt();
         this.takenAt = scheduleEvent.getTakenAt();
-    }
-
-    public void addMedicationSchedule(MedicationScheduleEntity medicationSchedule) {
-        this.medicationSchedule = medicationSchedule;
     }
 }

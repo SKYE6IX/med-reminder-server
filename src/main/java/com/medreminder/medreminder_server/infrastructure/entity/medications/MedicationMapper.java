@@ -3,7 +3,6 @@ package com.medreminder.medreminder_server.infrastructure.entity.medications;
 
 import com.medreminder.medreminder_server.domain.models.medication.*;
 import org.springframework.stereotype.Component;
-
 import java.util.Optional;
 
 @Component
@@ -70,7 +69,8 @@ public class MedicationMapper {
 
         if(scheduleEvent == null) return null;
 
-        return new ScheduleEventEntity(scheduleEvent.getId(),
+        return new ScheduleEventEntity(
+                scheduleEvent.getId(),
                 scheduleEvent.getDosage(),
                 scheduleEvent.getStatus(),
                 scheduleEvent.getScheduleAt());
@@ -79,7 +79,8 @@ public class MedicationMapper {
     public MedicationProfile toDomain(MedicationProfileEntity mpe) {
         if( mpe == null) return null;
 
-        return new MedicationProfile(mpe.getId(),
+        return new MedicationProfile(
+                mpe.getId(),
                 mpe.isActive(),
                 mpe.getNote(),
                 toDomain(mpe.getMedication()),
@@ -103,12 +104,17 @@ public class MedicationMapper {
 
         if(mse == null) return null;
 
-        return new MedicationSchedule(mse.getId(),
+        return new MedicationSchedule(
+                mse.getId(),
                 mse.getDoseQuantity(),
                 mse.getRecurrenceRule(),
                 mse.getStartTime(),
-                mse.getStartDate(),
                 mse.getTimeZone());
+    }
+
+    public ScheduleEvent toDomain(ScheduleEventEntity see) {
+        if(see == null) return null;
+        return new ScheduleEvent(see.getId(), see.getDosage(), see.getScheduleAt());
     }
 
     public MedicationPack toDomain(MedicationPackEntity medicationPack) {

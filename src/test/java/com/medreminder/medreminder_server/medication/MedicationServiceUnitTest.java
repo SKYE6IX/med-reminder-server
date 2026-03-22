@@ -4,10 +4,12 @@ package com.medreminder.medreminder_server.medication;
 import com.medreminder.medreminder_server.application.dtos.medication.CreateMedSchedule;
 import com.medreminder.medreminder_server.application.dtos.medication.CreateMedicationCommand;
 import com.medreminder.medreminder_server.application.dtos.medication.MedicationProfileResponse;
+import com.medreminder.medreminder_server.application.services.ScheduleEventServiceImpl;
 import com.medreminder.medreminder_server.domain.models.medication.*;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationService;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationServiceImpl;
+import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventService;
 import com.medreminder.medreminder_server.domain.services.users.ProfileRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
@@ -45,7 +47,11 @@ public class MedicationServiceUnitTest {
 
     @BeforeEach
     void setUp(){
-        medicationService = new MedicationServiceImpl(medicationRepository, profileRepository, medicationMapper);
+        ScheduleEventService scheduleEventService =
+                new ScheduleEventServiceImpl(medicationRepository, medicationMapper);
+
+        medicationService = new MedicationServiceImpl(medicationRepository,
+                profileRepository, medicationMapper, scheduleEventService);
     }
 
 
@@ -65,7 +71,7 @@ public class MedicationServiceUnitTest {
                 .medicationMeasurement("CAPSULE")
                 .medicationNote("Take on time")
                 .schedule(new CreateMedSchedule(1.2,"FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0",
-                        "2024-07-15T15:00:00","2024-07-15T15:00:00", "Europe/Moscow"))
+                        "2024-07-15T15:00:00", "Europe/Moscow"))
                 .medicationPack(null)
                 .build();
 
@@ -77,8 +83,7 @@ public class MedicationServiceUnitTest {
 
         MedicationSchedule schedule = new MedicationSchedule(null, cmd.getSchedule().dosage(),
                 cmd.getSchedule().recurrenceRule(),
-                LocalDateTime.parse(cmd.getSchedule().startTime(), formatter),
-                LocalDateTime.parse(cmd.getSchedule().startDate()),
+                LocalDateTime.parse(cmd.getSchedule().startDate(), formatter),
                 cmd.getSchedule().timeZone());
 
         MedicationProfileEntity snubMedicationProfileEntity =

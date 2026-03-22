@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 public class ScheduleEvent {
 
     private final String id;
-    private final double dosage;
+    private double dosage;
     private Status status;
-    private final LocalDateTime scheduleAt;
+    private LocalDateTime scheduleAt;
     private LocalDateTime takenAt;
     private MedicationSchedule medicationSchedule;
 
@@ -54,10 +54,19 @@ public class ScheduleEvent {
         this.medicationSchedule = medicationSchedule;
     }
 
-    public void updateScheduleEvent(String status, boolean isTaken){
-        this.status = Status.valueOf(status);
-        if(isTaken){
-            this.takenAt = LocalDateTime.now();
-        }
+    public void updateDosage(double dosage) {
+        this.dosage = dosage;
+    }
+
+    public void updateStatus(String status) {
+        this.status = Status.valueOf(status.toUpperCase());
+    }
+
+    public void updateScheduleAt(LocalDateTime scheduleAt) {
+        this.scheduleAt = scheduleAt;
+    }
+
+    public void updateTakenAt(LocalDateTime takenAt) {
+        this.takenAt = takenAt;
     }
 }

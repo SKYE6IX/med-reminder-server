@@ -1,6 +1,7 @@
 package com.medreminder.medreminder_server.infrastructure.entity.medications;
 
 
+import com.medreminder.medreminder_server.domain.models.medication.MedicationProfile;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
@@ -117,5 +118,10 @@ public class MedicationProfileEntity {
     public void addMedicationPack(MedicationPackEntity medicationPack) {
         this.medicationPack = medicationPack;
         medicationPack.addMedicationProfile(this);
+    }
+
+    public void update(MedicationProfile medicationProfile) {
+        this.isActive = medicationProfile.isActive();
+        this.note = medicationProfile.getNote();
     }
 }

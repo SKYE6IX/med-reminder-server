@@ -14,4 +14,8 @@ public interface MedicationRepository {
     List<ScheduleEventEntity> getMedicationScheduleByUserAndDate(String userId,
                                                                  LocalDateTime startOfDay,
                                                                  LocalDateTime endOfDay);
+
+    MedicationProfileEntity getMedicationProfileById(String id);
+
+    void deletePendingScheduleEvents(List<ScheduleEventEntity> scheduleEvents);
 }

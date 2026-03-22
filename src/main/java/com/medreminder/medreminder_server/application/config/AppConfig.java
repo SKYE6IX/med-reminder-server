@@ -4,6 +4,7 @@ package com.medreminder.medreminder_server.application.config;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationService;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationServiceImpl;
+import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventService;
 import com.medreminder.medreminder_server.domain.services.users.ProfileRepository;
 import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.domain.services.users.UserService;
@@ -23,7 +24,11 @@ public class AppConfig {
     @Bean
     MedicationService medicationService(MedicationRepository medicationRepository,
                                         ProfileRepository profileRepository,
-                                        MedicationMapper medicationMapper) {
-        return new MedicationServiceImpl(medicationRepository, profileRepository, medicationMapper);
+                                        MedicationMapper medicationMapper,
+                                        ScheduleEventService scheduleEventService) {
+
+        return new MedicationServiceImpl(medicationRepository,
+                profileRepository,
+                medicationMapper, scheduleEventService);
     }
 }

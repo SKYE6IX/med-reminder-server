@@ -12,24 +12,25 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class MedicationServiceImpl implements MedicationService {
 
     private final MedicationRepository medicationRepository;
     private final ProfileRepository profileRepository;
     private final MedicationMapper medicationMapper;
+    private final ScheduleEventService scheduleEventService;
 
     public MedicationServiceImpl(MedicationRepository medicationRepository,
                                  ProfileRepository profileRepository,
-                                 MedicationMapper medicationMapper) {
+                                 MedicationMapper medicationMapper,
+                                 ScheduleEventService scheduleEventService) {
+
         this.medicationRepository = medicationRepository;
         this.profileRepository = profileRepository;
         this.medicationMapper = medicationMapper;
-
+        this.scheduleEventService = scheduleEventService;
     }
 
     @Override
@@ -56,11 +57,44 @@ public class MedicationServiceImpl implements MedicationService {
 
         MedicationProfileEntity smp = medicationRepository.saveMedicationProfile(medicationProfileEntity);
 
-        ScheduleEventHandler scheduleHandler = new ScheduleEventHandler(medicationRepository, medicationMapper);
-
-        scheduleHandler.createScheduleEvent(smp.getMedicationSchedule());
+        scheduleEventService.createScheduleEvent(smp.getMedicationSchedule());
 
         return getResponse(smp, profileEntity);
+    }
+
+    @Override
+    public MedicationProfileResponse updateMedication(String medicationProfileId,
+                                                      UpdateMedicationCommand cmd) {
+
+        MedicationProfileEntity emp =
+                medicationRepository.getMedicationProfileById(medicationProfileId);
+
+        if (emp == null) {
+            return null;
+        }
+
+        MedicationProfile medicationProfileToUpdate = medicationMapper.toDomain(emp);
+        cmd.getStatus().ifPresent(medicationProfileToUpdate::updateActive);
+        cmd.getNote().ifPresent(medicationProfileToUpdate::updateNote);
+
+        cmd.getRecurrenceRule().ifPresent(newRules ->{
+            scheduleEventService.updateScheduleEvent(newRules, emp.getMedicationSchedule());
+        });
+
+        cmd.getDoseQuantity().ifPresent(newDoseQuantity ->{
+            scheduleEventService.updateScheduleEvent(newDoseQuantity, emp.getMedicationSchedule());
+        });
+
+        cmd.getStartTime().ifPresent(newStartTime ->{
+            scheduleEventService.updateScheduleEvent(LocalDateTime.parse(newStartTime),
+                    emp.getMedicationSchedule());
+        });
+
+        emp.update(medicationProfileToUpdate);
+
+        medicationRepository.saveMedicationProfile(emp);
+
+        return getResponse(emp);
     }
 
     @Override
@@ -108,8 +142,7 @@ public class MedicationServiceImpl implements MedicationService {
 
         return new MedicationSchedule(null,
                 schedule.dosage(), schedule.recurrenceRule(),
-                LocalDateTime.parse(schedule.startTime(),dtf),
-                LocalDateTime.parse(schedule.startDate(), dtf),
+                LocalDateTime.parse(schedule.startDate(),dtf),
                 schedule.timeZone());
     }
 
@@ -126,7 +159,9 @@ public class MedicationServiceImpl implements MedicationService {
 
     private static @NonNull MedicationProfileResponse getResponse(MedicationProfileEntity smp,
                                                                   ProfileEntity profileEntity) {
+
         String status = smp.isActive() ? "active" : "in_active";
+
         String createdAt = smp.getCreatedAt().isPresent() ? smp.getCreatedAt().get().toString() : "";
 
         MedicationProfileResponse response = new MedicationProfileResponse(smp.getId(),
@@ -140,11 +175,43 @@ public class MedicationServiceImpl implements MedicationService {
 
         MedicationScheduleEntity schedule = smp.getMedicationSchedule();
 
-        response.setSchedule(new MedScheduleResponse(schedule.getId(),
+        response.setSchedule(new MedScheduleResponse(
+                schedule.getId(),
                 schedule.getDoseQuantity(),
                 smp.getMedication().getMeasurementUnit().getSymbol(),
                 schedule.getRecurrenceRule(),
-                schedule.getStartTime().toString(), schedule.getStartDate().toString()));
+                schedule.getStartTime().toString(),
+                schedule.getStartDate().toString()));
+
+        return response;
+    }
+
+    private static @NonNull MedicationProfileResponse getResponse(MedicationProfileEntity smp) {
+
+        String status = smp.isActive() ? "active" : "in_active";
+
+        MedicationProfileResponse response = new MedicationProfileResponse(
+                smp.getId(),
+                smp.getMedication().getName(),
+                smp.getMedication().getUnitType(),
+                status, smp.getNote(),
+                smp.getCreatedAt().toString());
+
+        response.setProfile(new ProfileResponse(
+                smp.getProfile().getId(),
+                smp.getProfile().getName(),
+                smp.getProfile().getRelation(),
+                smp.getProfile().isSelf()));
+
+        MedicationScheduleEntity schedule = smp.getMedicationSchedule();
+
+        response.setSchedule(new MedScheduleResponse(
+                schedule.getId(),
+                schedule.getDoseQuantity(),
+                smp.getMedication().getMeasurementUnit().getSymbol(),
+                schedule.getRecurrenceRule(),
+                schedule.getStartTime().toString(),
+                schedule.getStartDate().toString()));
 
         return response;
     }

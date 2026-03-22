@@ -1,28 +1,31 @@
 package com.medreminder.medreminder_server.domain.models.medication;
 
+import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MedicationSchedule {
 
-    private String id;
+    private final String id;
     private double doseQuantity;
     private String recurrenceRule;
     private LocalDateTime startTime;
-    private LocalDateTime startDate;
+    private final LocalDateTime startDate;
     private LocalDateTime lastExpandedUntil;
-    private String timeZone;
+    private final String timeZone;
+    private final List<ScheduleEvent> scheduleEvents = new ArrayList<>();
 
     public MedicationSchedule(String id,
                               double doseQuantity,
                               String recurrenceRule,
-                              LocalDateTime startTime,
                               LocalDateTime startDate,
                               String timeZone) {
         this.id = id;
         this.doseQuantity = doseQuantity;
         this.recurrenceRule = recurrenceRule;
-        this.startTime = startTime;
         this.startDate = startDate;
         this.timeZone = timeZone;
     }
@@ -53,5 +56,25 @@ public class MedicationSchedule {
 
     public String getTimeZone() {
         return timeZone;
+    }
+
+    public List<ScheduleEvent> getScheduleEvents() {
+        return scheduleEvents;
+    }
+
+    public void addScheduleEvent(ScheduleEvent scheduleEvent) {
+        this.scheduleEvents.add(scheduleEvent);
+    }
+
+    public void updateDoseQuantity(double doseQuantity) {
+        this.doseQuantity = doseQuantity;
+    }
+
+    public void updateRecurrenceRule(String recurrenceRule) {
+        this.recurrenceRule = recurrenceRule;
+    }
+
+    public void updateStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
     }
 }

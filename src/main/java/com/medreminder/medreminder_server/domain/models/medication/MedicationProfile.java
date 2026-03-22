@@ -70,6 +70,14 @@ public class MedicationProfile {
         this.profile = profile;
     }
 
+    public void updateActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public void updateNote(String note) {
+        this.note = note;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if(this == obj){

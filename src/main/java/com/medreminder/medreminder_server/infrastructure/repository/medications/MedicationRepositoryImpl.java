@@ -30,7 +30,6 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
     @Override
     public void saveMedicationSchedule(MedicationScheduleEntity medicationScheduleEntity) {
-
         jpaMedicationScheduleRepository.save(medicationScheduleEntity);
     }
 
@@ -38,8 +37,16 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     public List<ScheduleEventEntity> getMedicationScheduleByUserAndDate(String userId,
                                                                         LocalDateTime startOfDay,
                                                                         LocalDateTime endOfDay) {
-
         return  jpaScheduleEventRepository.findByUserAndDate(userId, startOfDay, endOfDay);
     }
 
+    @Override
+    public MedicationProfileEntity getMedicationProfileById(String id) {
+        return jpaMedicationProfileRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public void deletePendingScheduleEvents(List<ScheduleEventEntity> scheduleEvents) {
+        jpaScheduleEventRepository.deleteAll(scheduleEvents);
+    }
 }

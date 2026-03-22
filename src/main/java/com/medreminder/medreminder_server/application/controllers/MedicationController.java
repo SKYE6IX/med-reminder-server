@@ -31,7 +31,7 @@ public class MedicationController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(value = "/schedules")
+    @GetMapping(value = "/schedules/event")
     public ResponseEntity<List<ScheduleEventResponse>> getMedicationsSchedules(@AuthenticationPrincipal UserDetails userDetails,
                                                         @RequestParam String eventDate) {
 
