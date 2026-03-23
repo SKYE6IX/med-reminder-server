@@ -45,10 +45,10 @@ public class MedicationMapper {
 
         if(medicationSchedule == null) return null;
 
-        return new MedicationScheduleEntity(medicationSchedule.getId(),
+        return new MedicationScheduleEntity(
+                medicationSchedule.getId(),
                 medicationSchedule.getDoseQuantity(),
                 medicationSchedule.getRecurrenceRule(),
-                medicationSchedule.getStartTime(),
                 medicationSchedule.getStartDate(),
                 medicationSchedule.getTimeZone());
     }

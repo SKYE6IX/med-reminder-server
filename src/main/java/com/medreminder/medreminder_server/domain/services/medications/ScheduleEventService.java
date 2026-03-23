@@ -11,7 +11,5 @@ public interface ScheduleEventService {
     public void updateScheduleEvent(String newRules, MedicationScheduleEntity managedSchedule);
 
     public void updateScheduleEvent(Double newDosage, MedicationScheduleEntity managedSchedule);
-
-    public void updateScheduleEvent(LocalDateTime newStartTime, MedicationScheduleEntity managedSchedule);
 }
 

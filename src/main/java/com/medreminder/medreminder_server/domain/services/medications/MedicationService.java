@@ -15,14 +15,4 @@ public interface MedicationService {
 
    List<ScheduleEventResponse> getMedicationScheduleEvents(String userId, String eventDate);
 
-
-//   TODO:
-//   Setting up updates for Medications;
-//   Not all fields need to be updated.
-//   Fields that need updating>
-//   >Status✅
-//   Schedule starting time
-//   Update frequency
-//   update dosage
-//   update note ✅
 }

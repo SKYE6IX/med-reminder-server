@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ScheduleEventServiceImpl implements ScheduleEventService {
@@ -35,57 +36,41 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
         List<LocalDateTime> dates = getNextScheduledDates(managedSchedule, 7);
 
+        LocalDateTime startTime = dates.stream().sorted().findFirst().orElse(null);
 
-//        dates.stream()
-//                .map(date -> {
-//                    LocalDateTime localDateTime = date.atZone(ZoneId.of(managedSchedule.getTimeZone()))
-//                            .toLocalDateTime();
-//
-//                    return new ScheduleEvent(null,
-//                            managedSchedule.getDoseQuantity(),
-//                            localDateTime);
-//
-//                })
-//                .map(medicationMapper::toEntity)
-//
-//                .forEach(managedSchedule::addScheduleEvent);
-//
-//        medicationRepository.saveMedicationSchedule(managedSchedule);
+        managedSchedule.addStartTime(startTime);
+
+        dates.stream()
+                .sorted()
+                .map(date -> {
+                    return new ScheduleEvent(null,
+                            managedSchedule.getDoseQuantity(),
+                            date);
+
+                })
+                .map(medicationMapper::toEntity)
+                .forEach(managedSchedule::addScheduleEvent);
+
+        medicationRepository.saveMedicationSchedule(managedSchedule);
     }
-
-
-//    What should happen when a new rules set?
-//      On creation of the rules, we use the rules to set up multiple events that cross span
-//      7 days. Changing the rules mean we need to update the pending events
-//      (which refer to the events that are yet to happen). But then, what field is it we
-//      need to actually update? -> scheduleAt.
-//      But this field hold two info, the days(date) and the time.
-//      Let assume we've already created multiple days which are -> twice a day at 2pm and 6pm;
-//      day1, day2, day3, day4, day5, day6, day7.
-//      day1 ✅ at 2pm, (it also possible user change the rules before the second time frame came in) 6pm
-//      day2 ✅ at 2pm, 6pm
-//      day3 not done
-//      day4 not done
-//      day5 not done
-//      .....
-//
-//
-//    What should happen when a new dosage is set?
-//    What should happen when a new start time is set?
 
     @Override
     public void updateScheduleEvent(String newRules, MedicationScheduleEntity managedSchedule) {
 
         MedicationSchedule domainSchedule = medicationMapper.toDomain(managedSchedule);
+
         domainSchedule.updateRecurrenceRule(newRules);
 
         managedSchedule.updateMedicationSchedule(domainSchedule);
 
+//      Collect all the pending event into list for deletion.
         List<ScheduleEventEntity> pendingEvents = managedSchedule
                 .getScheduleEvents().stream()
                 .filter(event -> event.getStatus().equals("PENDING"))
                 .toList();
 
+//        Passed all the above pending events to dates so it can be reused for the schedule date plus
+//        either a new Time or Same as the previous Time. Depend on the User's new selection.
         List<LocalDate> pendingDates = pendingEvents.stream()
                 .map(event -> event.getScheduleAt().toLocalDate())
                 .distinct()
@@ -94,34 +79,57 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
         medicationRepository.deletePendingScheduleEvents(pendingEvents);
 
-//        List<LocalDateTime> dates = getNextScheduledDates(managedSchedule, pendingDates.size());
-//
-//        pendingDates.stream()
-//                .flatMap(pendingDate -> dates.stream()
-//                        .map(date -> new ScheduleEvent(null,
-//                                managedSchedule.getDoseQuantity(),
-//                                LocalDateTime.of(pendingDate, date.toLocalTime())))
-//                        .map(medicationMapper::toEntity)
-//                ).forEach(managedSchedule::addScheduleEvent);
-//        medicationRepository.saveMedicationSchedule(managedSchedule);
+        List<LocalDateTime> newDates = getNextScheduledDates(managedSchedule, pendingDates.size());
+
+        LocalDateTime startTime = newDates.stream().sorted().findFirst().orElse(null);
+
+//        Always sync start time with the new updates of the "nextSchedules"
+        managedSchedule.addStartTime(startTime);
+
+        pendingDates.stream()
+                .flatMap(pendingDate -> newDates.stream()
+                        .map(date -> new ScheduleEvent(null,
+                                managedSchedule.getDoseQuantity(),
+                                LocalDateTime.of(pendingDate, date.toLocalTime())))
+                        .map(medicationMapper::toEntity)
+                ).forEach(managedSchedule::addScheduleEvent);
+
+        medicationRepository.saveMedicationSchedule(managedSchedule);
+
     }
 
     @Override
     public void updateScheduleEvent(Double newDosage, MedicationScheduleEntity managedSchedule) {
 
-    }
+        MedicationSchedule domainSchedule = medicationMapper.toDomain(managedSchedule);
+        domainSchedule.updateDoseQuantity(newDosage);
 
-    @Override
-    public void updateScheduleEvent(LocalDateTime newStartTime, MedicationScheduleEntity managedSchedule) {
+        managedSchedule.updateMedicationSchedule(domainSchedule);
 
+        List<ScheduleEventEntity> pendingEvents = managedSchedule
+                .getScheduleEvents().stream()
+                .filter(event -> event.getStatus().equals("PENDING"))
+                .map(medicationMapper::toDomain)
+                .peek(event -> event.updateDosage(newDosage))
+                .map(domainEvent -> {
+                    ScheduleEventEntity see = medicationMapper.toEntity(domainEvent);
+                    see.updateScheduleEvent(domainEvent);
+                    return see;
+                })
+                .toList();
+
+        medicationRepository.savePendingScheduleEvents(pendingEvents);
+
+        medicationRepository.saveMedicationSchedule(managedSchedule);
     }
 
     private List<LocalDateTime> getNextScheduledDates(MedicationScheduleEntity managedSchedule,
-                                                      int expansionWindowDays) {
+                                                        int expansionWindowDays) {
+        ZoneId zoneId = ZoneId.of(managedSchedule.getTimeZone());
 
-        LocalDateTime periodStart = managedSchedule.getLastExpandedUntil() != null
-                ? managedSchedule.getLastExpandedUntil()
-                : managedSchedule.getStartDate();
+        LocalDateTime periodStart = managedSchedule.getLastExpandedUntil() != null ?
+                managedSchedule.getLastExpandedUntil().atZone(zoneId).toLocalDateTime()
+                : managedSchedule.getStartDate().atZone(zoneId).toLocalDateTime();
 
         LocalDateTime windowStart = periodStart.toLocalDate().atStartOfDay();
 

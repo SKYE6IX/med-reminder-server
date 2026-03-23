@@ -11,11 +11,15 @@ public interface MedicationRepository {
 
     void saveMedicationSchedule(MedicationScheduleEntity medicationScheduleEntity);
 
+    void savePendingScheduleEvents(List<ScheduleEventEntity> scheduleEvents);
+
+    void deletePendingScheduleEvents(List<ScheduleEventEntity> scheduleEvents);
+
     List<ScheduleEventEntity> getMedicationScheduleByUserAndDate(String userId,
                                                                  LocalDateTime startOfDay,
                                                                  LocalDateTime endOfDay);
 
     MedicationProfileEntity getMedicationProfileById(String id);
 
-    void deletePendingScheduleEvents(List<ScheduleEventEntity> scheduleEvents);
+
 }

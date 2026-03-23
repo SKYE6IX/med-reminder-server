@@ -62,6 +62,7 @@ public class MedicationServiceImpl implements MedicationService {
         return getResponse(smp, profileEntity);
     }
 
+
     @Override
     public MedicationProfileResponse updateMedication(String medicationProfileId,
                                                       UpdateMedicationCommand cmd) {
@@ -77,17 +78,12 @@ public class MedicationServiceImpl implements MedicationService {
         cmd.getStatus().ifPresent(medicationProfileToUpdate::updateActive);
         cmd.getNote().ifPresent(medicationProfileToUpdate::updateNote);
 
-        cmd.getRecurrenceRule().ifPresent(newRules ->{
+        cmd.getRecurrenceRule().ifPresent(newRules -> {
             scheduleEventService.updateScheduleEvent(newRules, emp.getMedicationSchedule());
         });
 
-        cmd.getDoseQuantity().ifPresent(newDoseQuantity ->{
+        cmd.getDoseQuantity().ifPresent(newDoseQuantity -> {
             scheduleEventService.updateScheduleEvent(newDoseQuantity, emp.getMedicationSchedule());
-        });
-
-        cmd.getStartTime().ifPresent(newStartTime ->{
-            scheduleEventService.updateScheduleEvent(LocalDateTime.parse(newStartTime),
-                    emp.getMedicationSchedule());
         });
 
         emp.update(medicationProfileToUpdate);
@@ -157,54 +153,33 @@ public class MedicationServiceImpl implements MedicationService {
         return Optional.of(medicationPack);
     }
 
+
+
+
+    private static @NonNull MedicationProfileResponse getResponse(MedicationProfileEntity smp) {
+        return getResponse(smp, smp.getProfile());
+    }
+
     private static @NonNull MedicationProfileResponse getResponse(MedicationProfileEntity smp,
                                                                   ProfileEntity profileEntity) {
 
         String status = smp.isActive() ? "active" : "in_active";
-
         String createdAt = smp.getCreatedAt().isPresent() ? smp.getCreatedAt().get().toString() : "";
 
-        MedicationProfileResponse response = new MedicationProfileResponse(smp.getId(),
-                smp.getMedication().getName(),
-                smp.getMedication().getUnitType(),
-                status, smp.getNote(),
-                createdAt);
-
-        response.setProfile(new ProfileResponse(profileEntity.getId(),
-                profileEntity.getName(), profileEntity.getRelation(), profileEntity.isSelf()));
-
-        MedicationScheduleEntity schedule = smp.getMedicationSchedule();
-
-        response.setSchedule(new MedScheduleResponse(
-                schedule.getId(),
-                schedule.getDoseQuantity(),
-                smp.getMedication().getMeasurementUnit().getSymbol(),
-                schedule.getRecurrenceRule(),
-                schedule.getStartTime().toString(),
-                schedule.getStartDate().toString()));
-
-        return response;
-    }
-
-    private static @NonNull MedicationProfileResponse getResponse(MedicationProfileEntity smp) {
-
-        String status = smp.isActive() ? "active" : "in_active";
-
+//        Create a new Medication profile response object
         MedicationProfileResponse response = new MedicationProfileResponse(
                 smp.getId(),
                 smp.getMedication().getName(),
                 smp.getMedication().getUnitType(),
                 status, smp.getNote(),
-                smp.getCreatedAt().toString());
+                createdAt);
 
-        response.setProfile(new ProfileResponse(
-                smp.getProfile().getId(),
-                smp.getProfile().getName(),
-                smp.getProfile().getRelation(),
-                smp.getProfile().isSelf()));
+//        Attach the selected profile to the response
+        response.setProfile(new ProfileResponse(profileEntity.getId(),
+                profileEntity.getName(), profileEntity.getRelation(), profileEntity.isSelf()));
 
+//        Acquire the schedule and create an object and attached it to the response
         MedicationScheduleEntity schedule = smp.getMedicationSchedule();
-
         response.setSchedule(new MedScheduleResponse(
                 schedule.getId(),
                 schedule.getDoseQuantity(),
@@ -212,7 +187,6 @@ public class MedicationServiceImpl implements MedicationService {
                 schedule.getRecurrenceRule(),
                 schedule.getStartTime().toString(),
                 schedule.getStartDate().toString()));
-
         return response;
     }
 }

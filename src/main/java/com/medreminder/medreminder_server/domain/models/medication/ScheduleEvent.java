@@ -7,7 +7,7 @@ public class ScheduleEvent {
     private final String id;
     private double dosage;
     private Status status;
-    private LocalDateTime scheduleAt;
+    private final LocalDateTime scheduleAt;
     private LocalDateTime takenAt;
     private MedicationSchedule medicationSchedule;
 
@@ -60,10 +60,6 @@ public class ScheduleEvent {
 
     public void updateStatus(String status) {
         this.status = Status.valueOf(status.toUpperCase());
-    }
-
-    public void updateScheduleAt(LocalDateTime scheduleAt) {
-        this.scheduleAt = scheduleAt;
     }
 
     public void updateTakenAt(LocalDateTime takenAt) {

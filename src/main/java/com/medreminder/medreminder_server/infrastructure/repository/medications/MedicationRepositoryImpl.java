@@ -34,6 +34,11 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     }
 
     @Override
+    public void savePendingScheduleEvents(List<ScheduleEventEntity> scheduleEvents) {
+        jpaScheduleEventRepository.saveAll(scheduleEvents);
+    }
+
+    @Override
     public List<ScheduleEventEntity> getMedicationScheduleByUserAndDate(String userId,
                                                                         LocalDateTime startOfDay,
                                                                         LocalDateTime endOfDay) {

@@ -63,13 +63,11 @@ public class MedicationScheduleEntity {
     public MedicationScheduleEntity(String id,
                                     double doseQuantity,
                                     String recurrenceRule,
-                                    LocalDateTime startTime,
                                     LocalDateTime startDate,
                                     String timeZone) {
         this.id = id;
         this.doseQuantity = doseQuantity;
         this.recurrenceRule = recurrenceRule;
-        this.startTime = startTime;
         this.startDate = startDate;
         this.timeZone = timeZone;
     }
@@ -114,6 +112,10 @@ public class MedicationScheduleEntity {
         this.medicationProfile = medicationProfile;
     }
 
+    public void addStartTime (LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
     public void addScheduleEvent(ScheduleEventEntity scheduleEvent){
         this.scheduleEvents.add(scheduleEvent);
         scheduleEvent.addMedicationSchedule(this);
@@ -122,6 +124,5 @@ public class MedicationScheduleEntity {
     public void updateMedicationSchedule(MedicationSchedule medicationSchedule){
         this.doseQuantity = medicationSchedule.getDoseQuantity();
         this.recurrenceRule = medicationSchedule.getRecurrenceRule();
-        this.startTime = medicationSchedule.getStartTime();
     }
 }

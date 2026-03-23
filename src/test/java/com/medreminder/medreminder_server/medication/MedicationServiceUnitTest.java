@@ -4,6 +4,7 @@ package com.medreminder.medreminder_server.medication;
 import com.medreminder.medreminder_server.application.dtos.medication.CreateMedSchedule;
 import com.medreminder.medreminder_server.application.dtos.medication.CreateMedicationCommand;
 import com.medreminder.medreminder_server.application.dtos.medication.MedicationProfileResponse;
+import com.medreminder.medreminder_server.application.dtos.medication.UpdateMedicationCommand;
 import com.medreminder.medreminder_server.application.services.ScheduleEventServiceImpl;
 import com.medreminder.medreminder_server.domain.models.medication.*;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
@@ -14,6 +15,7 @@ import com.medreminder.medreminder_server.domain.services.users.ProfileRepositor
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,44 +59,12 @@ public class MedicationServiceUnitTest {
 
 
     @Test
-    void shouldCreateMedication_thenSaveIt(){
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        UUID profileId = UUID.randomUUID();
-        UUID medicationId = UUID.randomUUID();
+    void shouldCreateMedication_thenSaveIt() {
 
-        ProfileEntity snubProfileEntity =
-                new ProfileEntity(profileId.toString(),"test profile","BROTHER", true, null);
-
-        CreateMedicationCommand cmd = new CreateMedicationCommand.Builder()
-                .profileId(snubProfileEntity.getId())
-                .medicationName("Paracetamol")
-                .medicationUnit("TABLET")
-                .medicationMeasurement("CAPSULE")
-                .medicationNote("Take on time")
-                .schedule(new CreateMedSchedule(1.2,"FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0",
-                        "2024-07-15T15:00:00", "Europe/Moscow"))
-                .medicationPack(null)
-                .build();
-
-        MeasurementUnit measurementUnit = new MeasurementUnit(null,
-                Measurement.valueOf(cmd.getMedicationMeasurement()));
-        Medication medication = new Medication(null, cmd.getMedicationName(),
-                Unit.valueOf(cmd.getMedicationUnit()),measurementUnit);
-
-
-        MedicationSchedule schedule = new MedicationSchedule(null, cmd.getSchedule().dosage(),
-                cmd.getSchedule().recurrenceRule(),
-                LocalDateTime.parse(cmd.getSchedule().startDate(), formatter),
-                cmd.getSchedule().timeZone());
-
-        MedicationProfileEntity snubMedicationProfileEntity =
-                new MedicationProfileEntity(medicationId.toString(),
-                true, cmd.getMedicationNote());
-
-        snubMedicationProfileEntity.setProfile(snubProfileEntity);
-        snubMedicationProfileEntity.addMedication(medicationMapper.toEntity(medication));
-        snubMedicationProfileEntity.addMedicationSchedule(medicationMapper.toEntity(schedule));
-
+        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId());
+        MedicationProfileEntity snubMedicationProfileEntity  = MedicationStubFactory.createMedicationProfileEntity(
+                snubProfileEntity, cmd, medicationMapper);
 
         when(profileRepository.findProfileById(any(String.class)))
                 .thenReturn(Optional.of(snubProfileEntity));
@@ -110,6 +81,93 @@ public class MedicationServiceUnitTest {
         assertThat(response.getMedicationName()).isEqualTo(cmd.getMedicationName());
         assertThat(response.getMedicationUnit()).isEqualTo(cmd.getMedicationUnit());
         assertThat(response.getSchedule().dosage()).isEqualTo(1.2);
-        assertThat(response.getSchedule().starTime()).isEqualTo("2024-07-15T15:00");
+        assertThat(response.getSchedule().starTime()).isEqualTo("2024-07-15T08:00");
+    }
+
+
+    @Test
+    void shouldUpdateMedication_thenSaveIt(){
+
+        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId());
+        MedicationProfileEntity snubMedicationProfileEntity  = MedicationStubFactory.createMedicationProfileEntity(
+                snubProfileEntity, cmd, medicationMapper);
+
+//        Schedule is expected to have a starting time which is only added when
+//        rules are being created or updated
+        snubMedicationProfileEntity.getMedicationSchedule()
+                .addStartTime(LocalDateTime.parse("2024-07-15T08:00"));
+
+        when(medicationRepository.getMedicationProfileById(any(String.class)))
+                .thenReturn(snubMedicationProfileEntity);
+
+        UpdateMedicationCommand updateCmd = new UpdateMedicationCommand(false,
+                null, null, "We have just update the medication profile");
+
+        MedicationProfileResponse response = medicationService
+                .updateMedication(snubMedicationProfileEntity.getId(), updateCmd);
+
+        verify(medicationRepository).saveMedicationProfile(any(MedicationProfileEntity.class));
+
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isNotNull().isEqualTo(snubMedicationProfileEntity.getId());
+        assertThat(response.getStatus()).isEqualTo("in_active");
+        assertThat(response.getNote()).isEqualTo("We have just update the medication profile");
+    }
+
+
+    @Test
+    void shouldUpdateScheduleRule_thenSaveIt(){
+
+        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId());
+        MedicationProfileEntity snubMedicationProfileEntity  = MedicationStubFactory.createMedicationProfileEntity(
+                snubProfileEntity, cmd, medicationMapper);
+
+        when(medicationRepository.getMedicationProfileById(any(String.class)))
+                .thenReturn(snubMedicationProfileEntity);
+
+        UpdateMedicationCommand updateCmd = new UpdateMedicationCommand(null,
+                "FREQ=DAILY;BYHOUR=10,16,20;BYMINUTE=0;BYSECOND=0", null, null);
+
+        MedicationProfileResponse response = medicationService
+                .updateMedication(snubMedicationProfileEntity.getId(), updateCmd);
+
+        verify(medicationRepository).saveMedicationProfile(any(MedicationProfileEntity.class));
+
+        assertThat(response).isNotNull();
+        assertThat(response.getSchedule().starTime()).isEqualTo("2024-07-15T10:00");
+        assertThat(LocalDateTime.parse(response.getSchedule().startDate()).getMonth().getValue())
+                .isEqualTo(7);
+    }
+
+    @Test
+    void shouldUpdateDosage_thenSaveIt(){
+
+        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId());
+        MedicationProfileEntity snubMedicationProfileEntity  = MedicationStubFactory.createMedicationProfileEntity(
+                snubProfileEntity, cmd, medicationMapper);
+
+        snubMedicationProfileEntity.getMedicationSchedule()
+                .addStartTime(LocalDateTime.parse("2024-07-15T08:00"));
+
+        when(medicationRepository.getMedicationProfileById(any(String.class)))
+                .thenReturn(snubMedicationProfileEntity);
+
+        UpdateMedicationCommand updateCmd = new UpdateMedicationCommand(null,
+                null, 5.5, null);
+
+        MedicationProfileResponse response = medicationService
+                .updateMedication(snubMedicationProfileEntity.getId(), updateCmd);
+
+
+        verify(medicationRepository).saveMedicationProfile(any(MedicationProfileEntity.class));
+
+        verify(medicationRepository)
+                .savePendingScheduleEvents(snubMedicationProfileEntity.getMedicationSchedule().getScheduleEvents());
+
+        assertThat(response).isNotNull();
+        assertThat(response.getSchedule().dosage()).isEqualTo(5.5);
     }
 }
