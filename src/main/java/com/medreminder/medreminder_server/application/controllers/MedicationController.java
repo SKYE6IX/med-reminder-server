@@ -7,21 +7,27 @@ import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEv
 import com.medreminder.medreminder_server.application.dtos.medication.UpdateMedicationCommand;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationService;
+import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/medications")
 public class MedicationController {
 
-    MedicationService medicationService;
+    private final MedicationService medicationService;
+    private final ScheduleEventService scheduleEventService;
 
-    public MedicationController(MedicationService medicationService) {
+    public MedicationController(MedicationService medicationService,
+                                ScheduleEventService scheduleEventService) {
+
         this.medicationService = medicationService;
+        this.scheduleEventService = scheduleEventService;
     }
 
     @PostMapping()
@@ -40,6 +46,15 @@ public class MedicationController {
 
         return ResponseEntity.ok(response);
 
+    }
+
+    @PutMapping(value = "/schedules/event/{eventId}")
+    public ResponseEntity<ScheduleEventResponse> updateScheduleEvent(@PathVariable String eventId,
+                                                                     @RequestBody Map<String, String> eventBody) {
+
+        var response = scheduleEventService.updateScheduleEvent(eventId, eventBody);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/schedules/event")

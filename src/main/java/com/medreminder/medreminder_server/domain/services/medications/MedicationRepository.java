@@ -11,13 +11,17 @@ public interface MedicationRepository {
 
     void saveMedicationSchedule(MedicationScheduleEntity medicationScheduleEntity);
 
-    void savePendingScheduleEvents(List<ScheduleEventEntity> scheduleEvents);
+    void saveAllScheduleEvents(List<ScheduleEventEntity> scheduleEvents);
 
-    void deletePendingScheduleEvents(List<ScheduleEventEntity> scheduleEvents);
+    void saveScheduleEvent(ScheduleEventEntity scheduleEvent);
 
-    List<ScheduleEventEntity> getMedicationScheduleByUserAndDate(String userId,
-                                                                 LocalDateTime startOfDay,
-                                                                 LocalDateTime endOfDay);
+    void deleteAllScheduleEvents(List<ScheduleEventEntity> scheduleEvents);
+
+    List<ScheduleEventEntity> getScheduleEventsByUserAndDate(String userId,
+                                                             LocalDateTime startOfDay,
+                                                             LocalDateTime endOfDay);
 
     MedicationProfileEntity getMedicationProfileById(String id);
+
+    ScheduleEventEntity getScheduleEventById(String id);
 }

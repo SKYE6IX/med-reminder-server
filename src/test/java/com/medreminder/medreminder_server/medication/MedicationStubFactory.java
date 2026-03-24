@@ -5,11 +5,14 @@ import com.medreminder.medreminder_server.application.dtos.medication.CreateMedi
 import com.medreminder.medreminder_server.domain.models.medication.*;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 public class MedicationStubFactory {
 
@@ -42,6 +45,13 @@ public class MedicationStubFactory {
                 "2024-07-15T15:00:00",
                 "Europe/Moscow"
         );
+    }
+
+    public static List<ScheduleEvent> createScheduleEvent() {
+        return IntStream.range(1, 7)
+                .mapToObj(i -> new ScheduleEvent(null,5,
+                        LocalDateTime.now().plusDays(i)))
+                .toList();
     }
 
     public static Medication createMedication(CreateMedicationCommand cmd) {
@@ -80,6 +90,8 @@ public class MedicationStubFactory {
         entity.addMedication(medicationMapper.toEntity(createMedication(cmd)));
         entity.addMedicationSchedule(medicationMapper.toEntity(createMedicationSchedule(cmd)));
 
+        entity.getMedicationSchedule()
+                .addStartTime(LocalDateTime.parse("2024-07-15T08:00"));
         return entity;
     }
 }

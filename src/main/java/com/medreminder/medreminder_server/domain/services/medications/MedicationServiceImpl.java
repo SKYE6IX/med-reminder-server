@@ -75,6 +75,7 @@ public class MedicationServiceImpl implements MedicationService {
         }
 
         MedicationProfile medicationProfileToUpdate = medicationMapper.toDomain(emp);
+
         cmd.getStatus().ifPresent(medicationProfileToUpdate::updateActive);
         cmd.getNote().ifPresent(medicationProfileToUpdate::updateNote);
 
@@ -100,7 +101,7 @@ public class MedicationServiceImpl implements MedicationService {
         LocalDateTime endOfDay = LocalDate.parse(eventDate).atTime(LocalTime.MAX);
 
         List<ScheduleEventEntity> scheduleEvents =
-                medicationRepository.getMedicationScheduleByUserAndDate(userId, startOfDay, endOfDay);
+                medicationRepository.getScheduleEventsByUserAndDate(userId, startOfDay, endOfDay);
 
         return scheduleEvents.stream()
                 .map(event -> {
@@ -114,10 +115,12 @@ public class MedicationServiceImpl implements MedicationService {
                             event.getScheduleAt().toString());
 
                     ProfileEntity profile = event.getMedicationSchedule().getMedicationProfile().getProfile();
+
                     ser.setProfile(new ProfileResponse(profile.getId(),
                             profile.getName(),
                             profile.getRelation(), profile.isSelf()));
 
+                    ser.setTakenAt(event.getTakenAt().toString());
                     return ser;
                 }).toList();
     }
@@ -152,8 +155,6 @@ public class MedicationServiceImpl implements MedicationService {
 
         return Optional.of(medicationPack);
     }
-
-
 
 
     private static @NonNull MedicationProfileResponse getResponse(MedicationProfileEntity smp) {

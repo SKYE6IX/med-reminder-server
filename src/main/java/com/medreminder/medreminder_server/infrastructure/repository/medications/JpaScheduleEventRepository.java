@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface JpaScheduleEventRepository extends BaseJpaRepository<ScheduleEventEntity, String> {
 
@@ -24,4 +25,5 @@ public interface JpaScheduleEventRepository extends BaseJpaRepository<ScheduleEv
     List<ScheduleEventEntity> findByUserAndDate(@Param("userId") String userId,
                                                 @Param("startOfDay") LocalDateTime startOfDay,
                                                 @Param("endOfDay") LocalDateTime endOfDay);
+
 }

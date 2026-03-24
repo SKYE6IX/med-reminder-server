@@ -11,6 +11,7 @@ public class ScheduleEventResponse {
     private final double dosage;
     private final String measurement;
     private final String scheduleAt;
+    private String takenAt;
     private ProfileResponse profile;
 
     public ScheduleEventResponse(String id,
@@ -57,11 +58,19 @@ public class ScheduleEventResponse {
         return scheduleAt;
     }
 
+    public String getTakenAt() {
+        return takenAt;
+    }
+
     public ProfileResponse getProfile() {
         return profile;
     }
 
     public void setProfile(ProfileResponse profile) {
         this.profile = profile;
+    }
+
+    public void setTakenAt(String takenAt) {
+        this.takenAt = takenAt;
     }
 }

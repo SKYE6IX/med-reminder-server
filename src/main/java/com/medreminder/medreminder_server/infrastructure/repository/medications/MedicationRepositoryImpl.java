@@ -34,14 +34,24 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     }
 
     @Override
-    public void savePendingScheduleEvents(List<ScheduleEventEntity> scheduleEvents) {
+    public void saveAllScheduleEvents(List<ScheduleEventEntity> scheduleEvents) {
         jpaScheduleEventRepository.saveAll(scheduleEvents);
     }
 
     @Override
-    public List<ScheduleEventEntity> getMedicationScheduleByUserAndDate(String userId,
-                                                                        LocalDateTime startOfDay,
-                                                                        LocalDateTime endOfDay) {
+    public void saveScheduleEvent(ScheduleEventEntity scheduleEvent) {
+        jpaScheduleEventRepository.save(scheduleEvent);
+    }
+
+    @Override
+    public void deleteAllScheduleEvents(List<ScheduleEventEntity> scheduleEvents) {
+        jpaScheduleEventRepository.deleteAll(scheduleEvents);
+    }
+
+    @Override
+    public List<ScheduleEventEntity> getScheduleEventsByUserAndDate(String userId,
+                                                                    LocalDateTime startOfDay,
+                                                                    LocalDateTime endOfDay) {
         return  jpaScheduleEventRepository.findByUserAndDate(userId, startOfDay, endOfDay);
     }
 
@@ -52,7 +62,8 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     }
 
     @Override
-    public void deletePendingScheduleEvents(List<ScheduleEventEntity> scheduleEvents) {
-        jpaScheduleEventRepository.deleteAll(scheduleEvents);
+    public ScheduleEventEntity getScheduleEventById(String id) {
+
+        return jpaScheduleEventRepository.findById(id).orElse(null);
     }
 }

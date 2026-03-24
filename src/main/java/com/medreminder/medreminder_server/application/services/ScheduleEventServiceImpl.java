@@ -1,14 +1,19 @@
 package com.medreminder.medreminder_server.application.services;
 
 
+import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
+import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
 import com.medreminder.medreminder_server.domain.models.medication.MedicationSchedule;
 import com.medreminder.medreminder_server.domain.models.medication.ScheduleEvent;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventService;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import net.fortuna.ical4j.model.Recur;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -17,8 +22,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Map;
 
 @Service
 public class ScheduleEventServiceImpl implements ScheduleEventService {
@@ -105,6 +109,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                         .map(medicationMapper::toEntity)
                 )
                 .forEach(managedSchedule::addScheduleEvent);
+
         medicationRepository.saveMedicationSchedule(managedSchedule);
     }
 
@@ -130,9 +135,59 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 })
                 .toList();
 
-        medicationRepository.savePendingScheduleEvents(pendingEvents);
+        medicationRepository.saveAllScheduleEvents(pendingEvents);
 
         medicationRepository.saveMedicationSchedule(managedSchedule);
+    }
+
+    @Override
+    public ScheduleEventResponse updateScheduleEvent(String scheduleEventId, Map<String, String> eventBody) {
+
+        ScheduleEventEntity managedScheduleEvent = medicationRepository.getScheduleEventById(scheduleEventId);
+
+        ScheduleEvent domainScheduleEvent = medicationMapper.toDomain(managedScheduleEvent);
+
+        MedicationScheduleEntity managedSchedule = managedScheduleEvent.getMedicationSchedule();
+
+        domainScheduleEvent.updateStatus(eventBody.get(("action")));
+
+        if(domainScheduleEvent.getStatus().equals("TAKEN")){
+            final LocalDateTime takenAt = LocalDateTime.now()
+                    .atZone(ZoneId.of(managedSchedule.getTimeZone()))
+                    .toLocalDateTime();
+            domainScheduleEvent.updateTakenAt(takenAt);
+        }
+
+        managedScheduleEvent.updateScheduleEvent(domainScheduleEvent);
+
+        medicationRepository.saveScheduleEvent(managedScheduleEvent);
+
+        return getScheduleEventResponse(managedScheduleEvent);
+    }
+
+    private static @NonNull ScheduleEventResponse getScheduleEventResponse(ScheduleEventEntity managedScheduleEvent) {
+        MedicationScheduleEntity medicationSchedule =
+                managedScheduleEvent.getMedicationSchedule();
+
+        MedicationEntity medication = medicationSchedule
+                .getMedicationProfile().getMedication();
+
+        ProfileEntity profile = medicationSchedule.getMedicationProfile().getProfile();
+
+        ScheduleEventResponse response = new ScheduleEventResponse(managedScheduleEvent.getId(),
+                managedScheduleEvent.getStatus(),
+                medication.getName(),
+                "",
+                medicationSchedule.getDoseQuantity(),
+                medication.getMeasurementUnit().getSymbol(),
+                managedScheduleEvent.getScheduleAt().toString());
+
+        response.setProfile(new ProfileResponse(profile.getId(),
+                profile.getName(),
+                profile.getRelation(), profile.isSelf()));
+
+        response.setTakenAt(managedScheduleEvent.getTakenAt().toString());
+        return response;
     }
 
     private List<LocalDateTime> getNextScheduledDates(MedicationScheduleEntity managedSchedule,
