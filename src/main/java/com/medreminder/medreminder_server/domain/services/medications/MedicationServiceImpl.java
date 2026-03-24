@@ -78,12 +78,12 @@ public class MedicationServiceImpl implements MedicationService {
         cmd.getStatus().ifPresent(medicationProfileToUpdate::updateActive);
         cmd.getNote().ifPresent(medicationProfileToUpdate::updateNote);
 
-        cmd.getRecurrenceRule().ifPresent(newRules -> {
-            scheduleEventService.updateScheduleEvent(newRules, emp.getMedicationSchedule());
-        });
-
         cmd.getDoseQuantity().ifPresent(newDoseQuantity -> {
             scheduleEventService.updateScheduleEvent(newDoseQuantity, emp.getMedicationSchedule());
+        });
+
+        cmd.getRecurrenceRule().ifPresent(newRules -> {
+            scheduleEventService.updateScheduleEvent(newRules, emp.getMedicationSchedule());
         });
 
         emp.update(medicationProfileToUpdate);

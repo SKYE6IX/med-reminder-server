@@ -20,6 +20,4 @@ public interface MedicationRepository {
                                                                  LocalDateTime endOfDay);
 
     MedicationProfileEntity getMedicationProfileById(String id);
-
-
 }

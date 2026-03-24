@@ -31,6 +31,7 @@ public class UpdateMedicationCommand {
     public Optional<String> getRecurrenceRule() {
         if (recurrenceRule == null)
             return Optional.empty();
+
         return Optional.of(recurrenceRule);
     }
 

@@ -47,7 +47,8 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
     @Override
     public MedicationProfileEntity getMedicationProfileById(String id) {
-        return jpaMedicationProfileRepository.findById(id).orElse(null);
+
+        return jpaMedicationProfileRepository.findByIdWithScheduleAndEvents(id).orElse(null);
     }
 
     @Override

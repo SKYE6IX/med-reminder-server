@@ -46,7 +46,6 @@ public class MedicationScheduleEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    @Fetch(FetchMode.JOIN)
     private final List<ScheduleEventEntity > scheduleEvents = new ArrayList<>();
 
     @Column(name = "created_at")

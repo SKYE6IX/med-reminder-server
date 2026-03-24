@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,7 +31,6 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         this.medicationRepository = medicationRepository;
         this.medicationMapper = medicationMapper;
     }
-
 
     @Override
     public void createScheduleEvent(MedicationScheduleEntity managedSchedule) {
@@ -69,6 +70,11 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 .filter(event -> event.getStatus().equals("PENDING"))
                 .toList();
 
+        if (pendingEvents.isEmpty()) {
+            medicationRepository.saveMedicationSchedule(managedSchedule);
+            return;
+        }
+
 //        Passed all the above pending events to dates so it can be reused for the schedule date plus
 //        either a new Time or Same as the previous Time. Depend on the User's new selection.
         List<LocalDate> pendingDates = pendingEvents.stream()
@@ -76,32 +82,37 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 .distinct()
                 .sorted()
                 .toList();
+        int daysLeft = (int) ChronoUnit.DAYS.between(pendingDates.getFirst(), pendingDates.getLast());
 
-        medicationRepository.deletePendingScheduleEvents(pendingEvents);
+        managedSchedule.getScheduleEvents().removeAll(pendingEvents);
 
-        List<LocalDateTime> newDates = getNextScheduledDates(managedSchedule, pendingDates.size());
-
-        LocalDateTime startTime = newDates.stream().sorted().findFirst().orElse(null);
+//        Get the new dates base on the value user passed.
+        List<LocalTime> newTimes = getNextScheduledDates(managedSchedule, daysLeft)
+                .stream()
+                .map(LocalDateTime::toLocalTime)
+                .distinct()
+                .sorted()
+                .toList();
 
 //        Always sync start time with the new updates of the "nextSchedules"
-        managedSchedule.addStartTime(startTime);
+        managedSchedule.addStartTime(LocalDateTime.of(pendingDates.getFirst(), newTimes.getFirst()));
 
         pendingDates.stream()
-                .flatMap(pendingDate -> newDates.stream()
-                        .map(date -> new ScheduleEvent(null,
+                .flatMap(pendingDate -> newTimes.stream()
+                        .map(time -> new ScheduleEvent(null,
                                 managedSchedule.getDoseQuantity(),
-                                LocalDateTime.of(pendingDate, date.toLocalTime())))
+                                LocalDateTime.of(pendingDate, time)))
                         .map(medicationMapper::toEntity)
-                ).forEach(managedSchedule::addScheduleEvent);
-
+                )
+                .forEach(managedSchedule::addScheduleEvent);
         medicationRepository.saveMedicationSchedule(managedSchedule);
-
     }
 
     @Override
     public void updateScheduleEvent(Double newDosage, MedicationScheduleEntity managedSchedule) {
 
         MedicationSchedule domainSchedule = medicationMapper.toDomain(managedSchedule);
+
         domainSchedule.updateDoseQuantity(newDosage);
 
         managedSchedule.updateMedicationSchedule(domainSchedule);
@@ -114,6 +125,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 .map(domainEvent -> {
                     ScheduleEventEntity see = medicationMapper.toEntity(domainEvent);
                     see.updateScheduleEvent(domainEvent);
+                    see.addMedicationSchedule(managedSchedule);
                     return see;
                 })
                 .toList();
@@ -133,7 +145,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
         LocalDateTime windowStart = periodStart.toLocalDate().atStartOfDay();
 
-        LocalDateTime windowEnd = windowStart.plusDays(expansionWindowDays)
+        LocalDateTime windowEnd = windowStart.plusDays(expansionWindowDays - 1)
                 .toLocalDate()
                 .atTime(23, 59, 59);
 
