@@ -4,7 +4,7 @@ package com.medreminder.medreminder_server.medication;
 import com.medreminder.medreminder_server.application.dtos.medication.CreateMedicationCommand;
 import com.medreminder.medreminder_server.application.dtos.medication.MedicationProfileResponse;
 import com.medreminder.medreminder_server.application.dtos.medication.UpdateMedicationCommand;
-import com.medreminder.medreminder_server.application.services.ScheduleEventServiceImpl;
+import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventServiceImpl;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationService;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationServiceImpl;

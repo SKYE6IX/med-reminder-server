@@ -4,10 +4,11 @@ import com.medreminder.medreminder_server.application.dtos.medication.CreateMedi
 import com.medreminder.medreminder_server.application.dtos.medication.MedicationProfileResponse;
 import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
 import com.medreminder.medreminder_server.application.dtos.medication.UpdateMedicationCommand;
+import com.medreminder.medreminder_server.domain.services.UseCase;
 
 import java.util.List;
 
-public interface MedicationService {
+public interface MedicationService extends UseCase {
 
    MedicationProfileResponse createMedication(CreateMedicationCommand cmd);
 

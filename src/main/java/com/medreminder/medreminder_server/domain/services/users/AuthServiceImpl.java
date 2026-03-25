@@ -1,24 +1,23 @@
-package com.medreminder.medreminder_server.application.security;
+package com.medreminder.medreminder_server.domain.services.users;
 
 
 import com.medreminder.medreminder_server.application.dtos.user.AuthResponse;
 import com.medreminder.medreminder_server.application.dtos.user.LoginRequest;
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
+import com.medreminder.medreminder_server.application.security.JwtUtil;
+import com.medreminder.medreminder_server.application.security.UserAlreadyExistsException;
+import com.medreminder.medreminder_server.application.security.UserPrincipal;
 import com.medreminder.medreminder_server.domain.models.users.User;
-import com.medreminder.medreminder_server.domain.services.users.UserRepository;
-import com.medreminder.medreminder_server.domain.services.users.UserService;
 import com.medreminder.medreminder_server.infrastructure.entity.users.RefreshTokenEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import com.medreminder.medreminder_server.infrastructure.repository.users.JpaRefreshTokenRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -28,11 +27,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 
-@Service
-public class AuthService {
-
-    @Value("${jwt.refresh-expiry-days}")
-    private int refreshExpiryDays;
+public class AuthServiceImpl implements AuthService{
 
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
@@ -45,13 +40,13 @@ public class AuthService {
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder().withoutPadding();
 
-    public AuthService(AuthenticationManager authenticationManager,
-                       UserService userService,
-                       PasswordEncoder passwordEncoder,
-                       JwtUtil jwtUtil,
-                       UserMapper userMapper,
-                       JpaRefreshTokenRepository jpaRefreshTokenRepository,
-                       UserRepository userRepository) {
+    public AuthServiceImpl(AuthenticationManager authenticationManager,
+                           UserService userService,
+                           PasswordEncoder passwordEncoder,
+                           JwtUtil jwtUtil,
+                           UserMapper userMapper,
+                           JpaRefreshTokenRepository jpaRefreshTokenRepository,
+                           UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
@@ -61,6 +56,8 @@ public class AuthService {
         this.userRepository = userRepository;
     }
 
+
+    @Override
     public AuthResponse registerUserWithEmail(RegisterUserRequest request){
 
         UserEntity existingUser = userRepository.findUserByEmail(request.getEmail())
@@ -77,7 +74,7 @@ public class AuthService {
         User newUser = userService.createUser(request);
 
 //      Generate access token for user
-        String token = jwtUtil.generateToken(newUser.getEmail(), newUser.getId());
+        String accessToken = jwtUtil.generateToken(newUser.getEmail(), newUser.getId());
 
 //       Generate refresh token for user
         String refreshToken = generateRandomToken();
@@ -87,48 +84,45 @@ public class AuthService {
 
         jpaRefreshTokenRepository.save(refreshTokenEntity);
 
-        return new AuthResponse(newUser.getId(), newUser.getEmail(), token, refreshToken);
+        return new AuthResponse(newUser.getId(), newUser.getEmail(), accessToken, refreshToken);
     }
 
-
+    @Override
     public AuthResponse loginUserWithEmail(LoginRequest loginRequest){
 
         String email = loginRequest.email();
 
         String password = loginRequest.password();
 
-        UserEntity existingUser = userRepository.findUserByEmail(loginRequest.email())
-                .orElse(null);
-
-        if (existingUser == null){
-            throw new UsernameNotFoundException("Invalid email or password!");
-        }
-
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
         );
 
-        if (!auth.isAuthenticated()) {
+        UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
+
+        if (!auth.isAuthenticated() || userPrincipal == null) {
             throw new BadCredentialsException("Email or password is invalid");
         }
 
         jpaRefreshTokenRepository
-                .findByUserIdAndRevokedFalse(existingUser.getId())
+                .findByUserIdAndRevokedFalse(userPrincipal.getId())
                 .ifPresent(this::revokeRefreshToken);
 
 //     Generate new token
-        String token = jwtUtil.generateToken(existingUser.getEmail(), existingUser.getId());
+        String accessToken = jwtUtil.generateToken(userPrincipal.getEmail(), userPrincipal.getId());
 
         String refreshToken = generateRandomToken();
 
         RefreshTokenEntity refreshTokenEntity = createRefreshTokenEntity(refreshToken,
-                existingUser);
+                new UserEntity(userPrincipal.getId(),userPrincipal.getEmail(),null, null));
 
         jpaRefreshTokenRepository.save(refreshTokenEntity);
 
-        return new AuthResponse(existingUser.getId(), existingUser.getEmail(), token, refreshToken);
+        return new AuthResponse(userPrincipal.getId(), userPrincipal.getEmail(), accessToken, refreshToken);
+
     }
 
+    @Override
     public AuthResponse refreshToken(String token) {
 
         String hashToken = hashRefreshToken(token);
@@ -161,7 +155,8 @@ public class AuthService {
     private RefreshTokenEntity createRefreshTokenEntity(String rawToken, UserEntity userEntity) {
         String hashToken = hashRefreshToken(rawToken);;
 
-        Instant expiryTime = Instant.now().plus(refreshExpiryDays, ChronoUnit.DAYS);
+        final int REFRESH_TOKEN_EXPIRE_DAYS = 3650;
+        Instant expiryTime = Instant.now().plus(REFRESH_TOKEN_EXPIRE_DAYS, ChronoUnit.DAYS);
 
         return new RefreshTokenEntity(null, hashToken, expiryTime,false, userEntity);
     }

@@ -1,12 +1,10 @@
-package com.medreminder.medreminder_server.application.services;
+package com.medreminder.medreminder_server.domain.services.medications;
 
 
 import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
 import com.medreminder.medreminder_server.domain.models.medication.MedicationSchedule;
 import com.medreminder.medreminder_server.domain.models.medication.ScheduleEvent;
-import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
-import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventService;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
@@ -14,7 +12,6 @@ import com.medreminder.medreminder_server.infrastructure.entity.medications.Sche
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import net.fortuna.ical4j.model.Recur;
 import org.jspecify.annotations.NonNull;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,7 +21,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
-@Service
 public class ScheduleEventServiceImpl implements ScheduleEventService {
 
     private final MedicationRepository medicationRepository;

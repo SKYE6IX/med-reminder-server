@@ -3,6 +3,7 @@ package com.medreminder.medreminder_server.domain.services.users;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileRequest;
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
 import com.medreminder.medreminder_server.application.dtos.user.UpdateUserCommand;
+import com.medreminder.medreminder_server.application.dtos.user.UserResponse;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
@@ -99,6 +100,19 @@ public class UserServiceImpl implements UserService {
         userRepository.saveUser(userMapper.toEntity(domainUser, userEntity));
 
         return profileToDelete;
+    }
+
+    @Override
+    public UserResponse getUserById(String userId) {
+        UserEntity userEntity = getUserEntity(userId);
+
+        return new UserResponse(
+                userEntity.getId(),
+                userEntity.getEmail(),
+                userEntity.getName(),
+                userEntity.getDateOfBirth(),
+                userEntity.getGender());
+
     }
 
     private UserEntity getUserEntity(String userId) {

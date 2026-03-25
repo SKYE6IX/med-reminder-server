@@ -1,5 +1,6 @@
-package com.medreminder.medreminder_server.application.security;
+package com.medreminder.medreminder_server.application.services;
 
+import com.medreminder.medreminder_server.application.security.UserPrincipal;
 import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import org.jspecify.annotations.NonNull;

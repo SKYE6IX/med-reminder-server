@@ -23,12 +23,9 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final UserRepository userRepository;
 
-    public UserController(UserService userService,
-                          UserRepository userRepository) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.userRepository = userRepository;
     }
 
     @GetMapping()
@@ -36,14 +33,7 @@ public class UserController {
 
         var principal = getPrincipal(userDetails);
 
-        UserEntity userEntity = userRepository.findUserById(principal.getId())
-                .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
-
-        var response = new UserResponse(userEntity.getId(),
-                userEntity.getEmail(),
-                userEntity.getName(),
-                userEntity.getDateOfBirth(),
-                userEntity.getGender());
+        var response = userService.getUserById(principal.getId());
 
         return  ResponseEntity.ok(response);
     }
@@ -71,13 +61,14 @@ public class UserController {
 
         var response = userService.createProfile(principal.getId(), profileRequest);
 
-        return ResponseEntity.ok(new ProfileResponse(response.getId(),
+        return ResponseEntity.ok(new ProfileResponse(
+                response.getId(),
                 response.getName(),
                 response.getRelation().name(), response.isSelf()));
     }
 
     @DeleteMapping(value = "/profiles/{profileId}")
-    public ResponseEntity<?> deleteUser(@AuthenticationPrincipal UserDetails userDetails,
+    public ResponseEntity<?> deleteProfile(@AuthenticationPrincipal UserDetails userDetails,
                                         @PathVariable String profileId) {
 
         var principal = getPrincipal(userDetails);
