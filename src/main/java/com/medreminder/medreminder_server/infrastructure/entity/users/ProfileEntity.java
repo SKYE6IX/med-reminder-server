@@ -7,6 +7,7 @@ import jakarta.persistence.CascadeType;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,7 +36,7 @@ public class ProfileEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<MedicationProfileEntity> medicationProfile;
+    private List<MedicationProfileEntity> medicationProfile = new ArrayList<>();
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -71,6 +72,10 @@ public class ProfileEntity {
 
     public boolean isSelf() {
         return isSelf;
+    }
+
+    public UserEntity getUser() {
+        return user;
     }
 
     public List<MedicationProfileEntity> getMedicationProfile() {

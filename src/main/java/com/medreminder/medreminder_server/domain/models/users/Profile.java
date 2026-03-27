@@ -13,7 +13,7 @@ public class Profile {
     private final Relation relation;
     private final boolean isSelf;
     private User user;
-    private List<MedicationProfile> medicationProfiles = new ArrayList<>();
+    private final List<MedicationProfile> medicationProfiles = new ArrayList<>();
 
     public Profile(String id, String name, Relation relation, boolean isSelf) {
         this.id = id;
@@ -40,6 +40,10 @@ public class Profile {
 
     public User getUser() {
         return user;
+    }
+
+    public List<MedicationProfile> getMedicationProfiles() {
+        return medicationProfiles;
     }
 
     void setUser(User user) {

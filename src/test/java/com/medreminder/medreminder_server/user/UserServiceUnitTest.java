@@ -72,20 +72,25 @@ public class UserServiceUnitTest {
     void shouldUpdateUser_thenSaveIt(){
 
         UUID userId = UUID.randomUUID();
+        UUID profileId = UUID.randomUUID();
 
-        RegisterUserRequest registerUserRequest = new RegisterUserRequest("test@mail.com",
-                "test user", "12345678");
+        User testUser = new User(userId.toString(), "test@email.com",
+                "test user", "testhashpassword");
 
-        User testUser = new User(userId.toString(), registerUserRequest.getEmail(),
-                registerUserRequest.getName(), registerUserRequest.getPassword());
+        Profile testProfile = new Profile(profileId.toString(),
+                testUser.getName(),Relation.SELF, true);
+
+        testUser.addProfiles(testProfile);
+
+        UserEntity userEntity = userMapper.toEntity(testUser);
 
         UpdateUserCommand updateUserCommand = new UpdateUserCommand("updatetest@mail.com",
                 null, "1992-07-27", "Male");
 
         when(userRepository.findUserById(any(String.class)))
-                .thenReturn(Optional.of(userMapper.toEntity(testUser)));
+                .thenReturn(Optional.of(userEntity));
 
-        User updateUser = userService.updateUser(testUser.getId(), updateUserCommand);
+        User updateUser = userService.updateUser(userEntity.getId(), updateUserCommand);
 
         verify(userRepository, times(1)).saveUser(any(UserEntity.class));
 
@@ -139,21 +144,20 @@ public class UserServiceUnitTest {
         User testUser = new User(userId.toString(), "test@email.com",
                 "test user", "testhashpassword");
 
-        ProfileRequest profileRequest = new ProfileRequest("James","BROTHER");
-
         Profile testProfile = new Profile(profileId.toString(),
-                profileRequest.fullName(),Relation.valueOf(profileRequest.relation()), false);
+                "James",Relation.valueOf("BROTHER"), false);
 
         testUser.addProfiles(testProfile);
 
+        UserEntity userEntity = userMapper.toEntity(testUser);
+
         when(userRepository.findUserById(any(String.class)))
-                .thenReturn(Optional.of(userMapper.toEntity(testUser)));
+                .thenReturn(Optional.of(userEntity));
 
-
-        Profile deletedProfile = userService.deleteProfile(testUser.getId(), testProfile.getId());
+        userService.deleteProfile(testUser.getId(), testProfile.getId());
 
         verify(userRepository, times(1)).saveUser(any(UserEntity.class));
 
-        assertThat(deletedProfile.getId()).isNotNull().isEqualTo(profileId.toString());
+        assertThat(userEntity.getProfiles()).isEmpty();
     }
 }

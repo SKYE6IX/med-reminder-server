@@ -53,6 +53,16 @@ public class UserController {
         );
     }
 
+    @DeleteMapping()
+    public ResponseEntity<?> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
+
+        var principal = getPrincipal(userDetails);
+
+        userService.deleteUser(principal.getId());
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping(value = "/profiles")
     public ResponseEntity<ProfileResponse> createProfile(@AuthenticationPrincipal UserDetails userDetails,
                                                          @RequestBody ProfileRequest profileRequest) {
@@ -73,13 +83,8 @@ public class UserController {
 
         var principal = getPrincipal(userDetails);
 
-        Profile deletedProfile = userService.deleteProfile(principal.getId(), profileId);
+      userService.deleteProfile(principal.getId(), profileId);
 
-        if (deletedProfile == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new AppErrorResponse(HttpStatus.NOT_FOUND.value(),
-                            "Profile not found!"));
-        }
         return ResponseEntity.noContent().build();
     }
 

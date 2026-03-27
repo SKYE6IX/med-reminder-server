@@ -1,6 +1,7 @@
 package com.medreminder.medreminder_server.infrastructure.entity.users;
 
 
+import com.medreminder.medreminder_server.domain.models.medication.MedicationProfile;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
@@ -15,52 +16,24 @@ import java.util.stream.Collectors;
 public class UserMapper {
     private final MedicationMapper medicationMapper = new MedicationMapper();
 
-    public User toDomain(UserEntity userEntity) {
-
-        if (userEntity == null) return null;
-
-        User user = new User(userEntity.getId(),
-               userEntity.getEmail(),
-              userEntity.getHashPassword(),
-               userEntity.getName(),
-              userEntity.getDateOfBirth(),
-               userEntity.getGender());
-
-        userEntity.getProfiles().forEach(profile -> {
-          user.addProfiles(toDomain(profile));
-        });
-
-        return user;
-    }
-
-    public Profile toDomain(ProfileEntity profileEntity) {
-        if (profileEntity == null) return null;
-
-        Profile profile = new Profile(profileEntity.getId(),
-                profileEntity.getName(),
-                Relation.valueOf(profileEntity.getRelation()),
-                profileEntity.isSelf());
-
-        profileEntity.getMedicationProfile().forEach(profileMedication -> {
-            profile.addMedicationProfile(medicationMapper.toDomain(profileMedication));
-        });
-
-        return profile;
-    }
-
     public UserEntity toEntity(User user) {
-
         if(user == null) return null;
 
-        UserEntity userEntity = new UserEntity(user.getId(),
-                user.getEmail(), user.getName(),
+        UserEntity userEntity = new UserEntity(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
                 user.getHashPassword());
 
-       List<ProfileEntity> profileEntities = user.getProfiles().
-                stream().map(pe-> toEntity(pe, userEntity))
-               .toList();
+        if(!user.getProfiles().isEmpty()){
 
-       userEntity.getProfiles().addAll(profileEntities);
+            List<ProfileEntity> profileEntities = user.getProfiles()
+                    .stream()
+                    .map(profile -> toEntity(profile, userEntity))
+                    .toList();
+
+            userEntity.getProfiles().addAll(profileEntities);
+        }
 
        return userEntity;
     }
@@ -78,22 +51,73 @@ public class UserMapper {
 
         if (profile == null) return null;
 
-        return new ProfileEntity(profile.getId(),
+        return new ProfileEntity(
+                profile.getId(),
                 profile.getName(),
                 profile.getRelation().name(),
-                profile.isSelf(), managedEntity);
+                profile.isSelf(),
+                managedEntity);
+    }
+
+    public User toDomain(UserEntity userEntity) {
+
+        if (userEntity == null) return null;
+
+        User user = new User(
+                userEntity.getId(),
+                userEntity.getEmail(),
+                userEntity.getHashPassword(),
+                userEntity.getName(),
+                userEntity.getDateOfBirth(),
+                userEntity.getGender());
+
+        if(!userEntity.getProfiles().isEmpty()) {
+            List<Profile> profiles = userEntity.getProfiles()
+                    .stream()
+                    .map(this::toDomain)
+                    .toList();
+            user.getProfiles().addAll(profiles);
+        }
+
+        return user;
+    }
+
+    public Profile toDomain(ProfileEntity profileEntity) {
+
+        if (profileEntity == null) return null;
+
+        Profile profile = new Profile(
+                profileEntity.getId(),
+                profileEntity.getName(),
+                Relation.valueOf(profileEntity.getRelation()),
+                profileEntity.isSelf());
+
+        if(!profileEntity.getMedicationProfile().isEmpty()) {
+            List<MedicationProfile> medicationProfiles = profileEntity
+                    .getMedicationProfile()
+                    .stream()
+                    .map(medicationMapper::toDomain)
+                    .toList();
+            profile.getMedicationProfiles().addAll(medicationProfiles);
+        };
+
+        return profile;
     }
 
     private void syncProfiles(List<Profile> domainProfiles, UserEntity managedEntity) {
 
         Map<String, ProfileEntity> existingProfiles = managedEntity.getProfiles()
-                .stream().collect(Collectors.toMap(ProfileEntity::getId, p -> p));
+                .stream()
+                .collect(Collectors.toMap(ProfileEntity::getId, p -> p));
 
-        List<ProfileEntity>  syncedProfiles = domainProfiles.stream()
+        List<ProfileEntity> syncedProfiles = domainProfiles
+                .stream()
                 .map(p -> existingProfiles
-                        .getOrDefault(p.getId(), toEntity(p,managedEntity)))
+                        .getOrDefault(p.getId(), toEntity(p, managedEntity)))
                 .toList();
+
         managedEntity.getProfiles().clear();
+
         managedEntity.getProfiles().addAll(syncedProfiles);
     }
 }

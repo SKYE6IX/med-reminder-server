@@ -75,31 +75,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(String id) {
+    public void deleteUser(String userId) {
+        userRepository.deleteUser(userId);
     }
 
     @Override
-    public Profile deleteProfile(String userId, String id) {
+    public void deleteProfile(String userId, String profileId) {
 
         UserEntity userEntity = getUserEntity(userId);
 
         User domainUser = userMapper.toDomain(userEntity);
 
-        Profile profileToDelete = domainUser.getProfiles()
+        domainUser.getProfiles()
                 .stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-
-        if( profileToDelete == null ){
-            return null;
-        }
-
-        domainUser.removeProfiles(profileToDelete);
+                .filter(profile -> profile.getId().equals(profileId))
+                .findFirst().ifPresent(domainUser::removeProfiles);
 
         userRepository.saveUser(userMapper.toEntity(domainUser, userEntity));
-
-        return profileToDelete;
     }
 
     @Override

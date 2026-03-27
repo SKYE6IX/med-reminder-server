@@ -14,11 +14,11 @@ public interface UserService extends UseCase {
 
     User updateUser(String userId, UpdateUserCommand updateUserCommand);
 
-    void deleteUser(String id);
+    void deleteUser(String userId);
 
     Profile createProfile(String userId, ProfileRequest profileRequest);
 
-    Profile deleteProfile(String userId, String id);
+    void deleteProfile(String userId, String profileId);
 
     UserResponse getUserById(String userId);
 }

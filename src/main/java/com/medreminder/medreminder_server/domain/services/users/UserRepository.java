@@ -6,9 +6,11 @@ import java.util.Optional;
 
 public interface UserRepository {
 
+    UserEntity saveUser(UserEntity userEntity);
+
+    void deleteUser(String userId);
+
     Optional<UserEntity> findUserById(String id);
 
     Optional <UserEntity> findUserByEmail(String email);
-
-    UserEntity saveUser(UserEntity userEntity);
 }

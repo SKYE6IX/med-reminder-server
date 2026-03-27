@@ -46,4 +46,10 @@ public class UserRepositoryImpl implements UserRepository {
        return  jpaUserRepository.save(userEntity);
 
     }
+
+    @Override
+    public void deleteUser(String userId) {
+        jpaUserRepository.deleteById(userId);
+    }
+
 }
