@@ -7,23 +7,31 @@ import com.medreminder.medreminder_server.application.dtos.user.UserResponse;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
+import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserMapper userMapper = new UserMapper();
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository,
+                           UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     @Override
     public User createUser(RegisterUserRequest registerUserRequest) {
 
-        User user = new User(null, registerUserRequest.getEmail(),
+        User user = new User(null,
+                registerUserRequest.getEmail(),
                 registerUserRequest.getName(),
                 registerUserRequest.getPassword());
 
@@ -39,13 +47,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(String userId, UpdateUserCommand updateUserCommand) {
 
-        UserEntity userEntity = getUserEntity(userId);
+        UserEntity managedUser = getUserEntity(userId);
 
-        User domainUser = userMapper.toDomain(userEntity);
+        User domainUser = userMapper.toDomain(managedUser);
 
         domainUser.updateUser(updateUserCommand);
 
-        userRepository.saveUser(userMapper.toEntity(domainUser, userEntity));
+        managedUser.updateUserDetails(domainUser);
+
+        userRepository.saveUser(managedUser);
 
         return domainUser;
     }
@@ -53,25 +63,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public Profile createProfile(String userId, ProfileRequest profileRequest) {
 
-        UserEntity userEntity = getUserEntity(userId);
+        UserEntity managedUser = getUserEntity(userId);
 
-        User domainUser = userMapper.toDomain(userEntity);
+        User domainUser = userMapper.toDomain(managedUser);
 
         Profile profile = new Profile(null, profileRequest.fullName(),
                 Relation.valueOf(profileRequest.relation()), false);
 
         domainUser.addProfiles(profile);
 
-        return userRepository
-                .saveUser(userMapper.toEntity(domainUser, userEntity))
-                .getProfiles()
-                .stream()
-                .filter(pe ->
-                        pe.getName().equals(profile.getName())
-                        && Relation.valueOf(pe.getRelation()) == profile.getRelation())
-                .findFirst()
-                .map(userMapper::toDomain)
-                .orElseThrow(()-> new RuntimeException("Profile not found!"));
+        syncProfiles(domainUser.getProfiles(), managedUser);
+
+        ProfileEntity newProfile = userRepository.saveUser(managedUser).getProfiles().getLast();
+
+        return userMapper.toDomain(newProfile);
     }
 
     @Override
@@ -82,33 +87,52 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteProfile(String userId, String profileId) {
 
-        UserEntity userEntity = getUserEntity(userId);
+        UserEntity managedUser = getUserEntity(userId);
 
-        User domainUser = userMapper.toDomain(userEntity);
+        User domainUser = userMapper.toDomain(managedUser);
 
         domainUser.getProfiles()
                 .stream()
                 .filter(profile -> profile.getId().equals(profileId))
                 .findFirst().ifPresent(domainUser::removeProfiles);
 
-        userRepository.saveUser(userMapper.toEntity(domainUser, userEntity));
+        syncProfiles(domainUser.getProfiles(), managedUser);
+
+        userRepository.saveUser(managedUser);
     }
+
 
     @Override
     public UserResponse getUserById(String userId) {
         UserEntity userEntity = getUserEntity(userId);
-
         return new UserResponse(
                 userEntity.getId(),
                 userEntity.getEmail(),
                 userEntity.getName(),
                 userEntity.getDateOfBirth(),
                 userEntity.getGender());
-
     }
 
     private UserEntity getUserEntity(String userId) {
         return userRepository.findUserById(userId)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
+    }
+
+    private void syncProfiles(List<Profile> domainProfiles,
+                              UserEntity managedEntity) {
+
+        Map<String, ProfileEntity> existingProfiles = managedEntity
+                .getProfiles()
+                .stream()
+                .collect(Collectors.toMap(ProfileEntity::getId, p -> p));
+
+        List<ProfileEntity> syncedProfiles = domainProfiles
+                .stream()
+                .map(p -> existingProfiles
+                        .getOrDefault(p.getId(), userMapper.toEntity(p)))
+                .toList();
+
+        managedEntity.getProfiles().clear();
+        managedEntity.getProfiles().addAll(syncedProfiles);
     }
 }

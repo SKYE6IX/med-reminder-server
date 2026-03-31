@@ -43,12 +43,16 @@ public class MedicationPackEntity {
 
     public MedicationPackEntity(String id,
                                 double totalQuantity,
+                                double currentQuantity,
                                 String notifyRule,
-                                LocalDateTime addedAt) {
+                                LocalDateTime addedAt,
+                                MedicationProfileEntity medicationProfile) {
         this.id = id;
         this.totalQuantity = totalQuantity;
+        this.currentQuantity = currentQuantity;
         this.notifyRule = notifyRule;
         this.addedAt = addedAt;
+        this.medicationProfile = medicationProfile;
     }
 
     public String getId() {
@@ -69,7 +73,7 @@ public class MedicationPackEntity {
         return addedAt;
     }
 
-    public void addMedicationProfile(MedicationProfileEntity medicationProfile){
-        this.medicationProfile = medicationProfile;
+    public MedicationProfileEntity getMedicationProfile() {
+        return medicationProfile;
     }
 }

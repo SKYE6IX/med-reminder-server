@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface ProfileRepository {
     Optional<ProfileEntity> findProfileById(String id);
+
+    ProfileEntity saveProfile(ProfileEntity profileEntity);
 }

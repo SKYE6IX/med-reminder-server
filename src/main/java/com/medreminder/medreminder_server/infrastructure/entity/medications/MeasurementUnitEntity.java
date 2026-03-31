@@ -34,10 +34,14 @@ public class MeasurementUnitEntity {
     public MeasurementUnitEntity() {
     }
 
-    public MeasurementUnitEntity(String id, String name, String symbol) {
+    public MeasurementUnitEntity(String id,
+                                 String name,
+                                 String symbol,
+                                 MedicationEntity medication) {
         this.id = id;
         this.name = name;
         this.symbol = symbol;
+        this.medication = medication;
     }
 
     public String getId() {
@@ -52,7 +56,7 @@ public class MeasurementUnitEntity {
         return symbol;
     }
 
-    public void addMedication(MedicationEntity medication) {
-        this.medication = medication;
+    public MedicationEntity getMedication() {
+        return medication;
     }
 }

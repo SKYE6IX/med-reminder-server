@@ -62,10 +62,12 @@ public class MedicationProfileEntity {
 
     public MedicationProfileEntity(String id,
                                    boolean isActive,
-                                   String note) {
+                                   String note,
+                                   ProfileEntity profile) {
         this.id = id;
         this.isActive = isActive;
         this.note = note;
+        this.profile = profile;
     }
 
     public String getId() {
@@ -94,10 +96,6 @@ public class MedicationProfileEntity {
         return profile;
     }
 
-    public void setProfile(ProfileEntity profile) {
-        this.profile = profile;
-    }
-
     public Optional<LocalDateTime> getCreatedAt() {
        if (createdAt == null) {
            return Optional.empty();
@@ -105,23 +103,20 @@ public class MedicationProfileEntity {
        return Optional.of(createdAt);
     }
 
-    public void addMedication(MedicationEntity medication) {
-        this.medication = medication;
-        medication.addMedicationProfile(this);
-    }
-
-    public void addMedicationSchedule(MedicationScheduleEntity medicationSchedule) {
-        this.medicationSchedule = medicationSchedule;
-        medicationSchedule.addMedicationProfile(this);
-    }
-
-    public void addMedicationPack(MedicationPackEntity medicationPack) {
-        this.medicationPack = medicationPack;
-        medicationPack.addMedicationProfile(this);
-    }
-
-    public void update(MedicationProfile medicationProfile) {
+    public void updateMedicationProfile(MedicationProfile medicationProfile) {
         this.isActive = medicationProfile.isActive();
         this.note = medicationProfile.getNote();
+    }
+
+    public void setMedication(MedicationEntity medication) {
+        this.medication = medication;
+    }
+
+    public void setMedicationSchedule(MedicationScheduleEntity medicationSchedule) {
+        this.medicationSchedule = medicationSchedule;
+    }
+
+    public void setMedicationPack(MedicationPackEntity medicationPack) {
+        this.medicationPack = medicationPack;
     }
 }

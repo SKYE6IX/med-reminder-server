@@ -8,6 +8,7 @@ import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.services.users.UserServiceImpl;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,12 +32,12 @@ public class UserServiceUnitTest {
     private UserRepository userRepository;
 
     private UserServiceImpl userService;
-
-    UserMapper userMapper = new UserMapper();
+    private UserMapper userMapper;
 
     @BeforeEach
     void setUp(){
-        userService = new UserServiceImpl(userRepository);
+        userMapper = new UserMapper();
+        userService = new UserServiceImpl(userRepository, userMapper);
     }
 
     @Test
@@ -76,7 +77,6 @@ public class UserServiceUnitTest {
 
         User testUser = new User(userId.toString(), "test@email.com",
                 "test user", "testhashpassword");
-
         Profile testProfile = new Profile(profileId.toString(),
                 testUser.getName(),Relation.SELF, true);
 
@@ -92,7 +92,7 @@ public class UserServiceUnitTest {
 
         User updateUser = userService.updateUser(userEntity.getId(), updateUserCommand);
 
-        verify(userRepository, times(1)).saveUser(any(UserEntity.class));
+        verify(userRepository).saveUser(any(UserEntity.class));
 
         assertThat(updateUser.getId()).isNotNull().isEqualTo(userId.toString());
 
@@ -106,7 +106,6 @@ public class UserServiceUnitTest {
     @Test
     void shouldCreateProfile_thenSaveIt(){
         UUID userId = UUID.randomUUID();
-
         UUID profileId = UUID.randomUUID();
 
         User testUser = new User(userId.toString(), "test@email.com",
@@ -114,8 +113,11 @@ public class UserServiceUnitTest {
 
         ProfileRequest profileRequest = new ProfileRequest("James","BROTHER");
 
-        Profile testProfile = new Profile(profileId.toString(),
-                profileRequest.fullName(),Relation.valueOf(profileRequest.relation()), false);
+        Profile testProfile = new Profile(
+                profileId.toString(),
+                profileRequest.fullName(),
+                Relation.valueOf(profileRequest.relation()),
+                false);
 
         testUser.addProfiles(testProfile);
 
@@ -138,7 +140,6 @@ public class UserServiceUnitTest {
     @Test
     void shouldDeleteProfile_thenSaveIt(){
         UUID userId = UUID.randomUUID();
-
         UUID profileId = UUID.randomUUID();
 
         User testUser = new User(userId.toString(), "test@email.com",
@@ -154,9 +155,12 @@ public class UserServiceUnitTest {
         when(userRepository.findUserById(any(String.class)))
                 .thenReturn(Optional.of(userEntity));
 
+
+        assertThat(userEntity.getProfiles().size()).isEqualTo(1);
+
         userService.deleteProfile(testUser.getId(), testProfile.getId());
 
-        verify(userRepository, times(1)).saveUser(any(UserEntity.class));
+        verify(userRepository).saveUser(any(UserEntity.class));
 
         assertThat(userEntity.getProfiles()).isEmpty();
     }

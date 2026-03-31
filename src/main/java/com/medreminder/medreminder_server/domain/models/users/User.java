@@ -4,13 +4,12 @@ import com.medreminder.medreminder_server.application.dtos.user.UpdateUserComman
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class User  {
-    private String id;
+    private final String id;
     private String email;
     private String hashPassword;
     private String name;
@@ -20,10 +19,10 @@ public class User  {
     private LocalDateTime updatedAt;
     private final List<Profile> profiles = new ArrayList<>();
 
-    public User() {
-    }
-
-    public User( String id, String email, String name, String hashPassword ) {
+    public User( String id,
+                 String email,
+                 String name,
+                 String hashPassword ) {
         this.id = id;
         this.email = Objects.requireNonNull(email, "Email cannot be null");
         this.name = Objects.requireNonNull(name, "Name cannot be null");
@@ -73,41 +72,41 @@ public class User  {
         return profiles;
     }
 
-    public void changeName(String newName) {
-        if(newName == null || newName.isEmpty()){
-            throw new IllegalArgumentException("Name cannot be empty");
-        }
-        this.name = newName;
-    }
-
-    public void changeEmail(String newEmail) {
-        if(newEmail == null || newEmail.isEmpty()){
-            throw new IllegalArgumentException("Email cannot be empty");
-        }
-        this.email = newEmail;
-    }
-
-    public void changePassword(String newPassword) {
-        if( newPassword == null || newPassword.isEmpty()) {
-            throw new IllegalArgumentException("Password cannot be empty");
-        }
-        this.hashPassword = newPassword;
-    }
-
     public void updateUser(UpdateUserCommand command) {
-        command.getEmail().ifPresent(this::changeEmail);
-        command.getName().ifPresent(this::changeName);
+        command.getEmail().ifPresent(this::updateEmail);
+        command.getName().ifPresent(this::updateName);
         command.getDateOfBirth().ifPresent(dob -> this.dateOfBirth = LocalDate.parse(dob));
         command.getGender().ifPresent(gender -> this.gender = gender);
     }
 
     public void addProfiles(Profile profile) {
         this.profiles.add(profile);
-        profile.setUser(this);
+        profile.addUser(this);
     }
 
     public void removeProfiles(Profile profile) {
         this.profiles.remove(profile);
-        profile.setUser(null);
+        profile.addUser(null);
+    }
+
+    private void updateName(String newName) {
+        if(newName == null || newName.isEmpty()){
+            throw new IllegalArgumentException("Name cannot be empty");
+        }
+        this.name = newName;
+    }
+
+    private void updateEmail(String newEmail) {
+        if(newEmail == null || newEmail.isEmpty()){
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+        this.email = newEmail;
+    }
+
+    private void updatePassword(String newPassword) {
+        if( newPassword == null || newPassword.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
+        this.hashPassword = newPassword;
     }
 }

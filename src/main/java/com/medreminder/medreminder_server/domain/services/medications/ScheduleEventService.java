@@ -1,20 +1,21 @@
 package com.medreminder.medreminder_server.domain.services.medications;
 
 import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
+import com.medreminder.medreminder_server.domain.models.medication.MedicationSchedule;
 import com.medreminder.medreminder_server.domain.services.UseCase;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 public interface ScheduleEventService extends UseCase {
 
-    public void createScheduleEvent(MedicationScheduleEntity managedSchedule);
+    public void createScheduleEvents(MedicationSchedule schedule);
 
-    public void updateScheduleEvent(String newRules, MedicationScheduleEntity managedSchedule);
+    public ScheduleEventResponse updateScheduleEvents(String scheduleEventId, Map<String, String> eventBody);
 
-    public void updateScheduleEvent(Double newDosage, MedicationScheduleEntity managedSchedule);
+    public void updateScheduleEventsRules(MedicationSchedule schedule);
 
-    public ScheduleEventResponse updateScheduleEvent(String scheduleEventId, Map<String, String> eventBody);
+    public void updateScheduleEventsDosage(MedicationSchedule schedule);
+
 }
 

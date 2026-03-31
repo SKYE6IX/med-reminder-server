@@ -16,14 +16,12 @@ import java.util.stream.IntStream;
 
 public class MedicationStubFactory {
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-
     public static ProfileEntity createProfileEntity() {
         return createProfileEntity(UUID.randomUUID());
     }
 
     public static ProfileEntity createProfileEntity(UUID profileId) {
-        return new ProfileEntity(profileId.toString(), "test profile", "BROTHER", true, null);
+        return new ProfileEntity(profileId.toString(), "test profile", "BROTHER", true);
     }
 
     public static CreateMedicationCommand createMedicationCommand(String profileId) {
@@ -38,7 +36,60 @@ public class MedicationStubFactory {
                 .build();
     }
 
-    public static CreateMedSchedule createMedSchedule() {
+    public static Medication createMedication(CreateMedicationCommand cmd) {
+
+        Medication medication = new Medication(
+                null,
+                cmd.getMedicationName(),
+                Unit.valueOf(cmd.getMedicationUnit())
+        );
+
+        MeasurementUnit measurementUnit = new MeasurementUnit(
+                null, Measurement.valueOf(cmd.getMedicationMeasurement()));
+
+        medication.addMeasurementUnit(measurementUnit);
+
+        return medication;
+    }
+
+    public static MedicationSchedule createMedicationSchedule(CreateMedicationCommand cmd) {
+        final DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+        MedicationSchedule medicationSchedule = new MedicationSchedule(
+                null,
+                cmd.getSchedule().dosage(),
+                cmd.getSchedule().recurrenceRule(),
+                LocalDateTime.parse(cmd.getSchedule().startDate(), dtf),
+                cmd.getSchedule().timeZone()
+        );
+        medicationSchedule.updateStartTime(LocalDateTime.parse(cmd.getSchedule().startDate(), dtf));
+
+        createScheduleEvents().forEach(medicationSchedule::addScheduleEvent);
+
+        return medicationSchedule;
+    }
+
+    public static MedicationProfileEntity createMedicationProfileEntity(
+            CreateMedicationCommand cmd,
+            MedicationMapper medicationMapper
+    ) {
+
+        UUID medicationId = UUID.randomUUID();
+
+        MedicationProfileEntity mpe = new MedicationProfileEntity(
+                medicationId.toString(),
+                true,
+                cmd.getMedicationNote(),
+                createProfileEntity()
+        );
+        mpe.setMedication(medicationMapper.toEntity(createMedication(cmd),mpe));
+        mpe.setMedicationSchedule(medicationMapper.toEntity(createMedicationSchedule(cmd), mpe));
+
+        return mpe;
+    }
+
+    private static CreateMedSchedule createMedSchedule() {
+
         return new CreateMedSchedule(
                 1.2,
                 "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0",
@@ -47,51 +98,11 @@ public class MedicationStubFactory {
         );
     }
 
-    public static List<ScheduleEvent> createScheduleEvent() {
-        return IntStream.range(1, 7)
-                .mapToObj(i -> new ScheduleEvent(null,5,
+    private static List<ScheduleEvent> createScheduleEvents() {
+        return IntStream
+                .range(1, 7)
+                .mapToObj(i -> new ScheduleEvent(UUID.randomUUID().toString(),1.2,
                         LocalDateTime.now().plusDays(i)))
                 .toList();
-    }
-
-    public static Medication createMedication(CreateMedicationCommand cmd) {
-        MeasurementUnit measurementUnit = new MeasurementUnit(
-                null, Measurement.valueOf(cmd.getMedicationMeasurement()));
-
-        return new Medication(
-                null,
-                cmd.getMedicationName(),
-                Unit.valueOf(cmd.getMedicationUnit()),
-                measurementUnit
-        );
-    }
-
-    public static MedicationSchedule createMedicationSchedule(CreateMedicationCommand cmd) {
-        return new MedicationSchedule(
-                null,
-                cmd.getSchedule().dosage(),
-                cmd.getSchedule().recurrenceRule(),
-                LocalDateTime.parse(cmd.getSchedule().startDate(), FORMATTER),
-                cmd.getSchedule().timeZone()
-        );
-    }
-
-    public static MedicationProfileEntity createMedicationProfileEntity(
-            ProfileEntity profileEntity,
-            CreateMedicationCommand cmd,
-            MedicationMapper medicationMapper
-    ) {
-        UUID medicationId = UUID.randomUUID();
-
-        MedicationProfileEntity entity =
-                new MedicationProfileEntity(medicationId.toString(), true, cmd.getMedicationNote());
-
-        entity.setProfile(profileEntity);
-        entity.addMedication(medicationMapper.toEntity(createMedication(cmd)));
-        entity.addMedicationSchedule(medicationMapper.toEntity(createMedicationSchedule(cmd)));
-
-        entity.getMedicationSchedule()
-                .addStartTime(LocalDateTime.parse("2024-07-15T08:00"));
-        return entity;
     }
 }

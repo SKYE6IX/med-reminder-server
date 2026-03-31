@@ -5,6 +5,7 @@ public class MeasurementUnit {
     private final String id;
     private final Measurement name;
     private final String symbol;
+    private Medication medication;
 
     public MeasurementUnit(String id,
                            Measurement name) {
@@ -23,5 +24,13 @@ public class MeasurementUnit {
 
     public String getSymbol() {
         return symbol;
+    }
+
+    public Medication getMedication() {
+        return medication;
+    }
+
+    public void addMedication(Medication medication){
+        this.medication = medication;
     }
 }

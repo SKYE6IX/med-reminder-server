@@ -2,12 +2,11 @@ package com.medreminder.medreminder_server.domain.models.medication;
 
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class MedicationProfile {
 
-    private String id;
+    private final String id;
 
     private boolean isActive;
 
@@ -21,21 +20,12 @@ public class MedicationProfile {
 
     private MedicationPack medicationPack;
 
-    public MedicationProfile() {
-    }
-
     public MedicationProfile(String id,
                              boolean isActive,
-                             String note,
-                             Medication medication,
-                             MedicationSchedule medicationSchedule,
-                             MedicationPack medicationPack) {
+                             String note) {
         this.id = id;
         this.isActive = isActive;
         this.note = note;
-        this.medication = medication;
-        this.medicationSchedule = medicationSchedule;
-        this.medicationPack = medicationPack;
     }
 
     public String getId() {
@@ -66,16 +56,33 @@ public class MedicationProfile {
         return medicationPack;
     }
 
-    public void setProfile(Profile profile) {
-        this.profile = profile;
-    }
-
     public void updateActive(boolean isActive) {
         this.isActive = isActive;
     }
 
     public void updateNote(String note) {
         this.note = note;
+    }
+
+    public void addProfile(Profile profile) {
+        this.profile = profile;
+    }
+
+    public void addMedication(Medication medication) {
+        this.medication = medication;
+        medication.addMedicationProfile(this);
+    }
+
+    public void addMedicationSchedule(MedicationSchedule medicationSchedule) {
+        this.medicationSchedule = medicationSchedule;
+        medication.addMedicationProfile(this);
+    }
+
+    public void addMedicationPack(MedicationPack medicationPack) {
+        if (medicationPack != null) {
+            this.medicationPack = medicationPack;
+            medicationPack.addMedicationProfile(this);
+        }
     }
 
     @Override

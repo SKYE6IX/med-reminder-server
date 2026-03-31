@@ -27,4 +27,10 @@ public class ProfileRepositoryImpl implements ProfileRepository {
 
         return Optional.empty();
     }
+
+    @Override
+    public ProfileEntity saveProfile(ProfileEntity profileEntity) {
+
+        return jpaProfileRepository.save(profileEntity);
+    }
 }

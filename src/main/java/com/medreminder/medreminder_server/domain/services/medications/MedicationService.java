@@ -10,10 +10,9 @@ import java.util.List;
 
 public interface MedicationService extends UseCase {
 
-   MedicationProfileResponse createMedication(CreateMedicationCommand cmd);
+   MedicationProfileResponse createMedicationProfile(CreateMedicationCommand cmd);
 
-   MedicationProfileResponse updateMedication(String medicationProfileId, UpdateMedicationCommand cmd);
+   MedicationProfileResponse updateMedicationProfile(String medicationProfileId, UpdateMedicationCommand cmd);
 
    List<ScheduleEventResponse> getMedicationScheduleEvents(String userId, String eventDate);
-
 }

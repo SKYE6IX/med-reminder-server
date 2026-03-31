@@ -43,11 +43,13 @@ public class ScheduleEventEntity {
     public ScheduleEventEntity(String id,
                                double dosage,
                                String status,
-                               LocalDateTime scheduleAt) {
+                               LocalDateTime scheduleAt,
+                               MedicationScheduleEntity medicationSchedule){
         this.id = id;
         this.dosage = dosage;
         this.status = status;
         this.scheduleAt = scheduleAt;
+        this.medicationSchedule = medicationSchedule;
     }
 
     public String getId() {
@@ -72,10 +74,6 @@ public class ScheduleEventEntity {
 
     public MedicationScheduleEntity getMedicationSchedule() {
         return medicationSchedule;
-    }
-
-    public void addMedicationSchedule(MedicationScheduleEntity medicationSchedule) {
-        this.medicationSchedule = medicationSchedule;
     }
 
     public void updateScheduleEvent(ScheduleEvent scheduleEvent) {

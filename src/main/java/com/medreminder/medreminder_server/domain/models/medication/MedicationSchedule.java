@@ -16,6 +16,7 @@ public class MedicationSchedule {
     private final LocalDateTime startDate;
     private LocalDateTime lastExpandedUntil;
     private final String timeZone;
+    private MedicationProfile medicationProfile;
     private final List<ScheduleEvent> scheduleEvents = new ArrayList<>();
 
     public MedicationSchedule(String id,
@@ -58,12 +59,12 @@ public class MedicationSchedule {
         return timeZone;
     }
 
-    public List<ScheduleEvent> getScheduleEvents() {
-        return scheduleEvents;
+    public MedicationProfile getMedicationProfile() {
+        return medicationProfile;
     }
 
-    public void addScheduleEvent(ScheduleEvent scheduleEvent) {
-        this.scheduleEvents.add(scheduleEvent);
+    public List<ScheduleEvent> getScheduleEvents() {
+        return scheduleEvents;
     }
 
     public void updateDoseQuantity(double doseQuantity) {
@@ -76,5 +77,14 @@ public class MedicationSchedule {
 
     public void updateStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
+    }
+
+    public void addScheduleEvent(ScheduleEvent scheduleEvent) {
+        this.scheduleEvents.add(scheduleEvent);
+        scheduleEvent.setMedicationSchedule(this);
+    }
+
+    public void addMedicationProfile(MedicationProfile medicationProfile) {
+        this.medicationProfile = medicationProfile;
     }
 }

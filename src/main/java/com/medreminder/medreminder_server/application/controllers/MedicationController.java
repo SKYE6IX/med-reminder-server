@@ -33,7 +33,7 @@ public class MedicationController {
     @PostMapping()
     public ResponseEntity<MedicationProfileResponse> createMedication(@RequestBody CreateMedicationCommand cmd) {
 
-        MedicationProfileResponse response = medicationService.createMedication(cmd);
+        MedicationProfileResponse response = medicationService.createMedicationProfile(cmd);
 
         return ResponseEntity.ok(response);
     }
@@ -42,7 +42,7 @@ public class MedicationController {
     public ResponseEntity<MedicationProfileResponse> updateMedication(@PathVariable String medicationProfileId,
                                                                       @RequestBody UpdateMedicationCommand cmd) {
 
-        var response = medicationService.updateMedication(medicationProfileId, cmd);
+        var response = medicationService.updateMedicationProfile(medicationProfileId, cmd);
 
         return ResponseEntity.ok(response);
 
@@ -52,7 +52,7 @@ public class MedicationController {
     public ResponseEntity<ScheduleEventResponse> updateScheduleEvent(@PathVariable String eventId,
                                                                      @RequestBody Map<String, String> eventBody) {
 
-        var response = scheduleEventService.updateScheduleEvent(eventId, eventBody);
+        var response = scheduleEventService.updateScheduleEvents(eventId, eventBody);
 
         return ResponseEntity.ok(response);
     }

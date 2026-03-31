@@ -6,16 +6,11 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Entity(name = "USERS")
@@ -57,11 +52,15 @@ public class UserEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @OrderBy("createdAt ASC")
     private List<ProfileEntity> profiles = new ArrayList<>();
 
     public UserEntity() {}
 
-    public UserEntity(String id, String email, String name, String hashPassword) {
+    public UserEntity(String id,
+                      String email,
+                      String name,
+                      String hashPassword) {
         this.id = id;
         this.email = email;
         this.name = name;
@@ -96,15 +95,15 @@ public class UserEntity {
         return createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
     public List<ProfileEntity> getProfiles() {
         return profiles;
     }
 
-    void syncWithDomain(User domain){
+    public List<RefreshTokenEntity> getRefreshTokens() {
+        return refreshTokens;
+    }
+
+    public void updateUserDetails(User domain){
         this.email = domain.getEmail();
         this.hashPassword = domain.getHashPassword();
         this.name = domain.getName();

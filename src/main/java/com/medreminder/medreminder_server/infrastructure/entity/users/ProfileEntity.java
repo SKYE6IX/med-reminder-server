@@ -36,7 +36,8 @@ public class ProfileEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<MedicationProfileEntity> medicationProfile = new ArrayList<>();
+    @OrderBy("createdAt ASC")
+    private final List<MedicationProfileEntity> medicationProfile = new ArrayList<>();
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -49,12 +50,22 @@ public class ProfileEntity {
     public ProfileEntity() {
     }
 
-    public ProfileEntity(String id, String name, String relation, boolean isSelf,
-                         UserEntity user) {
+    public ProfileEntity(String id,
+                         String name,
+                         String relation,
+                         boolean isSelf) {
         this.id = id;
         this.name = name;
         this.relation = relation;
         this.isSelf = isSelf;
+    }
+
+    public ProfileEntity(String id,
+                         String name,
+                         String relation,
+                         boolean isSelf,
+                         UserEntity user) {
+        this(id, name, relation, isSelf);
         this.user = user;
     }
 

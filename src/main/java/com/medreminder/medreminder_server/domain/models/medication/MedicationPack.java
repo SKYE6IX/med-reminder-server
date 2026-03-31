@@ -4,21 +4,12 @@ import java.time.LocalDateTime;
 
 public class MedicationPack {
 
-    private String id;
+    private final String id;
     private double totalQuantity;
     private double currentQuantity;
     private String notifyRule;
-    private LocalDateTime addedAt;
-
-    public MedicationPack(String id,
-                          double totalQuantity,
-                          String notifyRule,
-                          LocalDateTime addedAt) {
-        this.id = id;
-        this.totalQuantity = totalQuantity;
-        this.notifyRule = notifyRule;
-        this.addedAt = addedAt;
-    }
+    private final LocalDateTime addedAt;
+    private MedicationProfile medicationProfile;
 
     public MedicationPack(String id,
                           double totalQuantity,
@@ -50,5 +41,25 @@ public class MedicationPack {
 
     public LocalDateTime getAddedAt() {
         return addedAt;
+    }
+
+    public MedicationProfile getMedicationProfile() {
+        return medicationProfile;
+    }
+
+    public void updateTotalQuantity(double totalQuantity) {
+        this.totalQuantity = totalQuantity;
+    }
+
+    public void updateCurrentQuantity(double currentQuantity) {
+        this.currentQuantity = currentQuantity;
+    }
+
+    public void updateNotifyRule(String notifyRule) {
+        this.notifyRule = notifyRule;
+    }
+
+    public void addMedicationProfile(MedicationProfile medicationProfile) {
+        this.medicationProfile = medicationProfile;
     }
 }

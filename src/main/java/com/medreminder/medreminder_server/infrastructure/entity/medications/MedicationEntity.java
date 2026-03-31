@@ -45,10 +45,12 @@ public class MedicationEntity {
 
     public MedicationEntity(String id,
                             String name,
-                            String unitType) {
+                            String unitType,
+                            MedicationProfileEntity medicationProfile) {
         this.id = id;
         this.name = name;
         this.unitType = unitType;
+        this.medicationProfile = medicationProfile;
     }
 
     public String getId() {
@@ -67,12 +69,11 @@ public class MedicationEntity {
         return measurementUnit;
     }
 
-    public void addMedicationProfile(MedicationProfileEntity medicationProfile){
-        this.medicationProfile = medicationProfile;
+    public MedicationProfileEntity getMedicationProfile() {
+        return medicationProfile;
     }
 
-    public void addMeasurementUnit(MeasurementUnitEntity measurementUnit){
+    public void setMeasurementUnit(MeasurementUnitEntity measurementUnit) {
         this.measurementUnit = measurementUnit;
-        measurementUnit.addMedication(this);
     }
 }

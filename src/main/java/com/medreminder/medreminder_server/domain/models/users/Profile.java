@@ -46,18 +46,18 @@ public class Profile {
         return medicationProfiles;
     }
 
-    void setUser(User user) {
+    public void addUser(User user) {
         this.user = user;
     }
 
     public void addMedicationProfile(MedicationProfile medicationProfile) {
         medicationProfiles.add(medicationProfile);
-        medicationProfile.setProfile(this);
+        medicationProfile.addProfile(this);
     }
 
     public void removeMedicationProfile(MedicationProfile medicationProfile) {
         medicationProfiles.remove(medicationProfile);
-        medicationProfile.setProfile(null);
+        medicationProfile.addProfile(null);
     }
 
     @Override

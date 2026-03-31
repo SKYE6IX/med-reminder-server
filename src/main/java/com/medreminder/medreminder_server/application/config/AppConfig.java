@@ -38,9 +38,11 @@ public class AppConfig {
     }
 
     @Bean
-    UserService userService(UserRepository userRepository,TransactionInterceptor txInterceptor) {
+    UserService userService(UserRepository userRepository,
+                            UserMapper userMapper,
+                            TransactionInterceptor txInterceptor ) {
 
-        UserService userService = new UserServiceImpl(userRepository);
+        UserService userService = new UserServiceImpl(userRepository, userMapper);
 
         return createProxyFactory(userService,UserService.class,txInterceptor);
     }
@@ -70,12 +72,15 @@ public class AppConfig {
                                         ProfileRepository profileRepository,
                                         MedicationMapper medicationMapper,
                                         ScheduleEventService scheduleEventService,
+                                        UserMapper userMapper,
                                         TransactionInterceptor txInterceptor) {
 
-        MedicationService medicationService = new MedicationServiceImpl(medicationRepository,
+        MedicationService medicationService = new MedicationServiceImpl(
+                medicationRepository,
                 profileRepository,
-                medicationMapper, scheduleEventService);
-
+                medicationMapper,
+                scheduleEventService,
+                userMapper);
         return createProxyFactory(medicationService, MedicationService.class, txInterceptor);
     }
 
@@ -139,5 +144,4 @@ public class AppConfig {
         return serviceInterface.cast(proxyFactory.getProxy());
 
     }
-
 }

@@ -5,16 +5,15 @@ public class Medication {
     private final String  id;
     private final String name;
     private final Unit unitType;
-    private final MeasurementUnit measurementUnit;
+    private MeasurementUnit measurementUnit;
+    private MedicationProfile medicationProfile;
 
     public Medication(String id,
                       String name,
-                      Unit unitType,
-                      MeasurementUnit measurementUnit) {
+                      Unit unitType) {
         this.id = id;
         this.name = name;
         this.unitType = unitType;
-        this.measurementUnit = measurementUnit;
     }
 
     public String getId() {
@@ -33,4 +32,16 @@ public class Medication {
         return measurementUnit;
     }
 
+    public MedicationProfile getMedicationProfile() {
+        return medicationProfile;
+    }
+
+    public void addMeasurementUnit(MeasurementUnit measurementUnit){
+        this.measurementUnit = measurementUnit;
+        measurementUnit.addMedication(this);
+    }
+
+    public void addMedicationProfile(MedicationProfile medicationProfile){
+        this.medicationProfile = medicationProfile;
+    }
 }
