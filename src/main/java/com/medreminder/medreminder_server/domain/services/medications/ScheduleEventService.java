@@ -11,11 +11,10 @@ public interface ScheduleEventService extends UseCase {
 
     public void createScheduleEvents(MedicationSchedule schedule);
 
-    public ScheduleEventResponse updateScheduleEvents(String scheduleEventId, Map<String, String> eventBody);
-
     public void updateScheduleEventsRules(MedicationSchedule schedule);
 
     public void updateScheduleEventsDosage(MedicationSchedule schedule);
 
+    public ScheduleEventResponse updateScheduleEvents(String scheduleEventId, Map<String, String> eventBody);
 }
 

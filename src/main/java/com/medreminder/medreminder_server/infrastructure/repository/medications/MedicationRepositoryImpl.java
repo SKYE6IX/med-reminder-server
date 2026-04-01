@@ -24,8 +24,8 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     }
 
     @Override
-    public MedicationProfileEntity saveMedicationProfile(MedicationProfileEntity medicationProfileEntity) {
-        return jpaMedicationProfileRepository.save(medicationProfileEntity);
+    public void saveMedicationProfile(MedicationProfileEntity medicationProfileEntity) {
+        jpaMedicationProfileRepository.save(medicationProfileEntity);
     }
 
     @Override

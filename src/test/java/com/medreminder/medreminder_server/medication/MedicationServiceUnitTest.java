@@ -154,4 +154,26 @@ public class MedicationServiceUnitTest {
         assertThat(response).isNotNull();
         assertThat(response.getSchedule().dosage()).isEqualTo(5.5);
     }
+
+    @Test
+    void shouldDeleteMedicationProfile_thenSaveIt(){
+
+        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId());
+        MedicationProfileEntity stubMedicationProfileEntity =
+                MedicationStubFactory.createMedicationProfileEntity(cmd, medicationMapper);
+
+        when(medicationRepository.getMedicationProfileById(any(String.class)))
+                .thenReturn(stubMedicationProfileEntity);
+
+        ProfileEntity ownerProfileEntity = stubMedicationProfileEntity.getProfile();
+
+        assertThat(ownerProfileEntity.getMedicationProfile().size()).isEqualTo(1);
+
+        medicationService.deleteMedicationProfile(stubMedicationProfileEntity.getId());
+
+        verify(profileRepository).saveProfile(any(ProfileEntity.class));
+
+        assertThat(ownerProfileEntity.getMedicationProfile().size()).isEqualTo(0);
+    }
 }

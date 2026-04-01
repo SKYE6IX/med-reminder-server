@@ -156,6 +156,40 @@ public class MedicationServiceImpl implements MedicationService {
     }
 
     @Override
+    public void deleteMedicationProfile(String medicationProfileId) {
+        MedicationProfileEntity managedMedicationProfile =
+                medicationRepository.getMedicationProfileById(medicationProfileId);
+
+        if (managedMedicationProfile == null) {
+            return;
+        }
+
+        Profile domainProfile = userMapper
+                .toDomain(managedMedicationProfile.getProfile());
+
+        List<MedicationProfile> allMedicationProfiles = managedMedicationProfile
+                .getProfile()
+                .getMedicationProfile()
+                .stream()
+                .map(medicationMapper::toDomain)
+                .toList();
+
+        allMedicationProfiles.forEach(domainProfile::addMedicationProfile);
+
+        MedicationProfile toDelete = allMedicationProfiles
+                .stream()
+                .filter(mp -> mp.getId().equals(medicationProfileId))
+                .findFirst()
+                .orElse(null);
+
+        domainProfile.removeMedicationProfile(toDelete);
+
+        syncMedicationProfiles(domainProfile.getMedicationProfiles(), managedMedicationProfile.getProfile());
+
+        profileRepository.saveProfile(managedMedicationProfile.getProfile());
+    }
+
+    @Override
     public List<ScheduleEventResponse> getMedicationScheduleEvents(String userId, String eventDate) {
 
         LocalDateTime startOfDay = LocalDate.parse(eventDate).atStartOfDay();
@@ -181,7 +215,8 @@ public class MedicationServiceImpl implements MedicationService {
                             profile.getName(),
                             profile.getRelation(), profile.isSelf()));
 
-                    ser.setTakenAt(event.getTakenAt().toString());
+                    if(event.getTakenAt() != null) {ser.setTakenAt(event.getTakenAt().toString());}
+
                     return ser;
                 }).toList();
     }
@@ -266,10 +301,10 @@ public class MedicationServiceImpl implements MedicationService {
                                         ProfileEntity managedProfile) {
 
         Map<String, MedicationProfileEntity> existingMedicationProfiles = new HashMap<>();
+        List<MedicationProfileEntity> syncedMedicationProfiles = new ArrayList<>();
 
 //        Only add med profiles if the profile has the medications
         if(!managedProfile.getMedicationProfile().isEmpty()){
-
             var toMaps = managedProfile.getMedicationProfile()
                     .stream()
                     .collect(Collectors.toMap(MedicationProfileEntity::getId,
@@ -277,15 +312,21 @@ public class MedicationServiceImpl implements MedicationService {
             existingMedicationProfiles.putAll(toMaps);
         }
 
-        List<MedicationProfileEntity> syncedMedicationProfiles = domainMedicationProfiles
-                .stream()
-                .map(medProfile ->
-                        existingMedicationProfiles
-                                .getOrDefault(medProfile.getId(),
-                                        medicationMapper.toEntity(medProfile, managedProfile)))
-                .toList();
+//        We check if the domain medication profile is empty, which mean user hasn't got
+//        anymore medication profile.
+        if(domainMedicationProfiles.isEmpty()) {
+//            If the list is empty, we need to make sure that the managed also is.
+            managedProfile.getMedicationProfile().clear();
+        } else {
+            var list = domainMedicationProfiles.stream()
+                    .map(medProfile -> existingMedicationProfiles
+                            .getOrDefault(medProfile.getId(),
+                                    medicationMapper.toEntity(medProfile, managedProfile)))
+                    .toList();
+            syncedMedicationProfiles.addAll(list);
 
-        managedProfile.getMedicationProfile().clear();
-        managedProfile.getMedicationProfile().addAll(syncedMedicationProfiles);
+            managedProfile.getMedicationProfile().clear();
+            managedProfile.getMedicationProfile().addAll(syncedMedicationProfiles);
+        }
     }
 }

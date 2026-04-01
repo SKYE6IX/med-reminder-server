@@ -14,5 +14,7 @@ public interface MedicationService extends UseCase {
 
    MedicationProfileResponse updateMedicationProfile(String medicationProfileId, UpdateMedicationCommand cmd);
 
+   void deleteMedicationProfile(String medicationProfileId);
+
    List<ScheduleEventResponse> getMedicationScheduleEvents(String userId, String eventDate);
 }

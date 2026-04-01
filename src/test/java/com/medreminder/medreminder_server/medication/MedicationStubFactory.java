@@ -76,15 +76,18 @@ public class MedicationStubFactory {
 
         UUID medicationId = UUID.randomUUID();
 
+        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+
         MedicationProfileEntity mpe = new MedicationProfileEntity(
                 medicationId.toString(),
                 true,
                 cmd.getMedicationNote(),
-                createProfileEntity()
+                snubProfileEntity
         );
         mpe.setMedication(medicationMapper.toEntity(createMedication(cmd),mpe));
         mpe.setMedicationSchedule(medicationMapper.toEntity(createMedicationSchedule(cmd), mpe));
 
+        snubProfileEntity.getMedicationProfile().add(mpe);
         return mpe;
     }
 

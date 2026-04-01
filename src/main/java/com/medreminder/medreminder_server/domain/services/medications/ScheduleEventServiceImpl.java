@@ -116,28 +116,28 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
     @Override
     public ScheduleEventResponse updateScheduleEvents(String scheduleEventId, Map<String, String> eventBody) {
-//        ScheduleEventEntity managedScheduleEvent = medicationRepository.getScheduleEventById(scheduleEventId);
-//
-//        ScheduleEvent domainScheduleEvent = medicationMapper.toDomain(managedScheduleEvent);
-//
-//        MedicationScheduleEntity managedSchedule = managedScheduleEvent.getMedicationSchedule();
-//
-//        domainScheduleEvent.updateStatus(eventBody.get(("action")));
-//
-//        if(domainScheduleEvent.getStatus().equals("TAKEN")){
-//            final LocalDateTime takenAt = LocalDateTime.now()
-//                    .atZone(ZoneId.of(managedSchedule.getTimeZone()))
-//                    .toLocalDateTime();
-//            domainScheduleEvent.updateTakenAt(takenAt);
-//        }
-//
-//        managedScheduleEvent.updateScheduleEvent(domainScheduleEvent);
-//
-//        medicationRepository.saveScheduleEvent(managedScheduleEvent);
-//
-//        return getScheduleEventResponse(managedScheduleEvent);
 
-        return  null;
+        ScheduleEventEntity managedScheduleEvent = medicationRepository.getScheduleEventById(scheduleEventId);
+
+        ScheduleEvent domainScheduleEvent = medicationMapper.toDomain(managedScheduleEvent);
+
+        domainScheduleEvent.updateStatus(eventBody.get(("action")));
+
+        if(domainScheduleEvent.getStatus().equals("TAKEN")){
+            final LocalDateTime takenAt = LocalDateTime.now()
+                    .atZone(ZoneId.of(managedScheduleEvent
+                            .getMedicationSchedule()
+                            .getTimeZone()))
+                    .toLocalDateTime();
+
+            domainScheduleEvent.updateTakenAt(takenAt);
+        }
+
+        managedScheduleEvent.updateScheduleEvent(domainScheduleEvent);
+
+        medicationRepository.saveScheduleEvent(managedScheduleEvent);
+
+        return getScheduleEventResponse(managedScheduleEvent);
     }
 
     private static @NonNull ScheduleEventResponse getScheduleEventResponse(ScheduleEventEntity managedScheduleEvent) {
@@ -161,7 +161,10 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 profile.getName(),
                 profile.getRelation(), profile.isSelf()));
 
-        response.setTakenAt(managedScheduleEvent.getTakenAt().toString());
+        if(managedScheduleEvent.getTakenAt() != null){
+            response.setTakenAt(managedScheduleEvent.getTakenAt().toString());
+        }
+
         return response;
     }
 

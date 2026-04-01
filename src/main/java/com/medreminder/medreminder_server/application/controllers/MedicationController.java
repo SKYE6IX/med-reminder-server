@@ -31,7 +31,7 @@ public class MedicationController {
     }
 
     @PostMapping()
-    public ResponseEntity<MedicationProfileResponse> createMedication(@RequestBody CreateMedicationCommand cmd) {
+    public ResponseEntity<MedicationProfileResponse> createMedicationProfile(@RequestBody CreateMedicationCommand cmd) {
 
         MedicationProfileResponse response = medicationService.createMedicationProfile(cmd);
 
@@ -39,13 +39,21 @@ public class MedicationController {
     }
 
     @PutMapping(value = "/{medicationProfileId}")
-    public ResponseEntity<MedicationProfileResponse> updateMedication(@PathVariable String medicationProfileId,
+    public ResponseEntity<MedicationProfileResponse> updateMedicationProfile(@PathVariable String medicationProfileId,
                                                                       @RequestBody UpdateMedicationCommand cmd) {
 
         var response = medicationService.updateMedicationProfile(medicationProfileId, cmd);
 
         return ResponseEntity.ok(response);
 
+    }
+
+    @DeleteMapping(value = "/{medicationProfileId}")
+    public ResponseEntity<?> deleteMedicationProfile(@PathVariable String medicationProfileId) {
+
+        medicationService.deleteMedicationProfile(medicationProfileId);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = "/schedules/event/{eventId}")
@@ -58,8 +66,8 @@ public class MedicationController {
     }
 
     @GetMapping(value = "/schedules/event")
-    public ResponseEntity<List<ScheduleEventResponse>> getMedicationsSchedules(@AuthenticationPrincipal UserDetails userDetails,
-                                                        @RequestParam String eventDate) {
+    public ResponseEntity<List<ScheduleEventResponse>> getMedicationsScheduleEvents(@AuthenticationPrincipal UserDetails userDetails,
+                                                                                    @RequestParam String eventDate) {
 
         UserPrincipal principal = (UserPrincipal) userDetails;
 

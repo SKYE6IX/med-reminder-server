@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MedicationRepository {
 
-    MedicationProfileEntity saveMedicationProfile(MedicationProfileEntity medicationProfileEntity);
+    void saveMedicationProfile(MedicationProfileEntity medicationProfileEntity);
 
     void saveMedicationSchedule(MedicationScheduleEntity medicationScheduleEntity);
 
