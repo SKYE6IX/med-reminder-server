@@ -12,6 +12,7 @@ import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.domain.services.users.UserService;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -57,6 +58,15 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
 
         var principal = getPrincipal(userDetails);
+
+        UserResponse userEntity = userService.getUserById(principal.getId());
+
+        if( userEntity == null ){
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("User not found!");
+        }
 
         userService.deleteUser(principal.getId());
 

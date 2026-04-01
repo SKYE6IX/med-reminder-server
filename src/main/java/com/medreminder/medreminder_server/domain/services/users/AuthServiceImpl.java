@@ -5,7 +5,7 @@ import com.medreminder.medreminder_server.application.dtos.user.AuthResponse;
 import com.medreminder.medreminder_server.application.dtos.user.LoginRequest;
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
-import com.medreminder.medreminder_server.application.security.UserAlreadyExistsException;
+import com.medreminder.medreminder_server.application.exceptions.UserAlreadyExistsException;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.infrastructure.entity.users.RefreshTokenEntity;
@@ -16,7 +16,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.nio.charset.StandardCharsets;

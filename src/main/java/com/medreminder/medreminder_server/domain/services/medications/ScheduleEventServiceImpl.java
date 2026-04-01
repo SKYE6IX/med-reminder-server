@@ -3,6 +3,7 @@ package com.medreminder.medreminder_server.domain.services.medications;
 
 import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
+import com.medreminder.medreminder_server.application.exceptions.ResourceNotFoundException;
 import com.medreminder.medreminder_server.domain.models.medication.MedicationSchedule;
 import com.medreminder.medreminder_server.domain.models.medication.ScheduleEvent;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationEntity;
@@ -118,6 +119,10 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
     public ScheduleEventResponse updateScheduleEvents(String scheduleEventId, Map<String, String> eventBody) {
 
         ScheduleEventEntity managedScheduleEvent = medicationRepository.getScheduleEventById(scheduleEventId);
+
+        if(managedScheduleEvent == null) {
+            throw new ResourceNotFoundException("Event with id " + scheduleEventId + " not found");
+        }
 
         ScheduleEvent domainScheduleEvent = medicationMapper.toDomain(managedScheduleEvent);
 

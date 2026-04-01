@@ -1,4 +1,4 @@
-package com.medreminder.medreminder_server.application.security;
+package com.medreminder.medreminder_server.application.exceptions;
 
 public class UserAlreadyExistsException extends RuntimeException {
 

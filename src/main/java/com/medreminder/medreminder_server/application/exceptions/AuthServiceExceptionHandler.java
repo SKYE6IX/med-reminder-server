@@ -1,4 +1,4 @@
-package com.medreminder.medreminder_server.application.security;
+package com.medreminder.medreminder_server.application.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Map;
 
 @RestControllerAdvice
-public class AuthExceptionHandler {
+public class AuthServiceExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<?> handleBadCredentials(BadCredentialsException e) {

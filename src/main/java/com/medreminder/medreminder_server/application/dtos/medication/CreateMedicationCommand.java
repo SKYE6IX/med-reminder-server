@@ -1,7 +1,13 @@
 package com.medreminder.medreminder_server.application.dtos.medication;
 
+import com.medreminder.medreminder_server.application.exceptions.BadRequestException;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.annotation.JsonPOJOBuilder;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @JsonDeserialize(builder = CreateMedicationCommand.Builder.class)
 public class CreateMedicationCommand {
@@ -98,9 +104,37 @@ public class CreateMedicationCommand {
             this.medicationPack = medicationPack;
             return this;
         }
-
         public CreateMedicationCommand build() {
+            validate();
             return new CreateMedicationCommand(this);
+        }
+
+        private void validate() {
+            Set<String> missing = new HashSet<>();
+
+            if (profileId == null || profileId.isEmpty()) {
+                missing.add("profileId");
+            }
+
+            if(medicationName == null || medicationName.isEmpty()) {
+                missing.add("medicationName");
+            }
+
+            if(medicationUnit == null || medicationUnit.isEmpty()) {
+                missing.add("medicationUnit");
+            }
+
+            if(medicationMeasurement == null || medicationMeasurement.isEmpty()) {
+                missing.add("medicationMeasurement");
+            }
+
+            if(schedule == null) {
+                missing.add("schedule");
+            }
+
+            if (!missing.isEmpty()) {
+                throw new BadRequestException("Missing required parameters");
+            }
         }
     }
 }

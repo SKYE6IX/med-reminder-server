@@ -2,6 +2,8 @@ package com.medreminder.medreminder_server.domain.services.medications;
 
 import com.medreminder.medreminder_server.application.dtos.medication.*;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
+import com.medreminder.medreminder_server.application.exceptions.BadRequestException;
+import com.medreminder.medreminder_server.application.exceptions.ResourceNotFoundException;
 import com.medreminder.medreminder_server.domain.models.medication.*;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.services.users.ProfileRepository;
@@ -84,7 +86,7 @@ public class MedicationServiceImpl implements MedicationService {
                 medicationRepository.getMedicationProfileById(medicationProfileId);
 
         if (managedMedicationProfile == null) {
-            return null;
+          throw new ResourceNotFoundException("Medication Profile with id " + medicationProfileId + " not found");
         }
 
         MedicationProfile domainMedicationProfile = medicationMapper
@@ -161,7 +163,7 @@ public class MedicationServiceImpl implements MedicationService {
                 medicationRepository.getMedicationProfileById(medicationProfileId);
 
         if (managedMedicationProfile == null) {
-            return;
+            throw new ResourceNotFoundException("Medication Profile with id " + medicationProfileId + " not found");
         }
 
         Profile domainProfile = userMapper
