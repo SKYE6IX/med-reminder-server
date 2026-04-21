@@ -237,12 +237,12 @@ public class MedicationServiceImpl implements MedicationService {
     }
 
     private MedicationSchedule createMedicationSchedule(CreateMedSchedule schedule) {
-        DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         return new MedicationSchedule(null,
                 schedule.dosage(),
                 schedule.recurrenceRule(),
-                LocalDateTime.parse(schedule.startDate(), dtf),
+                LocalDate.parse(schedule.startDate(), formatter),
                 schedule.timeZone());
     }
 

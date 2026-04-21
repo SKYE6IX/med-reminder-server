@@ -3,13 +3,12 @@ package com.medreminder.medreminder_server.application.controllers;
 import com.medreminder.medreminder_server.application.dtos.user.AuthResponse;
 import com.medreminder.medreminder_server.application.dtos.user.LoginRequest;
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
+import com.medreminder.medreminder_server.application.security.UserPrincipal;
 import com.medreminder.medreminder_server.domain.services.users.AuthService;
-import com.medreminder.medreminder_server.domain.services.users.AuthServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Map;
 
 @RestController
@@ -36,6 +35,16 @@ public class AuthController {
         AuthResponse response = authService.loginUserWithEmail(loginRequest);
 
         return  ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/logout")
+    ResponseEntity<?> logout(@AuthenticationPrincipal UserDetails userDetails) {
+
+        UserPrincipal userPrincipal = (UserPrincipal) userDetails;
+
+        authService.logoutUser(userPrincipal);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping(value = "/refresh")

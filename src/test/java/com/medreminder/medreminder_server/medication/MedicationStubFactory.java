@@ -8,6 +8,7 @@ import com.medreminder.medreminder_server.infrastructure.entity.medications.Medi
 import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -53,16 +54,17 @@ public class MedicationStubFactory {
     }
 
     public static MedicationSchedule createMedicationSchedule(CreateMedicationCommand cmd) {
-        final DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         MedicationSchedule medicationSchedule = new MedicationSchedule(
                 null,
                 cmd.getSchedule().dosage(),
                 cmd.getSchedule().recurrenceRule(),
-                LocalDateTime.parse(cmd.getSchedule().startDate(), dtf),
+                LocalDate.parse(cmd.getSchedule().startDate(), formatter),
                 cmd.getSchedule().timeZone()
         );
-        medicationSchedule.updateStartTime(LocalDateTime.parse(cmd.getSchedule().startDate(), dtf));
+
+        medicationSchedule.updateStartTime(LocalDateTime.now());
 
         createScheduleEvents().forEach(medicationSchedule::addScheduleEvent);
 
@@ -96,7 +98,7 @@ public class MedicationStubFactory {
         return new CreateMedSchedule(
                 1.2,
                 "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0",
-                "2024-07-15T15:00:00",
+                "15.06.2026",
                 "Europe/Moscow"
         );
     }

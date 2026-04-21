@@ -75,7 +75,7 @@ public class MedicationProfile {
 
     public void addMedicationSchedule(MedicationSchedule medicationSchedule) {
         this.medicationSchedule = medicationSchedule;
-        medication.addMedicationProfile(this);
+        medicationSchedule.addMedicationProfile(this);
     }
 
     public void addMedicationPack(MedicationPack medicationPack) {

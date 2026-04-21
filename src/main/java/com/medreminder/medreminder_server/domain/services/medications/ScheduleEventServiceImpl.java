@@ -22,6 +22,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
+//TODO:
+// Update the schedule creation and filter out when the generate schedules
+// time and date and either lower or equal to the current time and date when the
+// user is creating it. ✅
+
 public class ScheduleEventServiceImpl implements ScheduleEventService {
 
     private final MedicationRepository medicationRepository;
@@ -36,15 +41,20 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
     @Override
     public void createScheduleEvents(MedicationSchedule schedule) {
 
-        List<LocalDateTime> dateTimes = generateSchedulesDateTime(schedule, 7);
+        LocalDateTime now = LocalDateTime.now(ZoneId.of(schedule.getTimeZone()));
+
+        List<LocalDateTime> dateTimes =
+                generateSchedulesDateTime(schedule, 7)
+                .stream()
+                .filter(dateTime -> dateTime.isAfter(now))
+                .sorted()
+                .toList();
 
         dateTimes.stream()
-                .sorted()
                 .findFirst()
                 .ifPresent(schedule::updateStartTime);
 
         dateTimes.stream()
-                .sorted()
                 .map(date -> {
                     return new ScheduleEvent(null,
                             schedule.getDoseQuantity(),
@@ -52,7 +62,6 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 })
                 .forEach(schedule::addScheduleEvent);
     }
-
 
     @Override
     public void updateScheduleEventsRules(MedicationSchedule domainSchedule) {
@@ -177,9 +186,12 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                                                           int expansionWindowDays) {
         ZoneId zoneId = ZoneId.of(schedule.getTimeZone());
 
+        LocalDateTime startDateTime  = schedule.getStartDate()
+                .atTime(7,0).atZone(zoneId).toLocalDateTime();
+
         LocalDateTime periodStart = schedule.getLastExpandedUntil() != null ?
                 schedule.getLastExpandedUntil().atZone(zoneId).toLocalDateTime()
-                : schedule.getStartDate().atZone(zoneId).toLocalDateTime();
+                : startDateTime;
 
         LocalDateTime windowStart = periodStart.toLocalDate().atStartOfDay();
 

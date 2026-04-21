@@ -28,7 +28,7 @@ public class MedicationScheduleEntity {
     private LocalDateTime startTime;
 
     @Column(name = "start_date")
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @Column(name = "last_expanded_until")
     private LocalDateTime lastExpandedUntil;
@@ -63,7 +63,7 @@ public class MedicationScheduleEntity {
                                     double doseQuantity,
                                     String recurrenceRule,
                                     LocalDateTime startTime,
-                                    LocalDateTime startDate,
+                                    LocalDate startDate,
                                     String timeZone,
                                     MedicationProfileEntity medicationProfile) {
         this.id = id;
@@ -91,7 +91,7 @@ public class MedicationScheduleEntity {
         return startTime;
     }
 
-    public LocalDateTime getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 

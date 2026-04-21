@@ -151,6 +151,13 @@ public class AuthServiceImpl implements AuthService{
         return new AuthResponse(userEntity.getId(), userEntity.getEmail(), accessToken, refreshToken);
     }
 
+    @Override
+    public void logoutUser(UserPrincipal userPrincipal) {
+        jpaRefreshTokenRepository
+                .findByUserIdAndRevokedFalse(userPrincipal.getId())
+                .ifPresent(this::revokeRefreshToken);
+    }
+
     private RefreshTokenEntity createRefreshTokenEntity(String rawToken, UserEntity userEntity) {
         String hashToken = hashRefreshToken(rawToken);;
 
