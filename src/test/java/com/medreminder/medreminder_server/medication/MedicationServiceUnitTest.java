@@ -82,7 +82,6 @@ public class MedicationServiceUnitTest {
         assertThat(response.getMedicationName()).isEqualTo(cmd.getMedicationName());
         assertThat(response.getMedicationUnit()).isEqualTo(cmd.getMedicationUnit());
         assertThat(response.getSchedule().dosage()).isEqualTo(1.2);
-//        assertThat(response.getSchedule().starTime()).isEqualTo("2024-07-15T08:00");
     }
 
     @Test

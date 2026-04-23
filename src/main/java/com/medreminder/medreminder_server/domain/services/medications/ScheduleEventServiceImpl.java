@@ -22,11 +22,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
-//TODO:
-// Update the schedule creation and filter out when the generate schedules
-// time and date and either lower or equal to the current time and date when the
-// user is creating it. ✅
-
 public class ScheduleEventServiceImpl implements ScheduleEventService {
 
     private final MedicationRepository medicationRepository;
@@ -186,7 +181,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                                                           int expansionWindowDays) {
         ZoneId zoneId = ZoneId.of(schedule.getTimeZone());
 
-        LocalDateTime startDateTime  = schedule.getStartDate()
+        LocalDateTime startDateTime = schedule.getStartDate()
                 .atTime(7,0).atZone(zoneId).toLocalDateTime();
 
         LocalDateTime periodStart = schedule.getLastExpandedUntil() != null ?

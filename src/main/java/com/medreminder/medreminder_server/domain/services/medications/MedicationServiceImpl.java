@@ -51,8 +51,20 @@ public class MedicationServiceImpl implements MedicationService {
             return null;
         }
 
-        Profile domainProfile = userMapper.toDomain(managedProfileEntity);
+        List<MedicationProfileEntity> mpe = managedProfileEntity.getMedicationProfile();
 
+//        Convert profile entity to domain, and add the medication profile into it
+        Profile domainProfile = userMapper.toDomain(managedProfileEntity);
+//        We populate the domainProfile with an existing medprofiles if
+//        they exist
+        if (!mpe.isEmpty()){
+            mpe.stream()
+                    .map(medicationMapper::toDomain)
+                    .forEach(domainProfile::addMedicationProfile);
+        }
+
+
+//        Start Creating New Profile
         MedicationProfile medicationProfile = new MedicationProfile(null,
                 true, cmd.getMedicationNote());
 
@@ -303,9 +315,11 @@ public class MedicationServiceImpl implements MedicationService {
                                         ProfileEntity managedProfile) {
 
         Map<String, MedicationProfileEntity> existingMedicationProfiles = new HashMap<>();
+
         List<MedicationProfileEntity> syncedMedicationProfiles = new ArrayList<>();
 
-//        Only add med profiles if the profile has the medications
+//      We only add medicationProfiles into the existingMedicationProfiles
+//      Only if user has an existing one.
         if(!managedProfile.getMedicationProfile().isEmpty()){
             var toMaps = managedProfile.getMedicationProfile()
                     .stream()
@@ -315,19 +329,23 @@ public class MedicationServiceImpl implements MedicationService {
         }
 
 //        We check if the domain medication profile is empty, which mean user hasn't got
-//        anymore medication profile.
+//        anymore medication profile. This is the case for when user delete their medication
+//        profile.
         if(domainMedicationProfiles.isEmpty()) {
 //            If the list is empty, we need to make sure that the managed also is.
             managedProfile.getMedicationProfile().clear();
         } else {
-            var list = domainMedicationProfiles.stream()
+            var list = domainMedicationProfiles
+                    .stream()
                     .map(medProfile -> existingMedicationProfiles
                             .getOrDefault(medProfile.getId(),
                                     medicationMapper.toEntity(medProfile, managedProfile)))
                     .toList();
+
             syncedMedicationProfiles.addAll(list);
 
             managedProfile.getMedicationProfile().clear();
+
             managedProfile.getMedicationProfile().addAll(syncedMedicationProfiles);
         }
     }
