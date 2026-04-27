@@ -25,14 +25,14 @@ public class MedicationStubFactory {
         return new ProfileEntity(profileId.toString(), "test profile", "BROTHER", true);
     }
 
-    public static CreateMedicationCommand createMedicationCommand(String profileId) {
+    public static CreateMedicationCommand createMedicationCommand(String profileId, String rrule) {
         return new CreateMedicationCommand.Builder()
                 .profileId(profileId)
                 .medicationName("Paracetamol")
                 .medicationUnit("TABLET")
                 .medicationMeasurement("CAPSULE")
                 .medicationNote("Take on time")
-                .schedule(createMedSchedule())
+                .schedule(createMedSchedule(rrule))
                 .medicationPack(null)
                 .build();
     }
@@ -86,6 +86,7 @@ public class MedicationStubFactory {
                 cmd.getMedicationNote(),
                 snubProfileEntity
         );
+
         mpe.setMedication(medicationMapper.toEntity(createMedication(cmd),mpe));
         mpe.setMedicationSchedule(medicationMapper.toEntity(createMedicationSchedule(cmd), mpe));
 
@@ -93,11 +94,11 @@ public class MedicationStubFactory {
         return mpe;
     }
 
-    private static CreateMedSchedule createMedSchedule() {
+    private static CreateMedSchedule createMedSchedule(String rrule) {
 
         return new CreateMedSchedule(
                 1.2,
-                "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0",
+                rrule,
                 "15.06.2026",
                 "Europe/Moscow"
         );

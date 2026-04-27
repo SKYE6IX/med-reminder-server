@@ -182,13 +182,11 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         ZoneId zoneId = ZoneId.of(schedule.getTimeZone());
 
         LocalDateTime startDateTime = schedule.getStartDate()
-                .atTime(7,0).atZone(zoneId).toLocalDateTime();
+                .atStartOfDay().atZone(zoneId).toLocalDateTime();
 
-        LocalDateTime periodStart = schedule.getLastExpandedUntil() != null ?
-                schedule.getLastExpandedUntil().atZone(zoneId).toLocalDateTime()
+        LocalDateTime windowStart = schedule.getLastExpandedUntil() != null ?
+                schedule.getLastExpandedUntil().toLocalDate().atStartOfDay().atZone(zoneId).toLocalDateTime()
                 : startDateTime;
-
-        LocalDateTime windowStart = periodStart.toLocalDate().atStartOfDay();
 
         LocalDateTime windowEnd = windowStart.plusDays(expansionWindowDays - 1)
                 .toLocalDate()
