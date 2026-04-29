@@ -76,6 +76,7 @@ public class UserMapper {
                 .toList();
 
         user.getProfiles().addAll(profiles);
+
         return user;
     }
 

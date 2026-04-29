@@ -118,9 +118,9 @@ public class User  {
         this.email = newEmail;
     }
 
-    private void updatePassword(String newPassword) {
+    public void updatePassword(String newPassword) {
         if( newPassword == null || newPassword.isEmpty()) {
-            throw new IllegalArgumentException("Password cannot be empty");
+            throw new IllegalArgumentException("Hash Password cannot be empty!");
         }
         this.hashPassword = newPassword;
     }

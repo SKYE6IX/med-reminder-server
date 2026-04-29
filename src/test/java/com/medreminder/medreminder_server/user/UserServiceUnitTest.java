@@ -8,7 +8,6 @@ import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.services.users.UserServiceImpl;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -164,4 +163,6 @@ public class UserServiceUnitTest {
 
         assertThat(userEntity.getProfiles()).isEmpty();
     }
+
+
 }

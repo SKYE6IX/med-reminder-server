@@ -14,6 +14,8 @@ public interface AuthService extends UseCase {
 
     AuthResponse refreshToken(String token);
 
+    AuthResponse resetPassword(String userId, String oldPassword, String newPassword);
+
     void logoutUser(UserPrincipal userPrincipal);
 }
 

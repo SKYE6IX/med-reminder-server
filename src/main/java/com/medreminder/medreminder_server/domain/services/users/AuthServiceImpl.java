@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.nio.charset.StandardCharsets;
@@ -149,6 +150,45 @@ public class AuthServiceImpl implements AuthService{
         jpaRefreshTokenRepository.save(refreshTokenEntity);
 
         return new AuthResponse(userEntity.getId(), userEntity.getEmail(), accessToken, refreshToken);
+    }
+
+    @Override
+    public AuthResponse resetPassword(String userId, String oldPassword, String newPassword) {
+
+        UserEntity existingUser = userRepository.findUserById(userId).orElse(null);
+
+        if (existingUser == null) {
+            throw new UsernameNotFoundException("User not found!");
+        }
+
+        User domainUser = userMapper.toDomain(existingUser);
+
+        boolean passwordMatch = passwordEncoder.matches(oldPassword,domainUser.getHashPassword());
+
+        if (!passwordMatch) {
+            throw new BadCredentialsException("Invalid old password!");
+        }
+
+        String newPasswordHash = passwordEncoder.encode(newPassword);
+
+        domainUser.updatePassword(newPasswordHash);
+
+        existingUser.syncUserData(domainUser);
+
+        // Revoked the existing token
+        jpaRefreshTokenRepository
+                .findByUserIdAndRevokedFalse(domainUser.getId())
+                .ifPresent(this::revokeRefreshToken);
+
+        String accessToken = jwtUtil.generateToken(domainUser.getEmail(), domainUser.getId());
+        String refreshToken = generateRandomToken();
+
+        RefreshTokenEntity refreshTokenEntity = createRefreshTokenEntity(refreshToken, existingUser);
+
+        userRepository.saveUser(existingUser);
+        jpaRefreshTokenRepository.save(refreshTokenEntity);
+
+        return new AuthResponse(domainUser.getId(), domainUser.getEmail(), accessToken, refreshToken);
     }
 
     @Override
