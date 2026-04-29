@@ -1,6 +1,6 @@
 package com.medreminder.medreminder_server.user;
 
-import com.medreminder.medreminder_server.application.dtos.user.AuthResponse;
+import com.medreminder.medreminder_server.application.dtos.user.ResetPasswordResponse;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
@@ -49,9 +49,6 @@ public class AuthServiceUnitTest {
 
     @BeforeEach
     void setUp(){
-        when(env.getProperty("med.reminder.jwt.key"))
-                .thenReturn("ZUDyDWpzCerpPDJwVkkmOquSPBi2O3hi/JcsvrEP/I01Pf2cfpKqqMhj+tJjY1CgwxSBmg+5xSITdNsWAT8TIA==");
-
         JwtUtil jwtUtil = new JwtUtil(env);
         UserService userService = new UserServiceImpl(userRepository, userMapper);
 
@@ -85,14 +82,13 @@ public class AuthServiceUnitTest {
         when(jpaRefreshTokenRepository.findByUserIdAndRevokedFalse(any(String.class)))
                 .thenReturn(Optional.empty());
 
-        AuthResponse response = authService
+        ResetPasswordResponse response = authService
                 .resetPassword(testUser.getId(),"testhashpassword", "testnewpassword");
 
         verify(userRepository).saveUser(any(UserEntity.class));
 
         assertThat(response).isNotNull();
-        assertThat(response.id()).isEqualTo(userEntity.getId());
-        assertThat(response.email()).isEqualTo(testUser.getEmail());
-        assertThat(response.accessToken()).isNotEmpty();
+        assertThat(response.status()).isEqualTo("success");
+        assertThat(response.message()).isNotEmpty();
     }
 }

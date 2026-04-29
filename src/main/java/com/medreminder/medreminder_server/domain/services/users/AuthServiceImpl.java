@@ -4,6 +4,7 @@ package com.medreminder.medreminder_server.domain.services.users;
 import com.medreminder.medreminder_server.application.dtos.user.AuthResponse;
 import com.medreminder.medreminder_server.application.dtos.user.LoginRequest;
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
+import com.medreminder.medreminder_server.application.dtos.user.ResetPasswordResponse;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
 import com.medreminder.medreminder_server.application.exceptions.UserAlreadyExistsException;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
@@ -153,7 +154,7 @@ public class AuthServiceImpl implements AuthService{
     }
 
     @Override
-    public AuthResponse resetPassword(String userId, String oldPassword, String newPassword) {
+    public ResetPasswordResponse resetPassword(String userId, String oldPassword, String newPassword) {
 
         UserEntity existingUser = userRepository.findUserById(userId).orElse(null);
 
@@ -180,15 +181,9 @@ public class AuthServiceImpl implements AuthService{
                 .findByUserIdAndRevokedFalse(domainUser.getId())
                 .ifPresent(this::revokeRefreshToken);
 
-        String accessToken = jwtUtil.generateToken(domainUser.getEmail(), domainUser.getId());
-        String refreshToken = generateRandomToken();
-
-        RefreshTokenEntity refreshTokenEntity = createRefreshTokenEntity(refreshToken, existingUser);
-
         userRepository.saveUser(existingUser);
-        jpaRefreshTokenRepository.save(refreshTokenEntity);
 
-        return new AuthResponse(domainUser.getId(), domainUser.getEmail(), accessToken, refreshToken);
+        return new ResetPasswordResponse("success", "Successfully reset your password!");
     }
 
     @Override

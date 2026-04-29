@@ -3,6 +3,7 @@ package com.medreminder.medreminder_server.domain.services.users;
 import com.medreminder.medreminder_server.application.dtos.user.AuthResponse;
 import com.medreminder.medreminder_server.application.dtos.user.LoginRequest;
 import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
+import com.medreminder.medreminder_server.application.dtos.user.ResetPasswordResponse;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
 import com.medreminder.medreminder_server.domain.services.UseCase;
 
@@ -14,7 +15,7 @@ public interface AuthService extends UseCase {
 
     AuthResponse refreshToken(String token);
 
-    AuthResponse resetPassword(String userId, String oldPassword, String newPassword);
+    ResetPasswordResponse resetPassword(String userId, String oldPassword, String newPassword);
 
     void logoutUser(UserPrincipal userPrincipal);
 }
@@ -25,7 +26,7 @@ public interface AuthService extends UseCase {
 // On occasion where user want to replace their password;
 // Changing password mean getting the current user, and then after the operation
 // we need to sign them out, so they can then use the new password to sign in again.
-// Requirements: Current userID; Current Password; New Password;
+// Requirements: Current userID; Current Password; New Password; ✅
 
 
 //TODO 2:

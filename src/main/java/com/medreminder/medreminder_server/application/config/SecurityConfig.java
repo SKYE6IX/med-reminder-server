@@ -33,7 +33,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize ->
-                authorize.requestMatchers("/auth/logout").authenticated()
+                authorize.requestMatchers("/auth/reset-password").authenticated()
+                        .requestMatchers("/auth/logout").authenticated()
                         .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated())
 

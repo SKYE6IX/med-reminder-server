@@ -1,8 +1,6 @@
 package com.medreminder.medreminder_server.application.controllers;
 
-import com.medreminder.medreminder_server.application.dtos.user.AuthResponse;
-import com.medreminder.medreminder_server.application.dtos.user.LoginRequest;
-import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
+import com.medreminder.medreminder_server.application.dtos.user.*;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
 import com.medreminder.medreminder_server.domain.services.users.AuthService;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +51,19 @@ public class AuthController {
         String refreshToken = refreshBody.get("refreshToken");
 
         AuthResponse response = authService.refreshToken(refreshToken);
+
+        return  ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/reset-password")
+    ResponseEntity<?> resetPassword(@AuthenticationPrincipal UserDetails userDetails,
+                                    @RequestBody ResetPasswordRequest resetPasswordRequest) {
+
+        UserPrincipal userPrincipal = (UserPrincipal) userDetails;
+
+        ResetPasswordResponse response = authService.resetPassword(userPrincipal.getId(),
+                resetPasswordRequest.oldPassword(),
+                resetPasswordRequest.newPassword());
 
         return  ResponseEntity.ok(response);
     }
