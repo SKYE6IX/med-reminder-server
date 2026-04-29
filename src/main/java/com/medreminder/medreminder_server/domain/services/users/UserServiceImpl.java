@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
 
         domainUser.updateUser(updateUserCommand);
 
-        managedUser.updateUserDetails(domainUser);
+        managedUser.syncUserData(domainUser);
 
         userRepository.saveUser(managedUser);
 

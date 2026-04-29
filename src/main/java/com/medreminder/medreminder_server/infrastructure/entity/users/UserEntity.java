@@ -33,6 +33,15 @@ public class UserEntity {
 
     private String gender;
 
+    @Column(name = "password_reset_token")
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_issued_at")
+    private LocalDateTime passwordResetIssuedAt;
+
+    @Column(name = "password_reset_redeem_at")
+    private LocalDateTime passwordResetRedeemedAt;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -99,11 +108,19 @@ public class UserEntity {
         return profiles;
     }
 
-    public List<RefreshTokenEntity> getRefreshTokens() {
-        return refreshTokens;
+    public String getPasswordResetToken() {
+        return passwordResetToken;
     }
 
-    public void updateUserDetails(User domain){
+    public LocalDateTime getPasswordResetIssuedAt() {
+        return passwordResetIssuedAt;
+    }
+
+    public LocalDateTime getPasswordResetRedeemedAt() {
+        return passwordResetRedeemedAt;
+    }
+
+    public void syncUserData(User domain){
         this.email = domain.getEmail();
         this.hashPassword = domain.getHashPassword();
         this.name = domain.getName();

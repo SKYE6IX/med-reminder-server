@@ -7,6 +7,7 @@ import com.medreminder.medreminder_server.application.exceptions.ResourceNotFoun
 import com.medreminder.medreminder_server.domain.models.medication.*;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.services.users.ProfileRepository;
+import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.*;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
@@ -22,6 +23,11 @@ import java.util.stream.Collectors;
 //Created once a day got rejected.
 // Check deff, Upload the the rule file with the path.
 public class MedicationServiceImpl implements MedicationService {
+
+    Locale locale = Locale.of("ru-RU");
+
+    final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+            .localizedBy(locale);
 
     private final MedicationRepository medicationRepository;
     private final ProfileRepository profileRepository;
@@ -207,8 +213,10 @@ public class MedicationServiceImpl implements MedicationService {
     @Override
     public List<ScheduleEventResponse> getMedicationScheduleEvents(String userId, String eventDate) {
 
-        LocalDateTime startOfDay = LocalDate.parse(eventDate).atStartOfDay();
-        LocalDateTime endOfDay = LocalDate.parse(eventDate).atTime(LocalTime.MAX);
+        LocalDateTime startOfDay = LocalDate.parse(eventDate, dateFormatter).atStartOfDay();
+
+        LocalDateTime endOfDay = LocalDate.parse(eventDate, dateFormatter).atTime(LocalTime.MAX);
+
 
         List<ScheduleEventEntity> scheduleEvents =
                 medicationRepository.getScheduleEventsByUserAndDate(userId, startOfDay, endOfDay);
@@ -250,12 +258,11 @@ public class MedicationServiceImpl implements MedicationService {
     }
 
     private MedicationSchedule createMedicationSchedule(CreateMedSchedule schedule) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         return new MedicationSchedule(null,
                 schedule.dosage(),
                 schedule.recurrenceRule(),
-                LocalDate.parse(schedule.startDate(), formatter),
+                LocalDate.parse(schedule.startDate(), dateFormatter),
                 schedule.timeZone());
     }
 

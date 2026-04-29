@@ -1,4 +1,4 @@
-h1:Zix8i+Mvx6jwC2sB33Njkj/oaBVuytHKu8kgeuOeqs0=
+h1:hYOvPPJRBkukEvwkxZh8RVr+KkHaHuuVVhgs9HzXers=
 V20260228073530__init.sql h1:piXArQxcJfIl7pYmCksBYrIt7/wLOZlA2GLKur4R25o=
 V20260302125020__update_id_field.sql h1:WNMv2fnX/SKEPIp1ozI+J8iZgdamH5XD3O7KwXP7vvE=
 V20260303101307__update_email_field.sql h1:YdfzWuxYWKQQQOrDqVr+gIM2EgxMwuyTfe/bg+GzTso=
@@ -18,3 +18,4 @@ V20260320083805__modify_schedule_field.sql h1:AtWDnvhJ6cWwQ/LLkEE9Q4Gu6SOmb72Mkt
 V20260320093200__modify_schedule_field_v2.sql h1:6nw6ZJrJmlN5dIdeIpjp1FJWlOm0ya0KtTfrXqYIG5o=
 V20260320094830__modify_schedule_field_v3.sql h1:/AeL0C+dVoYnQH9y0HZp8817iblWc61W9FvjZaOsOwg=
 V20260421110621__update_schedule_entuty.sql h1:tdhsZj4urIsVZZk2uTUm3VLgFq5MebU9bnx1BxSylIA=
+V20260429132313__added_password_reset_data_fields.sql h1:cfigWkbsL7MlohQzGaysfr2gMxhdSQ0Hyt3o0rEzLFI=

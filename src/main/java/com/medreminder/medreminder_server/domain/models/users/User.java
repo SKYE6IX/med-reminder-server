@@ -15,6 +15,9 @@ public class User  {
     private String name;
     private LocalDate dateOfBirth;
     private String gender;
+    private String passwordResetToken;
+    private LocalDateTime passwordResetIssuedAt;
+    private LocalDateTime passwordResetRedeemedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private final List<Profile> profiles = new ArrayList<>();
@@ -72,6 +75,18 @@ public class User  {
         return profiles;
     }
 
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public LocalDateTime getPasswordResetIssuedAt() {
+        return passwordResetIssuedAt;
+    }
+
+    public LocalDateTime getPasswordResetRedeemedAt() {
+        return passwordResetRedeemedAt;
+    }
+
     public void updateUser(UpdateUserCommand command) {
         command.getEmail().ifPresent(this::updateEmail);
         command.getName().ifPresent(this::updateName);
@@ -108,5 +123,15 @@ public class User  {
             throw new IllegalArgumentException("Password cannot be empty");
         }
         this.hashPassword = newPassword;
+    }
+
+    public void issuePasswordResetToken(String token) {
+        this.passwordResetToken = token;
+        this.passwordResetIssuedAt = LocalDateTime.now();
+    }
+
+    public void redeemPasswordResetToken() {
+        this.passwordResetRedeemedAt = LocalDateTime.now();
+        this.passwordResetToken = null;
     }
 }
