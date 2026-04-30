@@ -1,8 +1,6 @@
 package com.medreminder.medreminder_server.user;
 
-import com.medreminder.medreminder_server.application.dtos.user.ProfileRequest;
-import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
-import com.medreminder.medreminder_server.application.dtos.user.UpdateUserCommand;
+import com.medreminder.medreminder_server.application.dtos.user.*;
 import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
@@ -89,17 +87,17 @@ public class UserServiceUnitTest {
         when(userRepository.findUserById(any(String.class)))
                 .thenReturn(Optional.of(userEntity));
 
-        User updateUser = userService.updateUser(userEntity.getId(), updateUserCommand);
+        UserResponse response = userService.updateUser(userEntity.getId(), updateUserCommand);
 
         verify(userRepository).saveUser(any(UserEntity.class));
 
-        assertThat(updateUser.getId()).isNotNull().isEqualTo(userId.toString());
+        assertThat(response.id()).isNotNull().isEqualTo(userId.toString());
 
-        assertThat(updateUser.getEmail()).isEqualTo("updatetest@mail.com");
+        assertThat(response.email()).isEqualTo("updatetest@mail.com");
 
-        assertThat(updateUser.getGender()).isNotNull().isEqualTo("Male");
+        assertThat(response.gender()).isNotNull().isEqualTo("Male");
 
-        assertThat(updateUser.getDateOfBirth().getYear()).isEqualTo(1992);
+        assertThat(response.dateOfBirth().getYear()).isEqualTo(1992);
     }
 
     @Test
@@ -126,13 +124,11 @@ public class UserServiceUnitTest {
         when(userRepository.saveUser(any(UserEntity.class)))
                 .thenReturn(userMapper.toEntity(testUser));
 
-        Profile profile = userService.createProfile(testUser.getId(), profileRequest);
+        ProfileResponse response = userService.createProfile(testUser.getId(), profileRequest);
 
-        assertThat(profile.getId()).isNotNull().isEqualTo(profileId.toString());
-
-        assertThat(profile.getName()).isEqualTo(profileRequest.fullName());
-
-        assertThat(profile.getRelation()).isEqualTo(Relation.BROTHER);
+        assertThat(response.id()).isNotNull().isEqualTo(profileId.toString());
+        assertThat(response.name()).isEqualTo(profileRequest.fullName());
+        assertThat(response.relation()).isEqualTo("BROTHER");
     }
 
 

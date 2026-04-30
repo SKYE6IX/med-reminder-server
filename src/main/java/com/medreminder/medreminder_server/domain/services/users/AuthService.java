@@ -28,7 +28,6 @@ public interface AuthService extends UseCase {
 // we need to sign them out, so they can then use the new password to sign in again.
 // Requirements: Current userID; Current Password; New Password; ✅
 
-
 //TODO 2:
 // On occasion where user forget their password;
 // This situation a bit different. We don't need user to be sign in.

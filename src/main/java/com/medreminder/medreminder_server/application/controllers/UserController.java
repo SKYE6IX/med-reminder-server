@@ -45,28 +45,15 @@ public class UserController {
 
         var principal = getPrincipal(userDetails);
 
-        var response = userService.updateUser(principal.getId(), cmd);
+        UserResponse response = userService.updateUser(principal.getId(), cmd);
 
-        return ResponseEntity.ok(
-                new UserResponse(response.getId(),
-                        response.getEmail(), response.getName(),
-                        response.getDateOfBirth(), response.getGender())
-        );
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping()
     public ResponseEntity<?> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
 
         var principal = getPrincipal(userDetails);
-
-        UserResponse userEntity = userService.getUserById(principal.getId());
-
-        if( userEntity == null ){
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body("User not found!");
-        }
 
         userService.deleteUser(principal.getId());
 
@@ -79,12 +66,9 @@ public class UserController {
 
         var principal = getPrincipal(userDetails);
 
-        var response = userService.createProfile(principal.getId(), profileRequest);
+        ProfileResponse response = userService.createProfile(principal.getId(), profileRequest);
 
-        return ResponseEntity.ok(new ProfileResponse(
-                response.getId(),
-                response.getName(),
-                response.getRelation().name(), response.isSelf()));
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping(value = "/profiles/{profileId}")

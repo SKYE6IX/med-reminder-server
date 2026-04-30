@@ -1,9 +1,6 @@
 package com.medreminder.medreminder_server.domain.services.users;
 
-import com.medreminder.medreminder_server.application.dtos.user.ProfileRequest;
-import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
-import com.medreminder.medreminder_server.application.dtos.user.UpdateUserCommand;
-import com.medreminder.medreminder_server.application.dtos.user.UserResponse;
+import com.medreminder.medreminder_server.application.dtos.user.*;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
@@ -45,7 +42,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(String userId, UpdateUserCommand updateUserCommand) {
+    public UserResponse updateUser(String userId, UpdateUserCommand updateUserCommand) {
 
         UserEntity managedUser = getUserEntity(userId);
 
@@ -57,11 +54,15 @@ public class UserServiceImpl implements UserService {
 
         userRepository.saveUser(managedUser);
 
-        return domainUser;
+        return new UserResponse(domainUser.getId(),
+                domainUser.getEmail(),
+                domainUser.getName(),
+                domainUser.getDateOfBirth(),
+                domainUser.getGender());
     }
 
     @Override
-    public Profile createProfile(String userId, ProfileRequest profileRequest) {
+    public ProfileResponse createProfile(String userId, ProfileRequest profileRequest) {
 
         UserEntity managedUser = getUserEntity(userId);
 
@@ -76,12 +77,17 @@ public class UserServiceImpl implements UserService {
 
         ProfileEntity newProfile = userRepository.saveUser(managedUser).getProfiles().getLast();
 
-        return userMapper.toDomain(newProfile);
+        return new ProfileResponse(newProfile.getId(),
+                newProfile.getName(), newProfile.getRelation(),
+                newProfile.isSelf());
     }
 
     @Override
     public void deleteUser(String userId) {
-        userRepository.deleteUser(userId);
+
+        UserEntity managedUser = getUserEntity(userId);
+
+        userRepository.deleteUser(managedUser.getId());
     }
 
     @Override
@@ -101,10 +107,11 @@ public class UserServiceImpl implements UserService {
         userRepository.saveUser(managedUser);
     }
 
-
     @Override
     public UserResponse getUserById(String userId) {
+
         UserEntity userEntity = getUserEntity(userId);
+
         return new UserResponse(
                 userEntity.getId(),
                 userEntity.getEmail(),
@@ -133,6 +140,7 @@ public class UserServiceImpl implements UserService {
                 .toList();
 
         managedEntity.getProfiles().clear();
+
         managedEntity.getProfiles().addAll(syncedProfiles);
     }
 }

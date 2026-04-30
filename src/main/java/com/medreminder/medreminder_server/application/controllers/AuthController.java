@@ -20,7 +20,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/register")
-    ResponseEntity<?> registerUser(@RequestBody RegisterUserRequest registerUserRequest) {
+    ResponseEntity<AuthResponse> registerUser(@RequestBody RegisterUserRequest registerUserRequest) {
 
         AuthResponse response = authService.registerUserWithEmail(registerUserRequest);
 
@@ -28,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/login")
-    ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
 
         AuthResponse response = authService.loginUserWithEmail(loginRequest);
 
@@ -46,7 +46,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/refresh")
-    ResponseEntity<?> refreshToken(@RequestBody Map<String, String> refreshBody) {
+    ResponseEntity<AuthResponse> refreshToken(@RequestBody Map<String, String> refreshBody) {
 
         String refreshToken = refreshBody.get("refreshToken");
 
@@ -56,7 +56,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/reset-password")
-    ResponseEntity<?> resetPassword(@AuthenticationPrincipal UserDetails userDetails,
+    ResponseEntity<ResetPasswordResponse> resetPassword(@AuthenticationPrincipal UserDetails userDetails,
                                     @RequestBody ResetPasswordRequest resetPasswordRequest) {
 
         UserPrincipal userPrincipal = (UserPrincipal) userDetails;
