@@ -8,9 +8,9 @@ public interface UserRepository {
 
     UserEntity saveUser(UserEntity userEntity);
 
-    void deleteUser(String userId);
-
     Optional<UserEntity> findUserById(String id);
 
     Optional <UserEntity> findUserByEmail(String email);
+
+    void deleteUser(String userId);
 }

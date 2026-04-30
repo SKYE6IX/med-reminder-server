@@ -19,6 +19,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -71,10 +73,18 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping(value = "/profiles")
+    public ResponseEntity<List<ProfileResponse>> getProfiles(@AuthenticationPrincipal UserDetails userDetails) {
+        var principal = getPrincipal(userDetails);
+
+        List<ProfileResponse> response = userService.getProfiles(principal.getId());
+
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping(value = "/profiles/{profileId}")
     public ResponseEntity<?> deleteProfile(@AuthenticationPrincipal UserDetails userDetails,
                                         @PathVariable String profileId) {
-
         var principal = getPrincipal(userDetails);
 
       userService.deleteProfile(principal.getId(), profileId);

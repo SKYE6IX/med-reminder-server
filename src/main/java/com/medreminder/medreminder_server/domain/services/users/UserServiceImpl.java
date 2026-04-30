@@ -83,6 +83,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<ProfileResponse> getProfiles(String userId) {
+
+        UserEntity managedUser = getUserEntity(userId);
+
+        List<ProfileEntity> profileEntities = managedUser.getProfiles();
+
+        return  profileEntities
+                .stream()
+                .map((profileEntity ->
+                        new ProfileResponse(profileEntity.getId(),
+                                profileEntity.getName(),
+                                profileEntity.getRelation(),
+                                profileEntity.isSelf())))
+                .toList();
+    }
+
+    @Override
     public void deleteUser(String userId) {
 
         UserEntity managedUser = getUserEntity(userId);
