@@ -12,14 +12,11 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
 
     private final JpaMedicationProfileRepository jpaMedicationProfileRepository;
-    private final JpaMedicationScheduleRepository jpaMedicationScheduleRepository;
     private final JpaScheduleEventRepository jpaScheduleEventRepository;
 
     public MedicationRepositoryImpl(JpaMedicationProfileRepository jpaMedicationProfileRepository,
-                                    JpaMedicationScheduleRepository jpaMedicationScheduleRepository,
                                     JpaScheduleEventRepository jpaScheduleEventRepository) {
         this.jpaMedicationProfileRepository = jpaMedicationProfileRepository;
-        this.jpaMedicationScheduleRepository = jpaMedicationScheduleRepository;
         this.jpaScheduleEventRepository = jpaScheduleEventRepository;
     }
 
@@ -29,13 +26,10 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     }
 
     @Override
-    public void saveMedicationSchedule(MedicationScheduleEntity medicationScheduleEntity) {
-        jpaMedicationScheduleRepository.save(medicationScheduleEntity);
-    }
+    public MedicationProfileEntity getMedicationProfileById(String id) {
 
-    @Override
-    public void saveAllScheduleEvents(List<ScheduleEventEntity> scheduleEvents) {
-        jpaScheduleEventRepository.saveAll(scheduleEvents);
+        return jpaMedicationProfileRepository
+                .findByIdWithScheduleAndEvents(id).orElse(null);
     }
 
     @Override
@@ -44,26 +38,15 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     }
 
     @Override
-    public void deleteAllScheduleEvents(List<ScheduleEventEntity> scheduleEvents) {
-        jpaScheduleEventRepository.deleteAll(scheduleEvents);
-    }
-
-    @Override
-    public List<ScheduleEventEntity> getScheduleEventsByUserAndDate(String userId,
-                                                                    LocalDateTime startOfDay,
-                                                                    LocalDateTime endOfDay) {
-        return  jpaScheduleEventRepository.findByUserAndDate(userId, startOfDay, endOfDay);
-    }
-
-    @Override
-    public MedicationProfileEntity getMedicationProfileById(String id) {
-
-        return jpaMedicationProfileRepository.findByIdWithScheduleAndEvents(id).orElse(null);
-    }
-
-    @Override
     public ScheduleEventEntity getScheduleEventById(String id) {
 
         return jpaScheduleEventRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public List<ScheduleEventEntity> getScheduleEventsByUserIdAndDates(String userId,
+                                                                       LocalDateTime startOfDay,
+                                                                       LocalDateTime endOfDay) {
+        return  jpaScheduleEventRepository.findByUserIdAndDates(userId, startOfDay, endOfDay);
     }
 }

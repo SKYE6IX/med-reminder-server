@@ -79,7 +79,6 @@ public class ScheduleEvent {
         this.takenAt = takenAt;
     }
 
-
     @Override
     public int hashCode() {
         return Objects.hash(id);

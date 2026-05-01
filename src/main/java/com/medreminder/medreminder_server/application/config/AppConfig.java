@@ -25,7 +25,6 @@ import org.springframework.transaction.interceptor.*;
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Objects;
 
 @Configuration
 @EnableTransactionManagement
@@ -68,20 +67,20 @@ public class AppConfig {
     }
 
     @Bean
-    MedicationService medicationService(MedicationRepository medicationRepository,
-                                        ProfileRepository profileRepository,
-                                        MedicationMapper medicationMapper,
-                                        ScheduleEventService scheduleEventService,
-                                        UserMapper userMapper,
-                                        TransactionInterceptor txInterceptor) {
+    MedicationProfileService medicationService(MedicationRepository medicationRepository,
+                                               ProfileRepository profileRepository,
+                                               MedicationMapper medicationMapper,
+                                               ScheduleEventService scheduleEventService,
+                                               UserMapper userMapper,
+                                               TransactionInterceptor txInterceptor) {
 
-        MedicationService medicationService = new MedicationServiceImpl(
+        MedicationProfileService medicationProfileService = new MedicationProfileServiceImpl(
                 medicationRepository,
                 profileRepository,
                 medicationMapper,
                 scheduleEventService,
                 userMapper);
-        return createProxyFactory(medicationService, MedicationService.class, txInterceptor);
+        return createProxyFactory(medicationProfileService, MedicationProfileService.class, txInterceptor);
     }
 
     @Bean

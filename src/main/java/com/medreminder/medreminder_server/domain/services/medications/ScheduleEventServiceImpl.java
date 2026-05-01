@@ -18,9 +18,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ScheduleEventServiceImpl implements ScheduleEventService {
 
@@ -34,98 +35,52 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
     }
 
     @Override
-    public void createScheduleEvents(MedicationSchedule schedule) {
+    public List<ScheduleEvent> createScheduleEvents(MedicationSchedule schedule) {
 
         LocalDateTime now = LocalDateTime.now(ZoneId.of(schedule.getTimeZone()));
 
-        List<LocalDateTime> dateTimes =
-                generateSchedulesDateTime(schedule, 7)
+        return generateSchedulesDateTime(schedule, 7)
+        .stream()
+        .filter(dateTime -> dateTime.isAfter(now))
+        .sorted()
+                .map((date)-> new ScheduleEvent(null,
+                        schedule.getDoseQuantity(),
+                        date))
+        .toList();
+    }
+
+    @Override
+    public List<ScheduleEvent> updateScheduleEventsRule(MedicationSchedule schedule) {
+
+        LocalDateTime now = LocalDateTime.now(ZoneId.of(schedule.getTimeZone()));
+
+//      Collect all the pending event into list for deletion.
+        Set<ScheduleEvent> pendingEvents = schedule
+                .getScheduleEvents()
+                .stream()
+                .filter(event-> event.getStatus().equals("PENDING"))
+                .collect(Collectors.toCollection(
+                        ()-> new TreeSet<>(Comparator.comparing(event -> event
+                                .getScheduleAt().toLocalDate()))
+                ));
+
+        return generateSchedulesDateTime(schedule, pendingEvents.size())
                 .stream()
                 .filter(dateTime -> dateTime.isAfter(now))
                 .sorted()
+                .map((date)-> new ScheduleEvent(null,
+                        schedule.getDoseQuantity(),
+                        date))
                 .toList();
-
-        dateTimes.stream()
-                .findFirst()
-                .ifPresent(schedule::updateStartTime);
-
-        dateTimes.stream()
-                .map(date -> {
-                    return new ScheduleEvent(null,
-                            schedule.getDoseQuantity(),
-                            date);
-                })
-                .forEach(schedule::addScheduleEvent);
     }
 
     @Override
-    public void updateScheduleEventsRules(MedicationSchedule domainSchedule) {
-
-//      Collect all the pending event into list for deletion.
-        List<ScheduleEvent> pendingEvents = domainSchedule
-                .getScheduleEvents()
-                .stream()
-                .filter(event -> event.getStatus().equals("PENDING"))
-                .toList();
-
-        if (pendingEvents.isEmpty()) {
-            return;
-        }
-
-//        Passed all the above pending events to dates so it can be reused for the schedule date plus
-//        either a new Time or Same as the previous Time. Depend on the User's new selection.
-        List<LocalDate> pendingDates = pendingEvents
-                .stream()
-                .map(event -> event.getScheduleAt().toLocalDate())
-                .distinct()
-                .sorted()
-                .toList();
-
-//        Days left inclusive on the day user change the rules
-        int daysLeft = (int) ChronoUnit.DAYS.between(pendingDates.getFirst(), pendingDates.getLast()) + 1;
-
-//        Get the new dates base on the value user passed.
-        List<LocalTime> newTimes = generateSchedulesDateTime(domainSchedule, daysLeft)
-                .stream()
-                .map(LocalDateTime::toLocalTime)
-                .distinct()
-                .sorted()
-                .toList();
-
-//        Always sync start time with the new updates of the "nextSchedules"
-        domainSchedule.updateStartTime(LocalDateTime.of(pendingDates.getFirst(), newTimes.getFirst()));
-
-//        Clear off the pending events from the domain. After this stage, only events in memory are
-//        the one that either has TAKEN or MISSED status.
-        domainSchedule.getScheduleEvents().removeAll(pendingEvents);
-
-      pendingDates
-                .stream()
-                .flatMap(pendingDate -> newTimes.stream()
-                        .map(time -> new ScheduleEvent(null,
-                                domainSchedule.getDoseQuantity(),
-                                LocalDateTime.of(pendingDate, time)))
-                )
-                .forEach(domainSchedule::addScheduleEvent);
-    }
-
-    @Override
-    public void updateScheduleEventsDosage(MedicationSchedule domainSchedule) {
-
-        domainSchedule.getScheduleEvents()
-                .stream()
-                .filter(event -> event.getStatus().equals("PENDING"))
-                .forEach(event -> event.updateDosage(domainSchedule.getDoseQuantity()));
-
-    }
-
-    @Override
-    public ScheduleEventResponse updateScheduleEvents(String scheduleEventId, Map<String, String> eventBody) {
+    public ScheduleEventResponse updateScheduleEvent(String scheduleEventId, Map<String, String> eventBody) {
 
         ScheduleEventEntity managedScheduleEvent = medicationRepository.getScheduleEventById(scheduleEventId);
 
         if(managedScheduleEvent == null) {
-            throw new ResourceNotFoundException("Event with id " + scheduleEventId + " not found");
+            throw new ResourceNotFoundException("Event is not found!");
         }
 
         ScheduleEvent domainScheduleEvent = medicationMapper.toDomain(managedScheduleEvent);
@@ -138,7 +93,6 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                             .getMedicationSchedule()
                             .getTimeZone()))
                     .toLocalDateTime();
-
             domainScheduleEvent.updateTakenAt(takenAt);
         }
 
@@ -149,7 +103,25 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         return getScheduleEventResponse(managedScheduleEvent);
     }
 
-    private static @NonNull ScheduleEventResponse getScheduleEventResponse(ScheduleEventEntity managedScheduleEvent) {
+    @Override
+    public List<ScheduleEventResponse> getScheduleEvents(String userId, String eventDate) {
+        final Locale locale = Locale.of("ru-RU");
+        final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+                .localizedBy(locale);
+
+        LocalDateTime startOfDay = LocalDate.parse(eventDate, dateFormatter).atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.parse(eventDate, dateFormatter).atTime(LocalTime.MAX);
+
+        List<ScheduleEventEntity> scheduleEvents = medicationRepository
+                .getScheduleEventsByUserIdAndDates(userId, startOfDay, endOfDay);
+
+        return scheduleEvents
+                .stream()
+                .map(this::getScheduleEventResponse)
+                .toList();
+    }
+
+    private ScheduleEventResponse getScheduleEventResponse(ScheduleEventEntity managedScheduleEvent) {
         MedicationScheduleEntity medicationSchedule =
                 managedScheduleEvent.getMedicationSchedule();
 
@@ -173,7 +145,6 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         if(managedScheduleEvent.getTakenAt() != null){
             response.setTakenAt(managedScheduleEvent.getTakenAt().toString());
         }
-
         return response;
     }
 

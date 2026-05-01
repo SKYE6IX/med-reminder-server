@@ -6,14 +6,12 @@ import com.medreminder.medreminder_server.application.dtos.medication.Medication
 import com.medreminder.medreminder_server.application.dtos.medication.UpdateMedicationCommand;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventServiceImpl;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
-import com.medreminder.medreminder_server.domain.services.medications.MedicationService;
-import com.medreminder.medreminder_server.domain.services.medications.MedicationServiceImpl;
+import com.medreminder.medreminder_server.domain.services.medications.MedicationProfileService;
+import com.medreminder.medreminder_server.domain.services.medications.MedicationProfileServiceImpl;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventService;
 import com.medreminder.medreminder_server.domain.services.users.ProfileRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,11 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -35,7 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class MedicationServiceUnitTest {
+public class MedicationProfileServiceUnitTest {
 
     @Mock
     private MedicationRepository medicationRepository;
@@ -43,7 +37,7 @@ public class MedicationServiceUnitTest {
     @Mock
     private ProfileRepository profileRepository;
 
-    private MedicationService medicationService;
+    private MedicationProfileService medicationProfileService;
 
     private final MedicationMapper medicationMapper = new MedicationMapper();
 
@@ -54,7 +48,7 @@ public class MedicationServiceUnitTest {
         final ScheduleEventService scheduleEventService =
                 new ScheduleEventServiceImpl(medicationRepository, medicationMapper);
 
-        medicationService = new MedicationServiceImpl(
+        medicationProfileService = new MedicationProfileServiceImpl(
                 medicationRepository,
                 profileRepository,
                 medicationMapper,
@@ -66,6 +60,7 @@ public class MedicationServiceUnitTest {
     void shouldCreateMedication_Profile_thenSaveIt() {
 
         ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
                 "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0");
 
@@ -75,7 +70,7 @@ public class MedicationServiceUnitTest {
         when(profileRepository.saveProfile(any(ProfileEntity.class)))
                 .thenReturn(snubProfileEntity);
 
-        MedicationProfileResponse response = medicationService.createMedicationProfile(cmd);
+        MedicationProfileResponse response = medicationProfileService.createMedicationProfile(cmd);
 
         verify(profileRepository).saveProfile(any(ProfileEntity.class));
 
@@ -101,7 +96,7 @@ public class MedicationServiceUnitTest {
         UpdateMedicationCommand updateCmd = new UpdateMedicationCommand(false,
                 null, null, "We have just update the medication profile");
 
-        MedicationProfileResponse response = medicationService
+        MedicationProfileResponse response = medicationProfileService
                 .updateMedicationProfile(stubMedicationProfileEntity.getId(), updateCmd);
 
         verify(medicationRepository).saveMedicationProfile(any(MedicationProfileEntity.class));
@@ -127,16 +122,19 @@ public class MedicationServiceUnitTest {
         UpdateMedicationCommand updateCmd = new UpdateMedicationCommand(null,
                 "FREQ=DAILY;BYHOUR=10,16,20;BYMINUTE=0;BYSECOND=0", null, null);
 
-        MedicationProfileResponse response = medicationService
+        MedicationProfileResponse response = medicationProfileService
                 .updateMedicationProfile(stubMedicationProfileEntity.getId(), updateCmd);
 
         verify(medicationRepository).saveMedicationProfile(any(MedicationProfileEntity.class));
 
         assertThat(response).isNotNull();
+
         assertThat(LocalDateTime.parse(response.getSchedule().starTime()).getHour())
                 .isEqualTo(10);
+        assertThat(response.getSchedule()
+                .recurrenceRule())
+                .isEqualTo("FREQ=DAILY;BYHOUR=10,16,20;BYMINUTE=0;BYSECOND=0");
     }
-
 
     @Test
     void shouldUpdateDosage_thenSaveIt(){
@@ -152,7 +150,7 @@ public class MedicationServiceUnitTest {
         UpdateMedicationCommand updateCmd = new UpdateMedicationCommand(null,
                 null, 5.5, null);
 
-        MedicationProfileResponse response = medicationService
+        MedicationProfileResponse response = medicationProfileService
                 .updateMedicationProfile(stubMedicationProfileEntity.getId(), updateCmd);
 
         verify(medicationRepository).saveMedicationProfile(any(MedicationProfileEntity.class));
@@ -167,6 +165,7 @@ public class MedicationServiceUnitTest {
         ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
                 "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0");
+
         MedicationProfileEntity stubMedicationProfileEntity =
                 MedicationStubFactory.createMedicationProfileEntity(cmd, medicationMapper);
 
@@ -177,7 +176,7 @@ public class MedicationServiceUnitTest {
 
         assertThat(ownerProfileEntity.getMedicationProfile().size()).isEqualTo(1);
 
-        medicationService.deleteMedicationProfile(stubMedicationProfileEntity.getId());
+        medicationProfileService.deleteMedicationProfile(stubMedicationProfileEntity.getId());
 
         verify(profileRepository).saveProfile(any(ProfileEntity.class));
 

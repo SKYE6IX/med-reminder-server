@@ -8,13 +8,11 @@ import com.medreminder.medreminder_server.domain.services.UseCase;
 
 import java.util.List;
 
-public interface MedicationService extends UseCase {
+public interface MedicationProfileService extends UseCase {
 
    MedicationProfileResponse createMedicationProfile(CreateMedicationCommand cmd);
 
    MedicationProfileResponse updateMedicationProfile(String medicationProfileId, UpdateMedicationCommand cmd);
 
    void deleteMedicationProfile(String medicationProfileId);
-
-   List<ScheduleEventResponse> getMedicationScheduleEvents(String userId, String eventDate);
 }

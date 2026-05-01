@@ -6,7 +6,7 @@ import com.medreminder.medreminder_server.application.dtos.medication.Medication
 import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
 import com.medreminder.medreminder_server.application.dtos.medication.UpdateMedicationCommand;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
-import com.medreminder.medreminder_server.domain.services.medications.MedicationService;
+import com.medreminder.medreminder_server.domain.services.medications.MedicationProfileService;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,20 +20,20 @@ import java.util.Map;
 @RequestMapping("/medications")
 public class MedicationController {
 
-    private final MedicationService medicationService;
+    private final MedicationProfileService medicationProfileService;
     private final ScheduleEventService scheduleEventService;
 
-    public MedicationController(MedicationService medicationService,
+    public MedicationController(MedicationProfileService medicationProfileService,
                                 ScheduleEventService scheduleEventService) {
 
-        this.medicationService = medicationService;
+        this.medicationProfileService = medicationProfileService;
         this.scheduleEventService = scheduleEventService;
     }
 
     @PostMapping()
     public ResponseEntity<MedicationProfileResponse> createMedicationProfile(@RequestBody CreateMedicationCommand cmd) {
 
-        MedicationProfileResponse response = medicationService.createMedicationProfile(cmd);
+        MedicationProfileResponse response = medicationProfileService.createMedicationProfile(cmd);
 
         return ResponseEntity.ok(response);
     }
@@ -42,7 +42,7 @@ public class MedicationController {
     public ResponseEntity<MedicationProfileResponse> updateMedicationProfile(@PathVariable String medicationProfileId,
                                                                       @RequestBody UpdateMedicationCommand cmd) {
 
-        var response = medicationService.updateMedicationProfile(medicationProfileId, cmd);
+        var response = medicationProfileService.updateMedicationProfile(medicationProfileId, cmd);
 
         return ResponseEntity.ok(response);
 
@@ -51,7 +51,7 @@ public class MedicationController {
     @DeleteMapping(value = "/{medicationProfileId}")
     public ResponseEntity<?> deleteMedicationProfile(@PathVariable String medicationProfileId) {
 
-        medicationService.deleteMedicationProfile(medicationProfileId);
+        medicationProfileService.deleteMedicationProfile(medicationProfileId);
 
         return ResponseEntity.noContent().build();
     }
@@ -60,7 +60,7 @@ public class MedicationController {
     public ResponseEntity<ScheduleEventResponse> updateScheduleEvent(@PathVariable String eventId,
                                                                      @RequestBody Map<String, String> eventBody) {
 
-        var response = scheduleEventService.updateScheduleEvents(eventId, eventBody);
+        var response = scheduleEventService.updateScheduleEvent(eventId, eventBody);
 
         return ResponseEntity.ok(response);
     }
@@ -71,7 +71,8 @@ public class MedicationController {
 
         UserPrincipal principal = (UserPrincipal) userDetails;
 
-        var response = medicationService.getMedicationScheduleEvents(principal.getId(), eventDate);
+        List<ScheduleEventResponse> response = scheduleEventService
+                .getScheduleEvents(principal.getId(), eventDate);
 
         return ResponseEntity.ok(response);
     }

@@ -95,7 +95,6 @@ public class MedicationStubFactory {
     }
 
     private static CreateMedSchedule createMedSchedule(String rrule) {
-
         return new CreateMedSchedule(
                 1.2,
                 rrule,

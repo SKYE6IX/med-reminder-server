@@ -2,12 +2,10 @@ package com.medreminder.medreminder_server.domain.services.medications;
 
 import com.medreminder.medreminder_server.application.dtos.medication.*;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
-import com.medreminder.medreminder_server.application.exceptions.BadRequestException;
 import com.medreminder.medreminder_server.application.exceptions.ResourceNotFoundException;
 import com.medreminder.medreminder_server.domain.models.medication.*;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.services.users.ProfileRepository;
-import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.*;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
@@ -19,15 +17,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-//TODO:
-//Created once a day got rejected.
-// Check deff, Upload the the rule file with the path.
-public class MedicationServiceImpl implements MedicationService {
 
-    Locale locale = Locale.of("ru-RU");
-
-    final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-            .localizedBy(locale);
+public class MedicationProfileServiceImpl implements MedicationProfileService {
 
     private final MedicationRepository medicationRepository;
     private final ProfileRepository profileRepository;
@@ -35,11 +26,11 @@ public class MedicationServiceImpl implements MedicationService {
     private final ScheduleEventService scheduleEventService;
     private final UserMapper userMapper;
 
-    public MedicationServiceImpl(MedicationRepository medicationRepository,
-                                 ProfileRepository profileRepository,
-                                 MedicationMapper medicationMapper,
-                                 ScheduleEventService scheduleEventService,
-                                 UserMapper userMapper) {
+    public MedicationProfileServiceImpl(MedicationRepository medicationRepository,
+                                        ProfileRepository profileRepository,
+                                        MedicationMapper medicationMapper,
+                                        ScheduleEventService scheduleEventService,
+                                        UserMapper userMapper) {
         this.medicationRepository = medicationRepository;
         this.profileRepository = profileRepository;
         this.medicationMapper = medicationMapper;
@@ -50,13 +41,12 @@ public class MedicationServiceImpl implements MedicationService {
     @Override
     public MedicationProfileResponse createMedicationProfile(CreateMedicationCommand cmd) {
 
-        ProfileEntity managedProfileEntity = profileRepository.findProfileById(cmd.getProfileId())
+        ProfileEntity managedProfileEntity = profileRepository
+                .findProfileById(cmd.getProfileId())
                 .orElse(null);
 
-//        Just in case profile isn't found. We need to set up an AOP that will
-//        handle the exception to return clear message.
         if (managedProfileEntity == null) {
-            return null;
+            throw new ResourceNotFoundException("Profile not found!");
         }
 
         List<MedicationProfileEntity> mpe = managedProfileEntity.getMedicationProfile();
@@ -71,19 +61,26 @@ public class MedicationServiceImpl implements MedicationService {
                     .forEach(domainProfile::addMedicationProfile);
         }
 
-//        Start Creating New Profile
+//        Start Creating New Medication Profile
         MedicationProfile medicationProfile = new MedicationProfile(null,
                 true, cmd.getMedicationNote());
-
         Medication medication = createMedication(cmd);
         MedicationSchedule medicationSchedule = createMedicationSchedule(cmd.getSchedule());
 
-        scheduleEventService.createScheduleEvents(medicationSchedule);
+//        Create schedule events
+        List<ScheduleEvent> scheduleEvents = scheduleEventService.createScheduleEvents(medicationSchedule);
 
+//        Get the first event from the list and use it as the start time.
+        medicationSchedule.updateStartTime(scheduleEvents.getFirst().getScheduleAt());
+//        Mapped all the schedule events.
+        scheduleEvents.forEach(medicationSchedule::addScheduleEvent);
+
+//        Put them all together in the medication profile.
         medicationProfile.addMedication(medication);
         medicationProfile.addMedicationSchedule(medicationSchedule);
         createMedicationPack(cmd.getMedicationPack()).ifPresent(medicationProfile::addMedicationPack);
 
+//        Add the medication profile to user profile.
         domainProfile.addMedicationProfile(medicationProfile);
 
 //        Sync the data
@@ -96,16 +93,14 @@ public class MedicationServiceImpl implements MedicationService {
         return getResponse(smp, savedProfileEntity);
     }
 
-
     @Override
     public MedicationProfileResponse updateMedicationProfile(String medicationProfileId,
                                                              UpdateMedicationCommand cmd) {
-
         MedicationProfileEntity managedMedicationProfile =
                 medicationRepository.getMedicationProfileById(medicationProfileId);
 
         if (managedMedicationProfile == null) {
-          throw new ResourceNotFoundException("Medication Profile with id " + medicationProfileId + " not found");
+          throw new ResourceNotFoundException("Medication Profile not found!");
         }
 
         MedicationProfile domainMedicationProfile = medicationMapper
@@ -115,62 +110,59 @@ public class MedicationServiceImpl implements MedicationService {
         cmd.getNote().ifPresent(domainMedicationProfile::updateNote);
 
         cmd.getRecurrenceRule().ifPresent(newRules -> {
-            domainMedicationProfile.getMedicationSchedule()
-                    .updateRecurrenceRule(newRules);
+            MedicationSchedule medicationSchedule = domainMedicationProfile.getMedicationSchedule();
+            medicationSchedule.updateRecurrenceRule(newRules);
 
-            scheduleEventService.updateScheduleEventsRules(domainMedicationProfile.getMedicationSchedule());
+            List<ScheduleEvent> updatedEvents = scheduleEventService
+                    .updateScheduleEventsRule(medicationSchedule);
 
-            managedMedicationProfile.getMedicationSchedule()
-                    .updateMedicationSchedule(domainMedicationProfile.getMedicationSchedule());
+//            Update the starting time.
+            medicationSchedule.updateStartTime(updatedEvents.getFirst().getScheduleAt());
 
-//            Sync the events
-            Map<String, ScheduleEventEntity> existingScheduleEvents = managedMedicationProfile
+//            Update medication Schedules
+            managedMedicationProfile
+                    .getMedicationSchedule()
+                    .updateMedicationSchedule(medicationSchedule);
+
+//            Remove all the pending event and reapply the newly created events
+//            with new rules.
+            managedMedicationProfile
                     .getMedicationSchedule()
                     .getScheduleEvents()
-                    .stream()
-                    .collect(Collectors.toMap(ScheduleEventEntity::getId,
-                            event -> event));
+                    .removeIf(event ->
+                            event.getStatus().equals("PENDING"));
 
-            List<ScheduleEventEntity> syncedEvents = domainMedicationProfile
+            managedMedicationProfile
                     .getMedicationSchedule()
                     .getScheduleEvents()
-                    .stream()
-                    .map(event -> existingScheduleEvents
-                            .getOrDefault(event.getId(),
-                                    medicationMapper.toEntity(event, managedMedicationProfile.getMedicationSchedule())))
-                    .toList();
-
-            managedMedicationProfile.getMedicationSchedule().getScheduleEvents().clear();
-            managedMedicationProfile.getMedicationSchedule().getScheduleEvents().addAll(syncedEvents);
+                    .addAll(
+                            updatedEvents
+                                    .stream()
+                                    .map(event ->
+                                            medicationMapper.toEntity(event,
+                                            managedMedicationProfile.getMedicationSchedule())).toList()
+                    );
         });
 
         cmd.getDoseQuantity().ifPresent(newDoseQuantity -> {
-            domainMedicationProfile.getMedicationSchedule()
-                    .updateDoseQuantity(newDoseQuantity);
+            MedicationSchedule medicationSchedule = domainMedicationProfile.getMedicationSchedule();
+            medicationSchedule.updateDoseQuantity(newDoseQuantity);
 
-            scheduleEventService
-                    .updateScheduleEventsDosage(domainMedicationProfile.getMedicationSchedule());
+//          Update medication Schedules.
+            managedMedicationProfile
+                    .getMedicationSchedule()
+                    .updateMedicationSchedule(medicationSchedule);
 
-            managedMedicationProfile.getMedicationSchedule()
-                    .updateMedicationSchedule(domainMedicationProfile.getMedicationSchedule());
-
-            Map<String, ScheduleEvent> updatedDomainEvents = domainMedicationProfile
+//            Update the dosage for all the pending events.
+            managedMedicationProfile
                     .getMedicationSchedule()
                     .getScheduleEvents()
                     .stream()
                     .filter(event -> event.getStatus().equals("PENDING"))
-                    .collect(Collectors.toMap(ScheduleEvent::getId, event -> event));
-
-            managedMedicationProfile.getMedicationSchedule()
-                    .getScheduleEvents()
-                    .stream()
-                    .filter(event -> updatedDomainEvents.containsKey(event.getId()))
-                    .forEach(event -> event.updateScheduleEvent(updatedDomainEvents.get(event.getId())));
+                    .forEach(event -> event.updateDosage(newDoseQuantity));
         });
 
-
         managedMedicationProfile.updateMedicationProfile(domainMedicationProfile);
-
         medicationRepository.saveMedicationProfile(managedMedicationProfile);
 
         return getResponse(managedMedicationProfile);
@@ -182,7 +174,7 @@ public class MedicationServiceImpl implements MedicationService {
                 medicationRepository.getMedicationProfileById(medicationProfileId);
 
         if (managedMedicationProfile == null) {
-            throw new ResourceNotFoundException("Medication Profile with id " + medicationProfileId + " not found");
+            throw new ResourceNotFoundException("Medication Profile not found!");
         }
 
         Profile domainProfile = userMapper
@@ -210,40 +202,6 @@ public class MedicationServiceImpl implements MedicationService {
         profileRepository.saveProfile(managedMedicationProfile.getProfile());
     }
 
-    @Override
-    public List<ScheduleEventResponse> getMedicationScheduleEvents(String userId, String eventDate) {
-
-        LocalDateTime startOfDay = LocalDate.parse(eventDate, dateFormatter).atStartOfDay();
-
-        LocalDateTime endOfDay = LocalDate.parse(eventDate, dateFormatter).atTime(LocalTime.MAX);
-
-
-        List<ScheduleEventEntity> scheduleEvents =
-                medicationRepository.getScheduleEventsByUserAndDate(userId, startOfDay, endOfDay);
-
-        return scheduleEvents.stream()
-                .map(event -> {
-                    ScheduleEventResponse ser = new ScheduleEventResponse(
-                            event.getId(),
-                            event.getStatus(),
-                            event.getMedicationSchedule().getMedicationProfile().getMedication().getName(),
-                            "",
-                            event.getDosage(),
-                            event.getMedicationSchedule().getMedicationProfile().getMedication().getMeasurementUnit().getSymbol(),
-                            event.getScheduleAt().toString());
-
-                    ProfileEntity profile = event.getMedicationSchedule().getMedicationProfile().getProfile();
-
-                    ser.setProfile(new ProfileResponse(profile.getId(),
-                            profile.getName(),
-                            profile.getRelation(), profile.isSelf()));
-
-                    if(event.getTakenAt() != null) {ser.setTakenAt(event.getTakenAt().toString());}
-
-                    return ser;
-                }).toList();
-    }
-
     private Medication createMedication(CreateMedicationCommand cmd) {
 
         Medication medication = new Medication(null,
@@ -258,6 +216,9 @@ public class MedicationServiceImpl implements MedicationService {
     }
 
     private MedicationSchedule createMedicationSchedule(CreateMedSchedule schedule) {
+        final Locale locale = Locale.of("ru-RU");
+        final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+                .localizedBy(locale);
 
         return new MedicationSchedule(null,
                 schedule.dosage(),
@@ -271,7 +232,6 @@ public class MedicationServiceImpl implements MedicationService {
         if( pack == null) {
             return Optional.empty();
         }
-
         MedicationPack medicationPack = new MedicationPack(null,
                 pack.totalQuantity(),
                 pack.totalQuantity(),
@@ -281,11 +241,11 @@ public class MedicationServiceImpl implements MedicationService {
         return Optional.of(medicationPack);
     }
 
-    private static @NonNull MedicationProfileResponse getResponse(MedicationProfileEntity smp) {
+    private MedicationProfileResponse getResponse(MedicationProfileEntity smp) {
         return getResponse(smp, smp.getProfile());
     }
 
-    private static @NonNull MedicationProfileResponse getResponse(MedicationProfileEntity smp,
+    private MedicationProfileResponse getResponse(MedicationProfileEntity smp,
                                                                   ProfileEntity profileEntity) {
         String status = smp.isActive() ? "active" : "in_active";
         String createdAt = smp.getCreatedAt().isPresent() ? smp.getCreatedAt().get().toString() : "";

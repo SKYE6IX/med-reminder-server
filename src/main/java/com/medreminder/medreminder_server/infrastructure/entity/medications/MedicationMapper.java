@@ -75,7 +75,6 @@ public class MedicationMapper {
                 .toList();
 
         mse.getScheduleEvents().addAll(eventEntities);
-
         return mse;
     }
 
@@ -167,7 +166,6 @@ public class MedicationMapper {
     public ScheduleEvent toDomain(ScheduleEventEntity see) {
 
         if(see == null) return null;
-
         return new ScheduleEvent(
                 see.getId(),
                 see.getDosage(),

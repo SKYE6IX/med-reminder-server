@@ -77,9 +77,11 @@ public class ScheduleEventEntity {
     }
 
     public void updateScheduleEvent(ScheduleEvent scheduleEvent) {
-        this.dosage = scheduleEvent.getDosage();
         this.status = scheduleEvent.getStatus();
-        this.scheduleAt = scheduleEvent.getScheduleAt();
         this.takenAt = scheduleEvent.getTakenAt();
+    }
+
+    public void updateDosage(double dosage) {
+        this.dosage = dosage;
     }
 }
