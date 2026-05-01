@@ -11,6 +11,8 @@ public interface MedicationRepository {
 
     MedicationProfileEntity getMedicationProfileById(String id);
 
+    List<MedicationProfileEntity> getAllMedicationProfilesByUserId(String userId);
+
     void saveScheduleEvent(ScheduleEventEntity scheduleEvent);
 
     ScheduleEventEntity getScheduleEventById(String id);

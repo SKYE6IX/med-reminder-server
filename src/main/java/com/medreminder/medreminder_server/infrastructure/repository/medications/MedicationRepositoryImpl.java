@@ -33,6 +33,11 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     }
 
     @Override
+    public List<MedicationProfileEntity> getAllMedicationProfilesByUserId(String userId) {
+        return jpaMedicationProfileRepository.findAllByUserId(userId);
+    }
+
+    @Override
     public void saveScheduleEvent(ScheduleEventEntity scheduleEvent) {
         jpaScheduleEventRepository.save(scheduleEvent);
     }

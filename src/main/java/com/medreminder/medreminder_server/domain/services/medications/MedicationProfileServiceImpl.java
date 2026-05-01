@@ -9,11 +9,9 @@ import com.medreminder.medreminder_server.domain.services.users.ProfileRepositor
 import com.medreminder.medreminder_server.infrastructure.entity.medications.*;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
-import org.jspecify.annotations.NonNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -90,7 +88,7 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
 
         MedicationProfileEntity smp = savedProfileEntity.getMedicationProfile().getLast();
 
-        return getResponse(smp, savedProfileEntity);
+        return getMedicationProfileResponse(smp, savedProfileEntity);
     }
 
     @Override
@@ -165,7 +163,31 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
         managedMedicationProfile.updateMedicationProfile(domainMedicationProfile);
         medicationRepository.saveMedicationProfile(managedMedicationProfile);
 
-        return getResponse(managedMedicationProfile);
+        return getMedicationProfileResponse(managedMedicationProfile);
+    }
+
+    @Override
+    public MedicationProfileResponse getMedicationProfile(String medicationProfileId) {
+        MedicationProfileEntity managedMedicationProfile =
+                medicationRepository.getMedicationProfileById(medicationProfileId);
+
+        if (managedMedicationProfile == null) {
+            throw new ResourceNotFoundException("Medication Profile not found!");
+        }
+
+        return getMedicationProfileResponse(managedMedicationProfile);
+    }
+
+    @Override
+    public List<MedicationProfileResponse> getMedicationProfiles(String userId) {
+
+        List<MedicationProfileEntity> medicationProfiles = medicationRepository
+                .getAllMedicationProfilesByUserId(userId);
+
+        return medicationProfiles
+                .stream()
+                .map(this::getMedicationProfileResponse)
+                .toList();
     }
 
     @Override
@@ -202,6 +224,8 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
         profileRepository.saveProfile(managedMedicationProfile.getProfile());
     }
 
+
+//    HELPER FUNCTIONS
     private Medication createMedication(CreateMedicationCommand cmd) {
 
         Medication medication = new Medication(null,
@@ -241,12 +265,12 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
         return Optional.of(medicationPack);
     }
 
-    private MedicationProfileResponse getResponse(MedicationProfileEntity smp) {
-        return getResponse(smp, smp.getProfile());
+    private MedicationProfileResponse getMedicationProfileResponse(MedicationProfileEntity smp) {
+        return getMedicationProfileResponse(smp, smp.getProfile());
     }
 
-    private MedicationProfileResponse getResponse(MedicationProfileEntity smp,
-                                                                  ProfileEntity profileEntity) {
+    private MedicationProfileResponse getMedicationProfileResponse(MedicationProfileEntity smp,
+                                                                   ProfileEntity profileEntity) {
         String status = smp.isActive() ? "active" : "in_active";
         String createdAt = smp.getCreatedAt().isPresent() ? smp.getCreatedAt().get().toString() : "";
 

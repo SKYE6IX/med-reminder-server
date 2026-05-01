@@ -12,7 +12,7 @@ public interface JpaScheduleEventRepository extends BaseJpaRepository<ScheduleEv
 
     @Query("""
         SELECT se FROM SCHEDULE_EVENTS se
-        JOIN  se.medicationSchedule s
+        JOIN se.medicationSchedule s
         JOIN s.medicationProfile mp
         JOIN mp.profile p
         JOIN p.user u

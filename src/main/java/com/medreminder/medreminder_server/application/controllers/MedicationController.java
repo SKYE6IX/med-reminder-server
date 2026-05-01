@@ -38,6 +38,24 @@ public class MedicationController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping(value = "/{medicationProfileId}")
+    public ResponseEntity<MedicationProfileResponse> getAllMedicationProfile(@PathVariable String medicationProfileId) {
+
+        MedicationProfileResponse response = medicationProfileService.getMedicationProfile(medicationProfileId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<MedicationProfileResponse>> getAllMedicationProfiles(@AuthenticationPrincipal UserDetails userDetails) {
+        UserPrincipal principal = (UserPrincipal) userDetails;
+
+        List<MedicationProfileResponse> responses = medicationProfileService
+                .getMedicationProfiles(principal.getId());
+
+        return ResponseEntity.ok(responses);
+    }
+
     @PutMapping(value = "/{medicationProfileId}")
     public ResponseEntity<MedicationProfileResponse> updateMedicationProfile(@PathVariable String medicationProfileId,
                                                                       @RequestBody UpdateMedicationCommand cmd) {
