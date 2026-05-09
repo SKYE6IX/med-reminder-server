@@ -1,10 +1,7 @@
 package com.medreminder.medreminder_server.medication;
 
 
-import com.medreminder.medreminder_server.application.dtos.medication.CreateMedicationCommand;
-import com.medreminder.medreminder_server.application.dtos.medication.MedicationProfileResponse;
-import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
-import com.medreminder.medreminder_server.application.dtos.medication.UpdateMedicationCommand;
+import com.medreminder.medreminder_server.application.dtos.medication.*;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventServiceImpl;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationProfileService;
@@ -84,6 +81,30 @@ public class MedicationProfileServiceUnitTest {
         assertThat(response.getMedicationName()).isEqualTo(cmd.getMedicationName());
         assertThat(response.getMedicationUnit()).isEqualTo(cmd.getMedicationUnit());
         assertThat(response.getSchedule().dosage()).isEqualTo("1.2");
+    }
+
+    @Test
+    void shouldCreateMedication_Profile_WithPack(){
+
+        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+
+        CreateMedPack pack = new CreateMedPack("30","7 DAYS");
+
+        CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
+                "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0", pack);
+
+        when(profileRepository.findProfileById(any(String.class)))
+                .thenReturn(Optional.of(snubProfileEntity));
+
+        when(profileRepository.saveProfile(any(ProfileEntity.class)))
+                .thenReturn(snubProfileEntity);
+
+        MedicationProfileResponse response = medicationProfileService.createMedicationProfile(cmd);
+
+        verify(profileRepository).saveProfile(any(ProfileEntity.class));
+
+        assertThat(response).isNotNull();
+        assertThat(response.getAmountInPack()).isEqualTo(pack.totalQuantity());
     }
 
     @Test

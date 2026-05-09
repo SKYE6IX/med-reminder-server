@@ -25,8 +25,15 @@ public class MedicationMapper {
         );
 
         mpe.setMedication(toEntity(medicationProfile.getMedication(), mpe));
+
         mpe.setMedicationSchedule(toEntity(medicationProfile.getMedicationSchedule(), mpe));
-        toEntity(medicationProfile.getMedicationPack(),mpe).ifPresent(mpe::setMedicationPack);
+
+        if(!medicationProfile.getMedicationPacks().isEmpty()){
+            medicationProfile.getMedicationPacks()
+                    .stream()
+                    .map(pack -> toEntity(pack, mpe))
+                    .forEach(packEntity -> mpe.getMedicationPacks().add(packEntity));
+        }
 
         return mpe;
     }
@@ -92,20 +99,18 @@ public class MedicationMapper {
         );
     }
 
-    public Optional<MedicationPackEntity> toEntity(MedicationPack medicationPack,
+    public MedicationPackEntity toEntity(MedicationPack medicationPack,
                                                    MedicationProfileEntity mpe) {
+        if(medicationPack == null) return null;
 
-        if(medicationPack == null) return Optional.empty();
-
-        MedicationPackEntity medicationPackEntity =  new MedicationPackEntity(
+        return new MedicationPackEntity(
                 medicationPack.getId(),
                 medicationPack.getTotalQuantity(),
                 medicationPack.getCurrentQuantity(),
                 medicationPack.getNotifyRule(),
-                medicationPack.getAddedAt(),
+                medicationPack.getStartedAt(),
+                medicationPack.getStatus().toString(),
                 mpe);
-
-        return Optional.of(medicationPackEntity);
     }
 
     public MedicationProfile toDomain(MedicationProfileEntity mpe) {
@@ -122,7 +127,10 @@ public class MedicationMapper {
 
        dmp.addMedicationSchedule(toDomain(mpe.getMedicationSchedule()));
 
-       dmp.addMedicationPack(toDomain(mpe.getMedicationPack()));
+       if(!mpe.getMedicationPacks().isEmpty()){
+           mpe.getMedicationPacks()
+                   .forEach(pack -> dmp.addMedicationPack(toDomain(pack)));
+       }
 
        return dmp;
     }
@@ -186,6 +194,9 @@ public class MedicationMapper {
                 medicationPack.getTotalQuantity(),
                 medicationPack.getCurrentQuantity(),
                 medicationPack.getNotifyRule(),
-                medicationPack.getAddedAt());
+                medicationPack.getStartedAt(),
+                medicationPack.getEndedAt(),
+                MedicationPackStatus.valueOf(medicationPack.getStatus())
+        );
     }
 }

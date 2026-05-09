@@ -5,12 +5,12 @@ import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEv
 import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
 import com.medreminder.medreminder_server.application.exceptions.ResourceNotFoundException;
 import com.medreminder.medreminder_server.domain.models.medication.MedicationPack;
+import com.medreminder.medreminder_server.domain.models.medication.MedicationPackStatus;
 import com.medreminder.medreminder_server.domain.models.medication.MedicationSchedule;
 import com.medreminder.medreminder_server.domain.models.medication.ScheduleEvent;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.*;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import net.fortuna.ical4j.model.Recur;
-import org.jspecify.annotations.NonNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -117,18 +116,39 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
             managedMedicationProfile.getMedicationSchedule()
                     .updateMedicationSchedule(domainMedicationSchedule);
 
-//         Update the medication pack if it exists
-            if(managedMedicationProfile.getMedicationPack() != null){
-                MedicationPack domainMedicationPack = medicationMapper
-                        .toDomain(managedMedicationProfile.getMedicationPack());
+//         Update the medication pack for the active one,
+//            flip to in_active if the currentQuantity is lower than the
+//            incoming dosage.
+            if(!managedMedicationProfile.getMedicationPacks().isEmpty()){
+                MedicationPack activeMedicationPack = getPackByStatus(managedMedicationProfile,
+                        MedicationPackStatus.ACTIVE.toString());
 
-                if(domainMedicationPack.getCurrentQuantity().compareTo(BigDecimal.ONE) >= 1){
-                    BigDecimal quantityLeft = domainMedicationPack.getCurrentQuantity()
+                if(activeMedicationPack != null){
+                    BigDecimal remainingQuantity = activeMedicationPack.getCurrentQuantity()
                             .subtract(domainScheduleEvent.getDosage());
-                    domainMedicationPack.updateCurrentQuantity(quantityLeft);
+
+                    if(remainingQuantity.compareTo(BigDecimal.ZERO) <= 0){
+//                      End the pack and start a new one if user refill;
+                        activeMedicationPack.updateStatus(MedicationPackStatus.COMPLETED);
+                        activeMedicationPack.updateEndedAt(LocalDateTime.now());
+                        syncMedicationPack(managedMedicationProfile, activeMedicationPack);
+
+//                        Get a pending pack from the list
+                        MedicationPack pendingMedicationPack = getPackByStatus(managedMedicationProfile,
+                                MedicationPackStatus.PENDING.toString());
+                        if( pendingMedicationPack != null){
+                            BigDecimal newRemainingQuantity = activeMedicationPack
+                                    .getCurrentQuantity().add(remainingQuantity);
+
+                            pendingMedicationPack.updateCurrentQuantity(newRemainingQuantity);
+                            pendingMedicationPack.updateStartedAt(LocalDateTime.now());
+                            syncMedicationPack(managedMedicationProfile, pendingMedicationPack);
+                        }
+                    } else {
+                        activeMedicationPack.updateCurrentQuantity(remainingQuantity);
+                        syncMedicationPack(managedMedicationProfile, activeMedicationPack);
+                    }
                 }
-            managedMedicationProfile.getMedicationPack()
-                    .updateMedicationPack(domainMedicationPack);
             }
 
             final LocalDateTime takenAt = LocalDateTime.now()
@@ -211,5 +231,27 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         Recur<LocalDateTime> recur = new Recur<>(schedule.getRecurrenceRule());
 
         return recur.getDates(windowStart, windowStart, windowEnd);
+    }
+
+
+    private void syncMedicationPack(MedicationProfileEntity managedMedicationProfile,
+                                    MedicationPack medicationPack) {
+
+        managedMedicationProfile.getMedicationPacks()
+                .stream()
+                .filter(mpe->  mpe.getId().equals(medicationPack.getId()))
+                .findFirst()
+                .ifPresent(mpe-> mpe.updateMedicationPack(medicationPack));
+    }
+
+    private MedicationPack getPackByStatus(MedicationProfileEntity managedMedicationProfile,
+                                           String status) {
+        return  managedMedicationProfile
+                .getMedicationPacks()
+                .stream()
+                .filter(mpe -> mpe.getStatus().equals(status))
+                .findFirst()
+                .map(medicationMapper::toDomain)
+                .orElse(null);
     }
 }

@@ -2,6 +2,8 @@ package com.medreminder.medreminder_server.domain.models.medication;
 
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class MedicationProfile {
@@ -18,7 +20,7 @@ public class MedicationProfile {
 
     private MedicationSchedule medicationSchedule;
 
-    private MedicationPack medicationPack;
+    private final List<MedicationPack> medicationPacks = new ArrayList<>();
 
     public MedicationProfile(String id,
                              boolean isActive,
@@ -52,8 +54,8 @@ public class MedicationProfile {
         return medicationSchedule;
     }
 
-    public MedicationPack getMedicationPack() {
-        return medicationPack;
+    public List<MedicationPack> getMedicationPacks() {
+        return medicationPacks;
     }
 
     public void updateActive(boolean isActive) {
@@ -80,7 +82,7 @@ public class MedicationProfile {
 
     public void addMedicationPack(MedicationPack medicationPack) {
         if (medicationPack != null) {
-            this.medicationPack = medicationPack;
+            this.medicationPacks.add(medicationPack);
             medicationPack.addMedicationProfile(this);
         }
     }
@@ -98,7 +100,6 @@ public class MedicationProfile {
         MedicationProfile that = (MedicationProfile) obj;
         return Objects.equals(id, that.id);
     }
-
     @Override
     public int hashCode() {
         return Objects.hash(id);

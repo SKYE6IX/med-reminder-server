@@ -1,5 +1,6 @@
 package com.medreminder.medreminder_server.medication;
 
+import com.medreminder.medreminder_server.application.dtos.medication.CreateMedPack;
 import com.medreminder.medreminder_server.application.dtos.medication.CreateMedSchedule;
 import com.medreminder.medreminder_server.application.dtos.medication.CreateMedicationCommand;
 import com.medreminder.medreminder_server.domain.models.medication.*;
@@ -35,6 +36,20 @@ public class MedicationStubFactory {
                 .medicationNote("Take on time")
                 .schedule(createMedSchedule(rrule))
                 .medicationPack(null)
+                .build();
+    }
+
+    public static CreateMedicationCommand createMedicationCommand(String profileId,
+                                                                  String rrule,
+                                                                  CreateMedPack createMedPack) {
+        return new CreateMedicationCommand.Builder()
+                .profileId(profileId)
+                .medicationName("Paracetamol")
+                .medicationUnit("TABLET")
+                .medicationMeasurement("CAPSULE")
+                .medicationNote("Take on time")
+                .schedule(createMedSchedule(rrule))
+                .medicationPack(createMedPack)
                 .build();
     }
 

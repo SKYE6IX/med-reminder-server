@@ -104,6 +104,7 @@ public class CreateMedicationCommand {
             this.medicationPack = medicationPack;
             return this;
         }
+
         public CreateMedicationCommand build() {
             validate();
             return new CreateMedicationCommand(this);

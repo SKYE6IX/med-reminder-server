@@ -24,12 +24,17 @@ public class MedicationPackEntity {
     @Column(name = "notify_rule")
     private String notifyRule;
 
-    @Column(name = "added_at")
-    private LocalDateTime addedAt;
+    @Column(name = "started_at")
+    private LocalDateTime startedAt;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @Column(name = "ended_at")
+    private LocalDateTime endedAt;
+
+    private String status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medication_profile_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private MedicationProfileEntity medicationProfile;
 
     @Column(name = "created_at")
@@ -47,13 +52,15 @@ public class MedicationPackEntity {
                                 BigDecimal totalQuantity,
                                 BigDecimal currentQuantity,
                                 String notifyRule,
-                                LocalDateTime addedAt,
+                                LocalDateTime startedAt,
+                                String status,
                                 MedicationProfileEntity medicationProfile) {
         this.id = id;
         this.totalQuantity = totalQuantity;
         this.currentQuantity = currentQuantity;
         this.notifyRule = notifyRule;
-        this.addedAt = addedAt;
+        this.startedAt = startedAt;
+        this.status = status;
         this.medicationProfile = medicationProfile;
     }
 
@@ -71,8 +78,16 @@ public class MedicationPackEntity {
 
     public String getNotifyRule() { return notifyRule; }
 
-    public LocalDateTime getAddedAt() {
-        return addedAt;
+    public LocalDateTime getStartedAt() {
+        return startedAt;
+    }
+
+    public LocalDateTime getEndedAt() {
+        return endedAt;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     public MedicationProfileEntity getMedicationProfile() {
@@ -83,6 +98,8 @@ public class MedicationPackEntity {
         this.totalQuantity = medicationPack.getTotalQuantity();
         this.currentQuantity = medicationPack.getCurrentQuantity();
         this.notifyRule = medicationPack.getNotifyRule();
-        this.addedAt = medicationPack.getAddedAt();
+        this.startedAt = medicationPack.getStartedAt();
+        this.endedAt = medicationPack.getEndedAt();
+        this.status = medicationPack.getStatus().toString();
     }
 }

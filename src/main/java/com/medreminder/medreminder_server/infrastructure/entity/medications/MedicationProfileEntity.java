@@ -8,6 +8,8 @@ import jakarta.persistence.CascadeType;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Entity(name = "MEDICATION_PROFILES")
@@ -42,12 +44,11 @@ public class MedicationProfileEntity {
     )
     private MedicationScheduleEntity medicationSchedule;
 
-    @OneToOne(
+    @OneToMany(
             mappedBy = "medicationProfile",
             cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    private MedicationPackEntity medicationPack;
+            orphanRemoval = true)
+    private List<MedicationPackEntity> medicationPacks = new ArrayList<>();
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -88,19 +89,12 @@ public class MedicationProfileEntity {
         return medicationSchedule;
     }
 
-    public MedicationPackEntity getMedicationPack() {
-        return medicationPack;
+    public List<MedicationPackEntity> getMedicationPacks() {
+        return medicationPacks;
     }
 
     public ProfileEntity getProfile() {
         return profile;
-    }
-
-    public Optional<LocalDateTime> getCreatedAt() {
-       if (createdAt == null) {
-           return Optional.empty();
-       }
-       return Optional.of(createdAt);
     }
 
     public void updateMedicationProfile(MedicationProfile medicationProfile) {
@@ -114,9 +108,5 @@ public class MedicationProfileEntity {
 
     public void setMedicationSchedule(MedicationScheduleEntity medicationSchedule) {
         this.medicationSchedule = medicationSchedule;
-    }
-
-    public void setMedicationPack(MedicationPackEntity medicationPack) {
-        this.medicationPack = medicationPack;
     }
 }

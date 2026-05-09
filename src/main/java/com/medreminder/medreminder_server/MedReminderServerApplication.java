@@ -28,3 +28,13 @@ public class MedReminderServerApplication {
 // 2. Set up service and controller for creating medication pack directly and refill process.
 // 3. Update the event schedules so that when the medicationProfile is not active, it shouldn't
 //		return it.✅
+
+
+//CASE WITH PACK:
+// When user adding a new pack when they didn't initially add it when they are creating
+// the schedule profile, we need to:
+//			Get the track amount of the current amountTaken.
+//			Subtract it from the total and then save it into the currentQuantity.
+
+
+// When user want to refill the PACK, How shall we update it?
