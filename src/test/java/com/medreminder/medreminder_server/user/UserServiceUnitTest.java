@@ -112,7 +112,7 @@ public class UserServiceUnitTest {
 
         Profile testProfile = new Profile(
                 profileId.toString(),
-                profileRequest.fullName(),
+                profileRequest.name(),
                 Relation.valueOf(profileRequest.relation()),
                 false);
 
@@ -127,7 +127,7 @@ public class UserServiceUnitTest {
         ProfileResponse response = userService.createProfile(testUser.getId(), profileRequest);
 
         assertThat(response.id()).isNotNull().isEqualTo(profileId.toString());
-        assertThat(response.name()).isEqualTo(profileRequest.fullName());
+        assertThat(response.name()).isEqualTo(profileRequest.name());
         assertThat(response.relation()).isEqualTo("BROTHER");
     }
 

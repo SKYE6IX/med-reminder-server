@@ -6,7 +6,7 @@ public class UpdateMedicationCommand {
 
     private Boolean isActive;
     private String recurrenceRule;
-    private Double doseQuantity;
+    private String doseQuantity;
     private String note;
 
     public UpdateMedicationCommand() {
@@ -14,7 +14,7 @@ public class UpdateMedicationCommand {
 
     public UpdateMedicationCommand(Boolean isActive,
                                    String recurrenceRule,
-                                   Double doseQuantity,
+                                   String doseQuantity,
                                    String note) {
         this.isActive = isActive;
         this.recurrenceRule = recurrenceRule;
@@ -35,7 +35,7 @@ public class UpdateMedicationCommand {
         return Optional.of(recurrenceRule);
     }
 
-    public Optional<Double> getDoseQuantity() {
+    public Optional<String> getDoseQuantity() {
 
         if (doseQuantity == null)
             return Optional.empty();

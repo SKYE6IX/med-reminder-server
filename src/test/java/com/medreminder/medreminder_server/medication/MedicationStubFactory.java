@@ -8,6 +8,7 @@ import com.medreminder.medreminder_server.infrastructure.entity.medications.Medi
 import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -58,10 +59,11 @@ public class MedicationStubFactory {
 
         MedicationSchedule medicationSchedule = new MedicationSchedule(
                 null,
-                cmd.getSchedule().dosage(),
+                new BigDecimal(cmd.getSchedule().dosage()),
                 cmd.getSchedule().recurrenceRule(),
                 LocalDate.parse(cmd.getSchedule().startDate(), formatter),
-                cmd.getSchedule().timeZone()
+                cmd.getSchedule().timeZone(),
+                new BigDecimal("0")
         );
 
         medicationSchedule.updateStartTime(LocalDateTime.now());
@@ -96,7 +98,7 @@ public class MedicationStubFactory {
 
     private static CreateMedSchedule createMedSchedule(String rrule) {
         return new CreateMedSchedule(
-                1.2,
+                "1.2",
                 rrule,
                 "15.06.2026",
                 "Europe/Moscow"
@@ -106,7 +108,8 @@ public class MedicationStubFactory {
     private static List<ScheduleEvent> createScheduleEvents() {
         return IntStream
                 .range(1, 7)
-                .mapToObj(i -> new ScheduleEvent(UUID.randomUUID().toString(),1.2,
+                .mapToObj(i -> new ScheduleEvent(UUID.randomUUID().toString(),
+                        new BigDecimal("1.2"),
                         LocalDateTime.now().plusDays(i)))
                 .toList();
     }

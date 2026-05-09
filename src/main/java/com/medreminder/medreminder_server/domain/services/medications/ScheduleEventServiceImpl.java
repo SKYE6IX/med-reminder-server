@@ -4,16 +4,15 @@ package com.medreminder.medreminder_server.domain.services.medications;
 import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
 import com.medreminder.medreminder_server.application.exceptions.ResourceNotFoundException;
+import com.medreminder.medreminder_server.domain.models.medication.MedicationPack;
 import com.medreminder.medreminder_server.domain.models.medication.MedicationSchedule;
 import com.medreminder.medreminder_server.domain.models.medication.ScheduleEvent;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.*;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import net.fortuna.ical4j.model.Recur;
 import org.jspecify.annotations.NonNull;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -39,10 +38,18 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
         LocalDateTime now = LocalDateTime.now(ZoneId.of(schedule.getTimeZone()));
 
-        return generateSchedulesDateTime(schedule, 7)
+        List<LocalDateTime> times = generateSchedulesDateTime(schedule,
+                7)
+                .stream()
+                .sorted()
+                .toList();
+
+        //  Get the first event from the list and use it as the start time.
+        schedule.updateStartTime(times.getFirst());
+
+        return times
         .stream()
         .filter(dateTime -> dateTime.isAfter(now))
-        .sorted()
                 .map((date)-> new ScheduleEvent(null,
                         schedule.getDoseQuantity(),
                         date))
@@ -64,10 +71,17 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                                 .getScheduleAt().toLocalDate()))
                 ));
 
-        return generateSchedulesDateTime(schedule, pendingEvents.size())
+        List<LocalDateTime> times = generateSchedulesDateTime(schedule, pendingEvents.size())
+                .stream()
+                .sorted()
+                .toList();
+
+        //  Get the first event from the list and use it as the start time.
+        schedule.updateStartTime(times.getFirst());
+
+        return  times
                 .stream()
                 .filter(dateTime -> dateTime.isAfter(now))
-                .sorted()
                 .map((date)-> new ScheduleEvent(null,
                         schedule.getDoseQuantity(),
                         date))
@@ -77,17 +91,46 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
     @Override
     public ScheduleEventResponse updateScheduleEvent(String scheduleEventId, Map<String, String> eventBody) {
 
-        ScheduleEventEntity managedScheduleEvent = medicationRepository.getScheduleEventById(scheduleEventId);
+        ScheduleEventEntity managedScheduleEvent = medicationRepository
+                .getScheduleEventById(scheduleEventId);
 
         if(managedScheduleEvent == null) {
             throw new ResourceNotFoundException("Event is not found!");
         }
 
-        ScheduleEvent domainScheduleEvent = medicationMapper.toDomain(managedScheduleEvent);
+        MedicationProfileEntity managedMedicationProfile = managedScheduleEvent
+                .getMedicationSchedule().getMedicationProfile();
 
+        ScheduleEvent domainScheduleEvent = medicationMapper.toDomain(managedScheduleEvent);
         domainScheduleEvent.updateStatus(eventBody.get(("action")));
 
+        MedicationSchedule domainMedicationSchedule = medicationMapper
+                .toDomain(managedMedicationProfile.getMedicationSchedule());
+
         if(domainScheduleEvent.getStatus().equals("TAKEN")){
+
+//          Track the amount that get taken and update medication schedule.
+            BigDecimal amountTaken = domainMedicationSchedule.getTakenQuantity()
+                    .add(domainScheduleEvent.getDosage());
+            domainMedicationSchedule.updateTakenQuantity(amountTaken);
+
+            managedMedicationProfile.getMedicationSchedule()
+                    .updateMedicationSchedule(domainMedicationSchedule);
+
+//         Update the medication pack if it exists
+            if(managedMedicationProfile.getMedicationPack() != null){
+                MedicationPack domainMedicationPack = medicationMapper
+                        .toDomain(managedMedicationProfile.getMedicationPack());
+
+                if(domainMedicationPack.getCurrentQuantity().compareTo(BigDecimal.ONE) >= 1){
+                    BigDecimal quantityLeft = domainMedicationPack.getCurrentQuantity()
+                            .subtract(domainScheduleEvent.getDosage());
+                    domainMedicationPack.updateCurrentQuantity(quantityLeft);
+                }
+            managedMedicationProfile.getMedicationPack()
+                    .updateMedicationPack(domainMedicationPack);
+            }
+
             final LocalDateTime takenAt = LocalDateTime.now()
                     .atZone(ZoneId.of(managedScheduleEvent
                             .getMedicationSchedule()
@@ -99,6 +142,8 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         managedScheduleEvent.updateScheduleEvent(domainScheduleEvent);
 
         medicationRepository.saveScheduleEvent(managedScheduleEvent);
+
+        medicationRepository.saveMedicationProfile(managedMedicationProfile);
 
         return getScheduleEventResponse(managedScheduleEvent);
     }
@@ -134,7 +179,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 managedScheduleEvent.getStatus(),
                 medication.getName(),
                 "",
-                medicationSchedule.getDoseQuantity(),
+                medicationSchedule.getDoseQuantity().stripTrailingZeros().toPlainString(),
                 medication.getMeasurementUnit().getSymbol(),
                 managedScheduleEvent.getScheduleAt().toString());
 

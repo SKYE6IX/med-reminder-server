@@ -4,6 +4,7 @@ import com.medreminder.medreminder_server.domain.models.medication.ScheduleEvent
 import jakarta.persistence.*;
 import org.hibernate.annotations.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity(name = "SCHEDULE_EVENTS")
@@ -14,7 +15,7 @@ public class ScheduleEventEntity {
     @UuidGenerator
     private String id;
 
-    private double dosage;
+    private BigDecimal dosage;
 
     private String status;
 
@@ -41,7 +42,7 @@ public class ScheduleEventEntity {
     }
 
     public ScheduleEventEntity(String id,
-                               double dosage,
+                               BigDecimal dosage,
                                String status,
                                LocalDateTime scheduleAt,
                                MedicationScheduleEntity medicationSchedule){
@@ -56,7 +57,7 @@ public class ScheduleEventEntity {
         return id;
     }
 
-    public double getDosage() {
+    public BigDecimal  getDosage() {
         return dosage;
     }
 
@@ -81,7 +82,7 @@ public class ScheduleEventEntity {
         this.takenAt = scheduleEvent.getTakenAt();
     }
 
-    public void updateDosage(double dosage) {
+    public void updateDosage(BigDecimal dosage) {
         this.dosage = dosage;
     }
 }

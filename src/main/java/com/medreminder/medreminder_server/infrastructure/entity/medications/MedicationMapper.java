@@ -61,6 +61,7 @@ public class MedicationMapper {
         MedicationScheduleEntity mse = new MedicationScheduleEntity(
                 medicationSchedule.getId(),
                 medicationSchedule.getDoseQuantity(),
+                medicationSchedule.getTakenQuantity(),
                 medicationSchedule.getRecurrenceRule(),
                 medicationSchedule.getStartTime(),
                 medicationSchedule.getStartDate(),
@@ -152,7 +153,8 @@ public class MedicationMapper {
                 mse.getDoseQuantity(),
                 mse.getRecurrenceRule(),
                 mse.getStartDate(),
-                mse.getTimeZone());
+                mse.getTimeZone(),
+                mse.getTakenQuantity());
 
         medicationSchedule.updateStartTime(mse.getStartTime());
 

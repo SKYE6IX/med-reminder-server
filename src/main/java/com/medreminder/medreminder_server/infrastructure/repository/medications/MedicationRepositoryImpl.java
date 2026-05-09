@@ -20,6 +20,8 @@ public class MedicationRepositoryImpl implements MedicationRepository {
         this.jpaScheduleEventRepository = jpaScheduleEventRepository;
     }
 
+
+
     @Override
     public void saveMedicationProfile(MedicationProfileEntity medicationProfileEntity) {
         jpaMedicationProfileRepository.save(medicationProfileEntity);
@@ -44,8 +46,8 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
     @Override
     public ScheduleEventEntity getScheduleEventById(String id) {
-
-        return jpaScheduleEventRepository.findById(id).orElse(null);
+        return jpaScheduleEventRepository.findByIdWithDetails(id)
+                .orElse(null);
     }
 
     @Override

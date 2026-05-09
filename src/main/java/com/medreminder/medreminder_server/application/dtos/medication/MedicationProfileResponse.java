@@ -9,10 +9,10 @@ public class MedicationProfileResponse {
     private String medicationUnit;
     private String status;
     private String note;
-    private String createdAt;
     private ProfileResponse profile;
     private MedScheduleResponse schedule;
-
+    private String amountTaken;
+    private String amountInPack;
 
     public MedicationProfileResponse() {
     }
@@ -20,13 +20,12 @@ public class MedicationProfileResponse {
     public MedicationProfileResponse(String id,
                                      String medicationName,
                                      String medicationUnit, String status,
-                                     String note, String createdAt) {
+                                     String note) {
         this.id = id;
         this.medicationName = medicationName;
         this.medicationUnit = medicationUnit;
         this.status = status;
         this.note = note;
-        this.createdAt = createdAt;
     }
 
     public String getId() {
@@ -49,10 +48,6 @@ public class MedicationProfileResponse {
         return note;
     }
 
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
     public ProfileResponse getProfile() {
         return profile;
     }
@@ -61,11 +56,27 @@ public class MedicationProfileResponse {
         return schedule;
     }
 
+    public String getAmountTaken() {
+        return amountTaken;
+    }
+
+    public String getAmountInPack() {
+        return amountInPack;
+    }
+
     public void setProfile(ProfileResponse profile) {
         this.profile = profile;
     }
 
     public void setSchedule(MedScheduleResponse schedule) {
         this.schedule = schedule;
+    }
+
+    public void setAmountTaken(String amountTaken) {
+        this.amountTaken = amountTaken;
+    }
+
+    public void setAmountInPack(String amountInPack) {
+        this.amountInPack = amountInPack;
     }
 }

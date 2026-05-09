@@ -10,6 +10,7 @@ import com.medreminder.medreminder_server.infrastructure.entity.medications.*;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -68,8 +69,6 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
 //        Create schedule events
         List<ScheduleEvent> scheduleEvents = scheduleEventService.createScheduleEvents(medicationSchedule);
 
-//        Get the first event from the list and use it as the start time.
-        medicationSchedule.updateStartTime(scheduleEvents.getFirst().getScheduleAt());
 //        Mapped all the schedule events.
         scheduleEvents.forEach(medicationSchedule::addScheduleEvent);
 
@@ -114,9 +113,6 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
             List<ScheduleEvent> updatedEvents = scheduleEventService
                     .updateScheduleEventsRule(medicationSchedule);
 
-//            Update the starting time.
-            medicationSchedule.updateStartTime(updatedEvents.getFirst().getScheduleAt());
-
 //            Update medication Schedules
             managedMedicationProfile
                     .getMedicationSchedule()
@@ -144,7 +140,7 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
 
         cmd.getDoseQuantity().ifPresent(newDoseQuantity -> {
             MedicationSchedule medicationSchedule = domainMedicationProfile.getMedicationSchedule();
-            medicationSchedule.updateDoseQuantity(newDoseQuantity);
+            medicationSchedule.updateDoseQuantity(new BigDecimal(newDoseQuantity));
 
 //          Update medication Schedules.
             managedMedicationProfile
@@ -157,7 +153,7 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                     .getScheduleEvents()
                     .stream()
                     .filter(event -> event.getStatus().equals("PENDING"))
-                    .forEach(event -> event.updateDosage(newDoseQuantity));
+                    .forEach(event -> event.updateDosage(new BigDecimal(newDoseQuantity)));
         });
 
         managedMedicationProfile.updateMedicationProfile(domainMedicationProfile);
@@ -225,7 +221,7 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
     }
 
 
-//    HELPER FUNCTIONS
+//    HELPER METHODS
     private Medication createMedication(CreateMedicationCommand cmd) {
 
         Medication medication = new Medication(null,
@@ -234,6 +230,7 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
 
         MeasurementUnit measurementUnit = new MeasurementUnit(null,
                 Measurement.valueOf(cmd.getMedicationMeasurement()));
+
         medication.addMeasurementUnit(measurementUnit);
 
         return medication;
@@ -245,10 +242,11 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                 .localizedBy(locale);
 
         return new MedicationSchedule(null,
-                schedule.dosage(),
+                new BigDecimal(schedule.dosage()),
                 schedule.recurrenceRule(),
                 LocalDate.parse(schedule.startDate(), dateFormatter),
-                schedule.timeZone());
+                schedule.timeZone(),
+                new BigDecimal("0"));
     }
 
     private Optional<MedicationPack> createMedicationPack(CreateMedPack pack) {
@@ -256,9 +254,10 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
         if( pack == null) {
             return Optional.empty();
         }
+
         MedicationPack medicationPack = new MedicationPack(null,
-                pack.totalQuantity(),
-                pack.totalQuantity(),
+                new BigDecimal(pack.totalQuantity()),
+                new BigDecimal(pack.totalQuantity()),
                 pack.notifyRule(),
                 LocalDateTime.now());
 
@@ -272,15 +271,14 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
     private MedicationProfileResponse getMedicationProfileResponse(MedicationProfileEntity smp,
                                                                    ProfileEntity profileEntity) {
         String status = smp.isActive() ? "active" : "in_active";
-        String createdAt = smp.getCreatedAt().isPresent() ? smp.getCreatedAt().get().toString() : "";
 
 //        Create a new Medication profile response object
         MedicationProfileResponse response = new MedicationProfileResponse(
                 smp.getId(),
                 smp.getMedication().getName(),
                 smp.getMedication().getUnitType(),
-                status, smp.getNote(),
-                createdAt);
+                status,
+                smp.getNote());
 
 //        Attach the selected profile to the response
         response.setProfile(new ProfileResponse(
@@ -294,12 +292,17 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
 
         response.setSchedule(new MedScheduleResponse(
                 schedule.getId(),
-                schedule.getDoseQuantity(),
+                schedule.getDoseQuantity().stripTrailingZeros().toPlainString(),
                 smp.getMedication().getMeasurementUnit().getSymbol(),
                 schedule.getRecurrenceRule(),
                 schedule.getStartTime().toString(),
                 schedule.getStartDate().toString())
         );
+
+        if(smp.getMedicationPack() != null) {
+            response.setAmountInPack(smp.getMedicationPack().getTotalQuantity().toString());
+        }
+
         return response;
     }
 

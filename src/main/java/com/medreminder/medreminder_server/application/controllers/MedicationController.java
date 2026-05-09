@@ -77,7 +77,6 @@ public class MedicationController {
     @PutMapping(value = "/schedules/event/{eventId}")
     public ResponseEntity<ScheduleEventResponse> updateScheduleEvent(@PathVariable String eventId,
                                                                      @RequestBody Map<String, String> eventBody) {
-
         var response = scheduleEventService.updateScheduleEvent(eventId, eventBody);
 
         return ResponseEntity.ok(response);
@@ -86,7 +85,6 @@ public class MedicationController {
     @GetMapping(value = "/schedules/event")
     public ResponseEntity<List<ScheduleEventResponse>> getMedicationsScheduleEvents(@AuthenticationPrincipal UserDetails userDetails,
                                                                                     @RequestParam String eventDate) {
-
         UserPrincipal principal = (UserPrincipal) userDetails;
 
         List<ScheduleEventResponse> response = scheduleEventService

@@ -135,12 +135,9 @@ public class AppConfig {
 
     private <T> T createProxyFactory(T target, Class<T> serviceInterface,
                                      TransactionInterceptor txInterceptor ) {
-
         ProxyFactory proxyFactory = new ProxyFactory(target);
         proxyFactory.addAdvice(txInterceptor);
         proxyFactory.addInterface(serviceInterface);
-
         return serviceInterface.cast(proxyFactory.getProxy());
-
     }
 }

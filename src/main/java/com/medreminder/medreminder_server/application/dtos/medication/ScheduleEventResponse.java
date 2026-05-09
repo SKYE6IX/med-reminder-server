@@ -8,7 +8,7 @@ public class ScheduleEventResponse {
     private final String status;
     private final String medicationName;
     private final String medicationImageUrl;
-    private final double dosage;
+    private final String dosage;
     private final String measurement;
     private final String scheduleAt;
     private String takenAt;
@@ -18,7 +18,7 @@ public class ScheduleEventResponse {
                                  String status,
                                  String medicationName,
                                  String medicationImageUrl,
-                                 double dosage,
+                                 String dosage,
                                  String measurement,
                                  String scheduleAt) {
         this.id = id;
@@ -46,7 +46,7 @@ public class ScheduleEventResponse {
         return measurement;
     }
 
-    public double getDosage() {
+    public String getDosage() {
         return dosage;
     }
 

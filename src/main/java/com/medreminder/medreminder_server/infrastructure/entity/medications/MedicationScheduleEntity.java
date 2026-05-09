@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import org.hibernate.annotations.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,7 +20,10 @@ public class MedicationScheduleEntity {
     private String id;
 
     @Column(name = "dose_quantity")
-    private double doseQuantity;
+    private BigDecimal doseQuantity;
+
+    @Column(name = "taken_quantity")
+    private BigDecimal  takenQuantity;
 
     @Column(name = "recurrence_rule")
     private String recurrenceRule;
@@ -60,7 +64,8 @@ public class MedicationScheduleEntity {
     }
 
     public MedicationScheduleEntity(String id,
-                                    double doseQuantity,
+                                    BigDecimal doseQuantity,
+                                    BigDecimal takenQuantity,
                                     String recurrenceRule,
                                     LocalDateTime startTime,
                                     LocalDate startDate,
@@ -68,6 +73,7 @@ public class MedicationScheduleEntity {
                                     MedicationProfileEntity medicationProfile) {
         this.id = id;
         this.doseQuantity = doseQuantity;
+        this.takenQuantity = takenQuantity;
         this.recurrenceRule = recurrenceRule;
         this.startTime = startTime;
         this.startDate = startDate;
@@ -79,8 +85,12 @@ public class MedicationScheduleEntity {
         return id;
     }
 
-    public double getDoseQuantity() {
+    public BigDecimal getDoseQuantity() {
         return doseQuantity;
+    }
+
+    public BigDecimal getTakenQuantity() {
+        return takenQuantity;
     }
 
     public String getRecurrenceRule() {
@@ -113,6 +123,7 @@ public class MedicationScheduleEntity {
 
     public void updateMedicationSchedule(MedicationSchedule medicationSchedule){
         this.doseQuantity = medicationSchedule.getDoseQuantity();
+        this.takenQuantity = medicationSchedule.getTakenQuantity();
         this.recurrenceRule = medicationSchedule.getRecurrenceRule();
         this.startTime = medicationSchedule.getStartTime();
     }

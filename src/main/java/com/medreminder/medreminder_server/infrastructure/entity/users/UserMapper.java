@@ -36,16 +36,6 @@ public class UserMapper {
        return userEntity;
     }
 
-    public ProfileEntity toEntity(Profile profile) {
-
-        if (profile == null) return null;
-        return new ProfileEntity(
-                profile.getId(),
-                profile.getName(),
-                profile.getRelation().name(),
-                profile.isSelf());
-    }
-
     public ProfileEntity toEntity(Profile profile,
                                   UserEntity userEntity ) {
         if (profile == null) return null;

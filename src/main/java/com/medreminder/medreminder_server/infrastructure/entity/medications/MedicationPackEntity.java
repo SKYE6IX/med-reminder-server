@@ -1,8 +1,10 @@
 package com.medreminder.medreminder_server.infrastructure.entity.medications;
 
+import com.medreminder.medreminder_server.domain.models.medication.MedicationPack;
 import jakarta.persistence.*;
 import org.hibernate.annotations.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity(name = "MEDICATION_PACKS")
@@ -14,10 +16,10 @@ public class MedicationPackEntity {
     private String id;
 
     @Column(name = "total_quantity")
-    private double totalQuantity;
+    private BigDecimal totalQuantity;
 
     @Column(name = "current_quantity")
-    private double currentQuantity;
+    private BigDecimal currentQuantity;
 
     @Column(name = "notify_rule")
     private String notifyRule;
@@ -42,8 +44,8 @@ public class MedicationPackEntity {
     }
 
     public MedicationPackEntity(String id,
-                                double totalQuantity,
-                                double currentQuantity,
+                                BigDecimal totalQuantity,
+                                BigDecimal currentQuantity,
                                 String notifyRule,
                                 LocalDateTime addedAt,
                                 MedicationProfileEntity medicationProfile) {
@@ -59,11 +61,11 @@ public class MedicationPackEntity {
         return id;
     }
 
-    public double getTotalQuantity() {
+    public BigDecimal getTotalQuantity() {
         return totalQuantity;
     }
 
-    public double getCurrentQuantity() {
+    public BigDecimal getCurrentQuantity() {
         return currentQuantity;
     }
 
@@ -75,5 +77,12 @@ public class MedicationPackEntity {
 
     public MedicationProfileEntity getMedicationProfile() {
         return medicationProfile;
+    }
+
+    public void updateMedicationPack (MedicationPack medicationPack) {
+        this.totalQuantity = medicationPack.getTotalQuantity();
+        this.currentQuantity = medicationPack.getCurrentQuantity();
+        this.notifyRule = medicationPack.getNotifyRule();
+        this.addedAt = medicationPack.getAddedAt();
     }
 }

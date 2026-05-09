@@ -1,6 +1,6 @@
 package com.medreminder.medreminder_server.application.dtos.medication;
 
-public record CreateMedSchedule(double dosage,
+public record CreateMedSchedule(String dosage,
                                 String recurrenceRule,
                                 String startDate,
                                 String timeZone) {}

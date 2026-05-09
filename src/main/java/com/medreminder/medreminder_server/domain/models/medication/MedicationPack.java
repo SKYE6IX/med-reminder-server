@@ -1,19 +1,20 @@
 package com.medreminder.medreminder_server.domain.models.medication;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class MedicationPack {
 
     private final String id;
-    private double totalQuantity;
-    private double currentQuantity;
+    private BigDecimal totalQuantity;
+    private BigDecimal  currentQuantity;
     private String notifyRule;
     private final LocalDateTime addedAt;
     private MedicationProfile medicationProfile;
 
     public MedicationPack(String id,
-                          double totalQuantity,
-                          double currentQuantity,
+                          BigDecimal totalQuantity,
+                          BigDecimal currentQuantity,
                           String notifyRule,
                           LocalDateTime addedAt) {
         this.id = id;
@@ -27,11 +28,11 @@ public class MedicationPack {
         return id;
     }
 
-    public double getTotalQuantity() {
+    public BigDecimal getTotalQuantity() {
         return totalQuantity;
     }
 
-    public double getCurrentQuantity() {
+    public BigDecimal getCurrentQuantity() {
         return currentQuantity;
     }
 
@@ -47,11 +48,11 @@ public class MedicationPack {
         return medicationProfile;
     }
 
-    public void updateTotalQuantity(double totalQuantity) {
+    public void updateTotalQuantity(BigDecimal totalQuantity) {
         this.totalQuantity = totalQuantity;
     }
 
-    public void updateCurrentQuantity(double currentQuantity) {
+    public void updateCurrentQuantity(BigDecimal currentQuantity) {
         this.currentQuantity = currentQuantity;
     }
 

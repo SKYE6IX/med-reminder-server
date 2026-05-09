@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
         User domainUser = userMapper.toDomain(managedUser);
 
-        Profile profile = new Profile(null, profileRequest.fullName(),
+        Profile profile = new Profile(null, profileRequest.name(),
                 Relation.valueOf(profileRequest.relation()), false);
 
         domainUser.addProfiles(profile);
@@ -153,11 +153,10 @@ public class UserServiceImpl implements UserService {
         List<ProfileEntity> syncedProfiles = domainProfiles
                 .stream()
                 .map(p -> existingProfiles
-                        .getOrDefault(p.getId(), userMapper.toEntity(p)))
+                        .getOrDefault(p.getId(), userMapper.toEntity(p, managedEntity)))
                 .toList();
 
         managedEntity.getProfiles().clear();
-
         managedEntity.getProfiles().addAll(syncedProfiles);
     }
 }

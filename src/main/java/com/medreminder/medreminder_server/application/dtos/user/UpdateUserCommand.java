@@ -22,18 +22,22 @@ public class UpdateUserCommand {
     }
 
     public Optional<String> getEmail() {
-        return Optional.ofNullable(email);
+        return Optional.ofNullable(email)
+                .filter(s -> !s.isEmpty());
     }
 
     public Optional<String> getName() {
-        return Optional.ofNullable(name);
+        return Optional.ofNullable(name)
+                .filter(s -> !s.isEmpty());
     }
 
     public Optional<String> getDateOfBirth() {
-        return Optional.ofNullable(dateOfBirth);
+        return Optional.ofNullable(dateOfBirth)
+                .filter(s -> !s.isEmpty());
     }
 
     public Optional<String> getGender() {
-        return Optional.ofNullable(gender);
+        return Optional.ofNullable(gender)
+                .filter(s -> !s.isEmpty());
     }
 }

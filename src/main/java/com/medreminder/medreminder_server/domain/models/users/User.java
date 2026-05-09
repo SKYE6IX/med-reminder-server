@@ -4,8 +4,10 @@ import com.medreminder.medreminder_server.application.dtos.user.UpdateUserComman
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class User  {
@@ -88,9 +90,11 @@ public class User  {
     }
 
     public void updateUser(UpdateUserCommand command) {
+        final Locale locale = Locale.of("ru-RU");
+        final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         command.getEmail().ifPresent(this::updateEmail);
         command.getName().ifPresent(this::updateName);
-        command.getDateOfBirth().ifPresent(dob -> this.dateOfBirth = LocalDate.parse(dob));
+        command.getDateOfBirth().ifPresent(dob -> this.dateOfBirth = LocalDate.parse(dob, dateFormatter));
         command.getGender().ifPresent(gender -> this.gender = gender);
     }
 

@@ -2,6 +2,7 @@ package com.medreminder.medreminder_server.domain.models.medication;
 
 import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,7 +11,8 @@ import java.util.List;
 public class MedicationSchedule {
 
     private final String id;
-    private double doseQuantity;
+    private BigDecimal doseQuantity;
+    private BigDecimal takenQuantity;
     private String recurrenceRule;
     private LocalDateTime startTime;
     private final LocalDate startDate;
@@ -20,22 +22,24 @@ public class MedicationSchedule {
     private final List<ScheduleEvent> scheduleEvents = new ArrayList<>();
 
     public MedicationSchedule(String id,
-                              double doseQuantity,
+                              BigDecimal doseQuantity,
                               String recurrenceRule,
                               LocalDate startDate,
-                              String timeZone) {
+                              String timeZone,
+                              BigDecimal takenQuantity) {
         this.id = id;
         this.doseQuantity = doseQuantity;
         this.recurrenceRule = recurrenceRule;
         this.startDate = startDate;
         this.timeZone = timeZone;
+        this.takenQuantity = takenQuantity;
     }
 
     public String getId() {
         return id;
     }
 
-    public double getDoseQuantity() {
+    public BigDecimal getDoseQuantity() {
         return doseQuantity;
     }
 
@@ -67,8 +71,16 @@ public class MedicationSchedule {
         return scheduleEvents;
     }
 
-    public void updateDoseQuantity(double doseQuantity) {
+    public BigDecimal getTakenQuantity() {
+        return takenQuantity;
+    }
+
+    public void updateDoseQuantity(BigDecimal  doseQuantity) {
         this.doseQuantity = doseQuantity;
+    }
+
+    public void updateTakenQuantity(BigDecimal takenQuantity) {
+        this.takenQuantity = takenQuantity;
     }
 
     public void updateRecurrenceRule(String recurrenceRule) {

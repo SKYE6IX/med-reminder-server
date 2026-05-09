@@ -156,7 +156,8 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public ResetPasswordResponse resetPassword(String userId, String oldPassword, String newPassword) {
 
-        UserEntity existingUser = userRepository.findUserById(userId).orElse(null);
+        UserEntity existingUser = userRepository.findUserById(userId)
+                .orElse(null);
 
         if (existingUser == null) {
             throw new UsernameNotFoundException("User not found!");

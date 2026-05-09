@@ -1,19 +1,20 @@
 package com.medreminder.medreminder_server.domain.models.medication;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class ScheduleEvent {
 
     private final String id;
-    private double dosage;
+    private final BigDecimal dosage;
     private Status status;
     private final LocalDateTime scheduleAt;
     private LocalDateTime takenAt;
     private MedicationSchedule medicationSchedule;
 
     public ScheduleEvent(String id,
-                         double dosage,
+                         BigDecimal dosage,
                          LocalDateTime scheduleAt) {
         this.id = id;
         this.dosage = dosage;
@@ -22,7 +23,7 @@ public class ScheduleEvent {
     }
 
     public ScheduleEvent(String id,
-                         double dosage,
+                         BigDecimal dosage,
                          String status,
                          LocalDateTime scheduleAt,
                          LocalDateTime takenAt) {
@@ -55,7 +56,7 @@ public class ScheduleEvent {
         return takenAt;
     }
 
-    public double getDosage() {
+    public BigDecimal  getDosage() {
         return dosage;
     }
 
@@ -65,10 +66,6 @@ public class ScheduleEvent {
 
     public void setMedicationSchedule(MedicationSchedule medicationSchedule) {
         this.medicationSchedule = medicationSchedule;
-    }
-
-    public void updateDosage(double dosage) {
-        this.dosage = dosage;
     }
 
     public void updateStatus(String status) {

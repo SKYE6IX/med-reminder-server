@@ -3,6 +3,7 @@ package com.medreminder.medreminder_server.medication;
 
 import com.medreminder.medreminder_server.application.dtos.medication.CreateMedicationCommand;
 import com.medreminder.medreminder_server.application.dtos.medication.MedicationProfileResponse;
+import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
 import com.medreminder.medreminder_server.application.dtos.medication.UpdateMedicationCommand;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventServiceImpl;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
@@ -12,6 +13,7 @@ import com.medreminder.medreminder_server.domain.services.medications.ScheduleEv
 import com.medreminder.medreminder_server.domain.services.users.ProfileRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -39,13 +43,15 @@ public class MedicationProfileServiceUnitTest {
 
     private MedicationProfileService medicationProfileService;
 
+    private ScheduleEventService scheduleEventService;
+
     private final MedicationMapper medicationMapper = new MedicationMapper();
 
     private final UserMapper userMapper = new UserMapper();
 
     @BeforeEach
     void setUp(){
-        final ScheduleEventService scheduleEventService =
+        scheduleEventService =
                 new ScheduleEventServiceImpl(medicationRepository, medicationMapper);
 
         medicationProfileService = new MedicationProfileServiceImpl(
@@ -77,7 +83,7 @@ public class MedicationProfileServiceUnitTest {
         assertThat(response).isNotNull();
         assertThat(response.getMedicationName()).isEqualTo(cmd.getMedicationName());
         assertThat(response.getMedicationUnit()).isEqualTo(cmd.getMedicationUnit());
-        assertThat(response.getSchedule().dosage()).isEqualTo(1.2);
+        assertThat(response.getSchedule().dosage()).isEqualTo("1.2");
     }
 
     @Test
@@ -148,7 +154,7 @@ public class MedicationProfileServiceUnitTest {
                 .thenReturn(stubMedicationProfileEntity);
 
         UpdateMedicationCommand updateCmd = new UpdateMedicationCommand(null,
-                null, 5.5, null);
+                null, "5.5", null);
 
         MedicationProfileResponse response = medicationProfileService
                 .updateMedicationProfile(stubMedicationProfileEntity.getId(), updateCmd);
@@ -156,7 +162,7 @@ public class MedicationProfileServiceUnitTest {
         verify(medicationRepository).saveMedicationProfile(any(MedicationProfileEntity.class));
 
         assertThat(response).isNotNull();
-        assertThat(response.getSchedule().dosage()).isEqualTo(5.5);
+        assertThat(response.getSchedule().dosage()).isEqualTo("5.5");
     }
 
     @Test
@@ -183,4 +189,35 @@ public class MedicationProfileServiceUnitTest {
         assertThat(ownerProfileEntity.getMedicationProfile().size()).isEqualTo(0);
     }
 
+
+    @Test
+    void shouldUpdateScheduleEvent_thenSaveIt(){
+
+        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
+                "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0");
+
+        MedicationProfileEntity stubMedicationProfileEntity =
+                MedicationStubFactory.createMedicationProfileEntity(cmd, medicationMapper);
+
+        ScheduleEventEntity stubScheduleEvent = stubMedicationProfileEntity
+                .getMedicationSchedule().getScheduleEvents().getFirst();
+
+        when(medicationRepository.getScheduleEventById(any(String.class)))
+                .thenReturn(stubScheduleEvent);
+
+        Map<String, String> updateEventInput = new HashMap<>();
+        updateEventInput.put("action", "TAKEN");
+
+        ScheduleEventResponse response = scheduleEventService
+                .updateScheduleEvent(stubScheduleEvent.getId(),updateEventInput);
+
+        verify(medicationRepository).saveScheduleEvent(any(ScheduleEventEntity.class));
+        verify(medicationRepository).saveMedicationProfile(any(MedicationProfileEntity.class));
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo("TAKEN");
+        assertThat(response.getTakenAt()).isNotNull();
+        assertThat(stubMedicationProfileEntity.getMedicationSchedule().getTakenQuantity().toString()).isEqualTo("1.2");
+    }
 }
