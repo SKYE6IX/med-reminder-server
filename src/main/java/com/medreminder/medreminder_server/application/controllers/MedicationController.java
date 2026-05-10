@@ -1,10 +1,7 @@
 package com.medreminder.medreminder_server.application.controllers;
 
 
-import com.medreminder.medreminder_server.application.dtos.medication.CreateMedicationCommand;
-import com.medreminder.medreminder_server.application.dtos.medication.MedicationProfileResponse;
-import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
-import com.medreminder.medreminder_server.application.dtos.medication.UpdateMedicationCommand;
+import com.medreminder.medreminder_server.application.dtos.medication.*;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationProfileService;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventService;
@@ -13,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -89,6 +87,14 @@ public class MedicationController {
 
         List<ScheduleEventResponse> response = scheduleEventService
                 .getScheduleEvents(principal.getId(), eventDate);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/packs")
+    public ResponseEntity<Map<String, String>> createMedicationPack(@RequestBody AddMedicationPack addMedicationPack){
+
+        Map<String, String> response = medicationProfileService.createMedicationPack(addMedicationPack);
 
         return ResponseEntity.ok(response);
     }

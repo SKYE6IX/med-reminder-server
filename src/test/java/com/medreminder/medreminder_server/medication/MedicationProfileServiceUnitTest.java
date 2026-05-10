@@ -88,7 +88,7 @@ public class MedicationProfileServiceUnitTest {
 
         ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
 
-        CreateMedPack pack = new CreateMedPack("30","7 DAYS");
+        CreateMedicationPack pack = new CreateMedicationPack("30","7 DAYS");
 
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
                 "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0", pack);

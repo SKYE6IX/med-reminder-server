@@ -5,6 +5,7 @@ import com.medreminder.medreminder_server.application.security.JwtUtil;
 import com.medreminder.medreminder_server.domain.services.UseCase;
 import com.medreminder.medreminder_server.domain.services.medications.*;
 import com.medreminder.medreminder_server.domain.services.users.*;
+import com.medreminder.medreminder_server.infrastructure.entity.billing.mappers.PlanMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import com.medreminder.medreminder_server.infrastructure.repository.users.JpaRefreshTokenRepository;
@@ -39,9 +40,10 @@ public class AppConfig {
     @Bean
     UserService userService(UserRepository userRepository,
                             UserMapper userMapper,
+                            PlanMapper planMapper,
                             TransactionInterceptor txInterceptor ) {
 
-        UserService userService = new UserServiceImpl(userRepository, userMapper);
+        UserService userService = new UserServiceImpl(userRepository, userMapper, planMapper);
 
         return createProxyFactory(userService,UserService.class,txInterceptor);
     }

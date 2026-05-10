@@ -2,6 +2,9 @@ package com.medreminder.medreminder_server.infrastructure.entity.users;
 
 
 import com.medreminder.medreminder_server.domain.models.users.User;
+import com.medreminder.medreminder_server.infrastructure.entity.billing.PaymentEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.billing.PlanEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.billing.SubscriptionEntity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -42,14 +45,6 @@ public class UserEntity {
     @Column(name = "password_reset_redeem_at")
     private LocalDateTime passwordResetRedeemedAt;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-
     @OneToMany(
             mappedBy = "user",
             cascade = CascadeType.PERSIST
@@ -63,6 +58,35 @@ public class UserEntity {
     )
     @OrderBy("createdAt ASC")
     private List<ProfileEntity> profiles = new ArrayList<>();
+
+    @OneToOne(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private PlanEntity plan;
+
+    @OneToOne(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private SubscriptionEntity subscription;
+
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<PaymentEntity> payments = new ArrayList<>();
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     public UserEntity() {}
 
@@ -118,6 +142,26 @@ public class UserEntity {
 
     public LocalDateTime getPasswordResetRedeemedAt() {
         return passwordResetRedeemedAt;
+    }
+
+    public PlanEntity getPlan() {
+        return plan;
+    }
+
+    public SubscriptionEntity getSubscription() {
+        return subscription;
+    }
+
+    public void setPlan(PlanEntity plan) {
+        this.plan = plan;
+    }
+
+    public void setSubscription(SubscriptionEntity subscription) {
+        this.subscription = subscription;
+    }
+
+    public List<PaymentEntity> getPayments() {
+        return payments;
     }
 
     public void syncUserData(User domain){

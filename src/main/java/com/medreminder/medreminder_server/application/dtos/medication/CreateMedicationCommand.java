@@ -4,9 +4,7 @@ import com.medreminder.medreminder_server.application.exceptions.BadRequestExcep
 import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.annotation.JsonPOJOBuilder;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @JsonDeserialize(builder = CreateMedicationCommand.Builder.class)
@@ -17,7 +15,7 @@ public class CreateMedicationCommand {
     private String medicationMeasurement;
     private String medicationNote;
     private CreateMedSchedule schedule;
-    private CreateMedPack medicationPack;
+    private CreateMedicationPack medicationPack;
 
     public CreateMedicationCommand() {
     }
@@ -56,7 +54,7 @@ public class CreateMedicationCommand {
         return schedule;
     }
 
-    public CreateMedPack getMedicationPack() {
+    public CreateMedicationPack getMedicationPack() {
         return medicationPack;
     }
 
@@ -68,7 +66,7 @@ public class CreateMedicationCommand {
         private String medicationMeasurement;
         private String medicationNote;
         private CreateMedSchedule schedule;
-        private CreateMedPack medicationPack;
+        private CreateMedicationPack medicationPack;
 
 
         public Builder profileId(String profileId) {
@@ -100,7 +98,7 @@ public class CreateMedicationCommand {
             return this;
         }
 
-        public Builder medicationPack(CreateMedPack medicationPack) {
+        public Builder medicationPack(CreateMedicationPack medicationPack) {
             this.medicationPack = medicationPack;
             return this;
         }

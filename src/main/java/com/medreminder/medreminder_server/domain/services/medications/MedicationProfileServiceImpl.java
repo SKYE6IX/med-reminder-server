@@ -10,6 +10,7 @@ import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEnt
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class MedicationProfileServiceImpl implements MedicationProfileService {
@@ -214,5 +215,41 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                 managedMedicationProfile.getProfile());
 
         profileRepository.saveProfile(managedMedicationProfile.getProfile());
+    }
+
+    @Override
+    public Map<String, String> createMedicationPack(AddMedicationPack addMedicationPack) {
+
+        MedicationProfileEntity managedMedicationProfile =
+                medicationRepository.getMedicationProfileById(addMedicationPack.medicationProfileId());
+
+        if (managedMedicationProfile == null) {
+            throw new ResourceNotFoundException("Medication Profile not found!");
+        }
+
+        boolean hasActivePack = managedMedicationProfile
+                .getMedicationPacks()
+                .stream()
+                .anyMatch(mpe -> mpe.getStatus().equals("ACTIVE"));
+
+        MedicationPack pack = new MedicationPack(null,
+                new BigDecimal(addMedicationPack.totalQuantity()),
+                new BigDecimal(addMedicationPack.totalQuantity()),
+                addMedicationPack.notifyRule(),
+                hasActivePack ? null : LocalDateTime.now(),
+                null,
+                hasActivePack ? MedicationPackStatus.PENDING : MedicationPackStatus.ACTIVE
+                );
+
+        managedMedicationProfile
+                .getMedicationPacks()
+                .add(medicationMapper.toEntity(pack, managedMedicationProfile));
+
+        medicationRepository.saveMedicationProfile(managedMedicationProfile);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("amountInPack", pack.getTotalQuantity().toString());
+
+        return result;
     }
 }

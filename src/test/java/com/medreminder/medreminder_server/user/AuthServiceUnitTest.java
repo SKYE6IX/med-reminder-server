@@ -6,6 +6,7 @@ import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.services.users.*;
+import com.medreminder.medreminder_server.infrastructure.entity.billing.mappers.PlanMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import com.medreminder.medreminder_server.infrastructure.repository.users.JpaRefreshTokenRepository;
@@ -49,8 +50,9 @@ public class AuthServiceUnitTest {
 
     @BeforeEach
     void setUp(){
+        PlanMapper planMapper = new PlanMapper();
         JwtUtil jwtUtil = new JwtUtil(env);
-        UserService userService = new UserServiceImpl(userRepository, userMapper);
+        UserService userService = new UserServiceImpl(userRepository, userMapper, planMapper);
 
         userMapper = new UserMapper();
         passwordEncoder = new BCryptPasswordEncoder();

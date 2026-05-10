@@ -1,6 +1,7 @@
 package com.medreminder.medreminder_server.domain.models.users;
 
 import com.medreminder.medreminder_server.application.dtos.user.UpdateUserCommand;
+import com.medreminder.medreminder_server.domain.models.billing.Plan;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,8 +21,6 @@ public class User  {
     private String passwordResetToken;
     private LocalDateTime passwordResetIssuedAt;
     private LocalDateTime passwordResetRedeemedAt;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private final List<Profile> profiles = new ArrayList<>();
 
     public User( String id,
@@ -59,14 +58,6 @@ public class User  {
 
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 
     public String getGender() {

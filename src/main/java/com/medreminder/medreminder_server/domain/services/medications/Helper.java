@@ -1,8 +1,11 @@
-package com.medreminder.medreminder_server.infrastructure.entity.medications;
+package com.medreminder.medreminder_server.domain.services.medications;
 
 import com.medreminder.medreminder_server.application.dtos.medication.*;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
 import com.medreminder.medreminder_server.domain.models.medication.*;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 
 import java.math.BigDecimal;
@@ -40,11 +43,12 @@ public class Helper {
                 new BigDecimal("0"));
     }
 
-   public static Optional<MedicationPack> createMedicationPack(CreateMedPack pack) {
+   public static Optional<MedicationPack> createMedicationPack(CreateMedicationPack pack) {
 
         if( pack == null) {
             return Optional.empty();
         }
+
         MedicationPack medicationPack = new MedicationPack(null,
                 new BigDecimal(pack.totalQuantity()),
                 new BigDecimal(pack.totalQuantity()),

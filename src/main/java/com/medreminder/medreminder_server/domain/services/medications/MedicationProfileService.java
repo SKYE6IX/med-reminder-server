@@ -1,12 +1,10 @@
 package com.medreminder.medreminder_server.domain.services.medications;
 
-import com.medreminder.medreminder_server.application.dtos.medication.CreateMedicationCommand;
-import com.medreminder.medreminder_server.application.dtos.medication.MedicationProfileResponse;
-import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
-import com.medreminder.medreminder_server.application.dtos.medication.UpdateMedicationCommand;
+import com.medreminder.medreminder_server.application.dtos.medication.*;
 import com.medreminder.medreminder_server.domain.services.UseCase;
 
 import java.util.List;
+import java.util.Map;
 
 public interface MedicationProfileService extends UseCase {
 
@@ -19,4 +17,6 @@ public interface MedicationProfileService extends UseCase {
    List<MedicationProfileResponse> getMedicationProfiles(String userId);
 
    void deleteMedicationProfile(String medicationProfileId);
+
+   Map<String, String> createMedicationPack(AddMedicationPack addMedicationPack);
 }

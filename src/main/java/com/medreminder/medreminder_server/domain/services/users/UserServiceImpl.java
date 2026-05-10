@@ -1,9 +1,13 @@
 package com.medreminder.medreminder_server.domain.services.users;
 
 import com.medreminder.medreminder_server.application.dtos.user.*;
+import com.medreminder.medreminder_server.domain.models.billing.Plan;
+import com.medreminder.medreminder_server.domain.models.billing.PlanType;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
+import com.medreminder.medreminder_server.infrastructure.entity.billing.PlanEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.billing.mappers.PlanMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
@@ -17,11 +21,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PlanMapper planMapper;
 
     public UserServiceImpl(UserRepository userRepository,
-                           UserMapper userMapper) {
+                           UserMapper userMapper,
+                           PlanMapper planMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.planMapper = planMapper;
     }
 
     @Override
@@ -32,11 +39,23 @@ public class UserServiceImpl implements UserService {
                 registerUserRequest.getName(),
                 registerUserRequest.getPassword());
 
+//        Create a self profile for new user.
         Profile profile = new Profile(null, user.getName(), Relation.SELF, true);
-
         user.addProfiles(profile);
 
-        UserEntity newUser = userRepository.saveUser(userMapper.toEntity(user));
+//        Create a default Plan for User.
+        Plan freePlan = new Plan(null,
+                PlanType.FREE,
+                1,
+                false,
+                false,
+                false);
+
+        UserEntity userEntity = userMapper.toEntity(user);
+        PlanEntity planEntity = planMapper.toEntity(freePlan, userEntity);
+        userEntity.setPlan(planEntity);
+
+        UserEntity newUser = userRepository.saveUser(userEntity);
 
         return userMapper.toDomain(newUser);
     }
