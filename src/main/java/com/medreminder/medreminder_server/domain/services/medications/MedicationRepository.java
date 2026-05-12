@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MedicationRepository {
 
-    void saveMedicationProfile(MedicationProfileEntity medicationProfileEntity);
+    MedicationProfileEntity saveMedicationProfile(MedicationProfileEntity medicationProfileEntity);
 
     MedicationProfileEntity getMedicationProfileById(String id);
 
@@ -20,4 +20,6 @@ public interface MedicationRepository {
     List<ScheduleEventEntity> getScheduleEventsByUserIdAndDates(String userId,
                                                                 LocalDateTime startOfDay,
                                                                 LocalDateTime endOfDay);
+
+    List<MedicationPackEntity> getAllMedicationPacksByUserId(String userId);
 }

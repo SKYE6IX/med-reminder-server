@@ -140,6 +140,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                             BigDecimal newRemainingQuantity = activeMedicationPack
                                     .getCurrentQuantity().add(remainingQuantity);
 
+                            pendingMedicationPack.updateStatus(MedicationPackStatus.ACTIVE);
                             pendingMedicationPack.updateCurrentQuantity(newRemainingQuantity);
                             pendingMedicationPack.updateStartedAt(LocalDateTime.now());
                             syncMedicationPack(managedMedicationProfile, pendingMedicationPack);

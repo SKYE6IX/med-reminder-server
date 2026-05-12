@@ -13,18 +13,19 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
     private final JpaMedicationProfileRepository jpaMedicationProfileRepository;
     private final JpaScheduleEventRepository jpaScheduleEventRepository;
+    private final JpaMedicationPackRepository jpaMedicationPackRepository;
 
     public MedicationRepositoryImpl(JpaMedicationProfileRepository jpaMedicationProfileRepository,
-                                    JpaScheduleEventRepository jpaScheduleEventRepository) {
+                                    JpaScheduleEventRepository jpaScheduleEventRepository,
+                                    JpaMedicationPackRepository jpaMedicationPackRepository) {
         this.jpaMedicationProfileRepository = jpaMedicationProfileRepository;
         this.jpaScheduleEventRepository = jpaScheduleEventRepository;
+        this.jpaMedicationPackRepository = jpaMedicationPackRepository;
     }
 
-
-
     @Override
-    public void saveMedicationProfile(MedicationProfileEntity medicationProfileEntity) {
-        jpaMedicationProfileRepository.save(medicationProfileEntity);
+    public MedicationProfileEntity saveMedicationProfile(MedicationProfileEntity medicationProfileEntity) {
+        return jpaMedicationProfileRepository.save(medicationProfileEntity);
     }
 
     @Override
@@ -56,4 +57,11 @@ public class MedicationRepositoryImpl implements MedicationRepository {
                                                                        LocalDateTime endOfDay) {
         return  jpaScheduleEventRepository.findByUserIdAndDates(userId, startOfDay, endOfDay);
     }
+
+    @Override
+    public List<MedicationPackEntity> getAllMedicationPacksByUserId(String userId) {
+
+        return jpaMedicationPackRepository.findAllByUserId(userId);
+    }
+
 }

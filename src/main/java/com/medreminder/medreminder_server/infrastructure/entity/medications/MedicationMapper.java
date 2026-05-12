@@ -3,11 +3,9 @@ package com.medreminder.medreminder_server.infrastructure.entity.medications;
 
 import com.medreminder.medreminder_server.domain.models.medication.*;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class MedicationMapper {
@@ -107,9 +105,10 @@ public class MedicationMapper {
                 medicationPack.getId(),
                 medicationPack.getTotalQuantity(),
                 medicationPack.getCurrentQuantity(),
-                medicationPack.getNotifyRule(),
+                medicationPack.getReminderDays(),
                 medicationPack.getStartedAt(),
                 medicationPack.getStatus().toString(),
+                medicationPack.isRefilled(),
                 mpe);
     }
 
@@ -193,10 +192,11 @@ public class MedicationMapper {
                 medicationPack.getId(),
                 medicationPack.getTotalQuantity(),
                 medicationPack.getCurrentQuantity(),
-                medicationPack.getNotifyRule(),
+                medicationPack.getReminderDays(),
                 medicationPack.getStartedAt(),
                 medicationPack.getEndedAt(),
-                MedicationPackStatus.valueOf(medicationPack.getStatus())
+                MedicationPackStatus.valueOf(medicationPack.getStatus()),
+                medicationPack.isRefilled()
         );
     }
 }

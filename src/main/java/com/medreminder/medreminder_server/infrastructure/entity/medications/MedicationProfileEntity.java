@@ -48,6 +48,7 @@ public class MedicationProfileEntity {
             mappedBy = "medicationProfile",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
+    @OrderBy("createdAt ASC")
     private List<MedicationPackEntity> medicationPacks = new ArrayList<>();
 
     @Column(name = "created_at")

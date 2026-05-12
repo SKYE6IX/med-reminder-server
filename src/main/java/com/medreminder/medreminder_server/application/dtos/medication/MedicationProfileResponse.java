@@ -9,10 +9,11 @@ public class MedicationProfileResponse {
     private String medicationUnit;
     private String status;
     private String note;
-    private ProfileResponse profile;
-    private MedScheduleResponse schedule;
     private String amountTaken;
     private String amountInPack;
+    private ProfileResponse profile;
+    private MedScheduleResponse schedule;
+
 
     public MedicationProfileResponse() {
     }

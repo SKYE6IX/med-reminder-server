@@ -21,8 +21,8 @@ public class MedicationPackEntity {
     @Column(name = "current_quantity")
     private BigDecimal currentQuantity;
 
-    @Column(name = "notify_rule")
-    private String notifyRule;
+    @Column(name = "reminder_days")
+    private int reminderDays;
 
     @Column(name = "started_at")
     private LocalDateTime startedAt;
@@ -31,6 +31,9 @@ public class MedicationPackEntity {
     private LocalDateTime endedAt;
 
     private String status;
+
+    @Column(name ="is_refilled")
+    private boolean isRefilled;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medication_profile_id")
@@ -51,16 +54,18 @@ public class MedicationPackEntity {
     public MedicationPackEntity(String id,
                                 BigDecimal totalQuantity,
                                 BigDecimal currentQuantity,
-                                String notifyRule,
+                                int reminderDays,
                                 LocalDateTime startedAt,
                                 String status,
+                                boolean isRefilled,
                                 MedicationProfileEntity medicationProfile) {
         this.id = id;
         this.totalQuantity = totalQuantity;
         this.currentQuantity = currentQuantity;
-        this.notifyRule = notifyRule;
+        this.reminderDays = reminderDays;
         this.startedAt = startedAt;
         this.status = status;
+        this.isRefilled = isRefilled;
         this.medicationProfile = medicationProfile;
     }
 
@@ -76,7 +81,7 @@ public class MedicationPackEntity {
         return currentQuantity;
     }
 
-    public String getNotifyRule() { return notifyRule; }
+    public int getReminderDays() { return reminderDays; }
 
     public LocalDateTime getStartedAt() {
         return startedAt;
@@ -90,6 +95,10 @@ public class MedicationPackEntity {
         return status;
     }
 
+    public boolean isRefilled() {
+        return isRefilled;
+    }
+
     public MedicationProfileEntity getMedicationProfile() {
         return medicationProfile;
     }
@@ -97,9 +106,10 @@ public class MedicationPackEntity {
     public void updateMedicationPack (MedicationPack medicationPack) {
         this.totalQuantity = medicationPack.getTotalQuantity();
         this.currentQuantity = medicationPack.getCurrentQuantity();
-        this.notifyRule = medicationPack.getNotifyRule();
+        this.reminderDays = medicationPack.getReminderDays();
         this.startedAt = medicationPack.getStartedAt();
         this.endedAt = medicationPack.getEndedAt();
         this.status = medicationPack.getStatus().toString();
+        this.isRefilled = medicationPack.isRefilled();
     }
 }

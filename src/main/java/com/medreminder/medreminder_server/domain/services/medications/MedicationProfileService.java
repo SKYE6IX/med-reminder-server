@@ -18,5 +18,9 @@ public interface MedicationProfileService extends UseCase {
 
    void deleteMedicationProfile(String medicationProfileId);
 
-   Map<String, String> createMedicationPack(AddMedicationPack addMedicationPack);
+   Map<String, String> createMedicationPack(AddMedicationPackRequest addMedicationPackRequest);
+
+   RefillMedicationPackResponse  refillMedicationPack(RefillMedicationPackRequest refillMedicationPackRequest);
+
+   List<RefillMedicationPackResponse> getRefillMedicationPacks(String userId);
 }

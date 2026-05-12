@@ -8,27 +8,31 @@ public class MedicationPack {
     private final String id;
     private final BigDecimal totalQuantity;
     private BigDecimal currentQuantity;
-    private final String notifyRule;
+    private final int reminderDays;
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
     private MedicationPackStatus status;
     private MedicationProfile medicationProfile;
+    private boolean isRefilled;
 
     public MedicationPack(String id,
                           BigDecimal totalQuantity,
                           BigDecimal currentQuantity,
-                          String notifyRule,
+                          int reminderDays,
                           LocalDateTime startedAt,
                           LocalDateTime endedAt,
-                          MedicationPackStatus status
-                          ) {
+                          MedicationPackStatus status,
+                          boolean isRefilled
+
+    ) {
         this.id = id;
         this.totalQuantity = totalQuantity;
         this.currentQuantity = currentQuantity;
-        this.notifyRule = notifyRule;
+        this.reminderDays = reminderDays;
         this.startedAt = startedAt;
         this.endedAt = endedAt;
         this.status = status;
+        this.isRefilled = isRefilled;
     }
 
     public String getId() {
@@ -43,8 +47,8 @@ public class MedicationPack {
         return currentQuantity;
     }
 
-    public String getNotifyRule() {
-        return notifyRule;
+    public int getReminderDays() {
+        return reminderDays;
     }
 
     public LocalDateTime getStartedAt() {
@@ -63,6 +67,10 @@ public class MedicationPack {
         return medicationProfile;
     }
 
+    public boolean isRefilled() {
+        return isRefilled;
+    }
+
     public void updateCurrentQuantity(BigDecimal currentQuantity) {
         this.currentQuantity = currentQuantity;
     }
@@ -77,6 +85,10 @@ public class MedicationPack {
 
     public void updateStatus(MedicationPackStatus status) {
         this.status = status;
+    }
+
+    public void updateIsRefilled(boolean isRefilled) {
+        this.isRefilled = isRefilled;
     }
 
     public void addMedicationProfile(MedicationProfile medicationProfile) {

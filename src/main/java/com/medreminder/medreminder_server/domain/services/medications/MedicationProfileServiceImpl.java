@@ -166,7 +166,6 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
         if (managedMedicationProfile == null) {
             throw new ResourceNotFoundException("Medication Profile not found!");
         }
-
         return Helper.getMedicationProfileResponse(managedMedicationProfile);
     }
 
@@ -218,38 +217,132 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
     }
 
     @Override
-    public Map<String, String> createMedicationPack(AddMedicationPack addMedicationPack) {
-
+    public Map<String, String> createMedicationPack(AddMedicationPackRequest addMedicationPackRequest) {
         MedicationProfileEntity managedMedicationProfile =
-                medicationRepository.getMedicationProfileById(addMedicationPack.medicationProfileId());
+                medicationRepository.getMedicationProfileById(addMedicationPackRequest.medicationProfileId());
 
         if (managedMedicationProfile == null) {
             throw new ResourceNotFoundException("Medication Profile not found!");
         }
 
-        boolean hasActivePack = managedMedicationProfile
-                .getMedicationPacks()
-                .stream()
-                .anyMatch(mpe -> mpe.getStatus().equals("ACTIVE"));
-
         MedicationPack pack = new MedicationPack(null,
-                new BigDecimal(addMedicationPack.totalQuantity()),
-                new BigDecimal(addMedicationPack.totalQuantity()),
-                addMedicationPack.notifyRule(),
-                hasActivePack ? null : LocalDateTime.now(),
+                new BigDecimal(addMedicationPackRequest.totalQuantity()),
+                new BigDecimal(addMedicationPackRequest.totalQuantity()),
+                addMedicationPackRequest.reminderDays(),
+                LocalDateTime.now(),
                 null,
-                hasActivePack ? MedicationPackStatus.PENDING : MedicationPackStatus.ACTIVE
-                );
-
+                MedicationPackStatus.ACTIVE,
+                false
+        );
         managedMedicationProfile
                 .getMedicationPacks()
                 .add(medicationMapper.toEntity(pack, managedMedicationProfile));
-
         medicationRepository.saveMedicationProfile(managedMedicationProfile);
-
         Map<String, String> result = new HashMap<>();
-        result.put("amountInPack", pack.getTotalQuantity().toString());
-
+        result.put("amountInPack", pack.getTotalQuantity().stripTrailingZeros().toPlainString());
         return result;
+    }
+
+    @Override
+    public RefillMedicationPackResponse refillMedicationPack(RefillMedicationPackRequest refillMedicationPackRequest) {
+        MedicationProfileEntity managedMedicationProfile =
+                medicationRepository.getMedicationProfileById(refillMedicationPackRequest.medicationProfileId());
+
+        if (managedMedicationProfile == null) {
+            throw new ResourceNotFoundException("Medication Profile not found!");
+        }
+
+//        Get the pack we want to refill.
+        MedicationPack existingPack = managedMedicationProfile
+                .getMedicationPacks()
+                .stream()
+                .filter(packEntity ->
+                        packEntity.getId().equals(refillMedicationPackRequest.medicationPackId()))
+                .findFirst()
+                .map(medicationMapper::toDomain)
+                .orElse(null);
+//        Throw error if this pack doesn't exist, since we can't refill a pack that doesn't
+//        exist.
+        if (existingPack == null) {
+            throw new ResourceNotFoundException("Medication Pack not found!, Can't be refilled");
+        }
+
+        boolean isExistingActive = existingPack.getStatus() == MedicationPackStatus.ACTIVE;
+//       We start to create a new pack.
+        MedicationPack newPack = new MedicationPack(null,
+                new BigDecimal(refillMedicationPackRequest.totalQuantity()),
+                new BigDecimal(refillMedicationPackRequest.totalQuantity()),
+                refillMedicationPackRequest.reminderDays(),
+                isExistingActive ? null : LocalDateTime.now(),
+                null,
+                isExistingActive ? MedicationPackStatus.PENDING : MedicationPackStatus.ACTIVE,
+                false
+        );
+
+//        Update the existing pack.
+        existingPack.updateIsRefilled(true);
+        managedMedicationProfile.getMedicationPacks()
+                .stream()
+                .filter(packEntity -> packEntity.getId().equals(existingPack.getId()))
+                .findFirst()
+                .ifPresent(medicationPack -> medicationPack.updateMedicationPack(existingPack));
+
+        managedMedicationProfile
+                .getMedicationPacks()
+                .add(medicationMapper.toEntity(newPack, managedMedicationProfile));
+
+        MedicationPackEntity refilledPack = medicationRepository
+                .saveMedicationProfile(managedMedicationProfile)
+                .getMedicationPacks().getLast();
+
+        return  new RefillMedicationPackResponse(
+                refilledPack.getId(),
+                "REFILLED",
+                refilledPack.getStartedAt() != null ? refilledPack.getStartedAt().toString() : "",
+                refilledPack.getTotalQuantity().stripTrailingZeros().toPlainString(),
+                managedMedicationProfile.getMedication().getName(),
+                "",
+                managedMedicationProfile.getId()
+        );
+    }
+
+    @Override
+    public List<RefillMedicationPackResponse> getRefillMedicationPacks(String userId) {
+
+        List<MedicationPackEntity> packEntities = medicationRepository
+                .getAllMedicationPacksByUserId(userId);
+
+        return packEntities
+                .stream()
+                .filter(packEntity -> {
+                    MedicationScheduleEntity schedule = packEntity
+                            .getMedicationProfile().getMedicationSchedule();
+
+                    BigDecimal refillThreshold = schedule.getDoseQuantity()
+                            .multiply(BigDecimal.valueOf(packEntity.getReminderDays()));
+
+                    return (packEntity.getCurrentQuantity().compareTo(refillThreshold) <= 0 && !packEntity.isRefilled()) ||
+                            packEntity.getStatus().equals(MedicationPackStatus.PENDING.toString());
+                })
+                .map(packEntity -> {
+
+                    MedicationProfileEntity medicationProfileEntity = packEntity.getMedicationProfile();
+//                    All pending that get return from filter are refilled pack that are waiting
+//                    to be used.
+                    String status = packEntity
+                            .getStatus()
+                            .equals(MedicationPackStatus.PENDING.toString()) ? "REFILLED":"DEPLETED";
+
+                    return new RefillMedicationPackResponse(
+                            packEntity.getId(),
+                            status,
+                            packEntity.getStartedAt() != null ? packEntity.getStartedAt().toString() : "",
+                            packEntity.getTotalQuantity().stripTrailingZeros().toPlainString(),
+                            medicationProfileEntity.getMedication().getName(),
+                            "",
+                            medicationProfileEntity.getId()
+                    );
+                })
+                .toList();
     }
 }

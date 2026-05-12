@@ -10,7 +10,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,23 +28,29 @@ public class MedicationController {
     }
 
     @PostMapping()
-    public ResponseEntity<MedicationProfileResponse> createMedicationProfile(@RequestBody CreateMedicationCommand cmd) {
+    public ResponseEntity<MedicationProfileResponse> createMedicationProfile(
+            @RequestBody CreateMedicationCommand cmd) {
 
-        MedicationProfileResponse response = medicationProfileService.createMedicationProfile(cmd);
+        MedicationProfileResponse response = medicationProfileService
+                .createMedicationProfile(cmd);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/{medicationProfileId}")
-    public ResponseEntity<MedicationProfileResponse> getAllMedicationProfile(@PathVariable String medicationProfileId) {
+    public ResponseEntity<MedicationProfileResponse> getAllMedicationProfile(
+            @PathVariable String medicationProfileId) {
 
-        MedicationProfileResponse response = medicationProfileService.getMedicationProfile(medicationProfileId);
+        MedicationProfileResponse response = medicationProfileService
+                .getMedicationProfile(medicationProfileId);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping()
-    public ResponseEntity<List<MedicationProfileResponse>> getAllMedicationProfiles(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<MedicationProfileResponse>> getAllMedicationProfiles(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
         UserPrincipal principal = (UserPrincipal) userDetails;
 
         List<MedicationProfileResponse> responses = medicationProfileService
@@ -55,10 +60,12 @@ public class MedicationController {
     }
 
     @PutMapping(value = "/{medicationProfileId}")
-    public ResponseEntity<MedicationProfileResponse> updateMedicationProfile(@PathVariable String medicationProfileId,
-                                                                      @RequestBody UpdateMedicationCommand cmd) {
+    public ResponseEntity<MedicationProfileResponse> updateMedicationProfile(
+            @PathVariable String medicationProfileId,
+            @RequestBody UpdateMedicationCommand cmd) {
 
-        var response = medicationProfileService.updateMedicationProfile(medicationProfileId, cmd);
+        var response = medicationProfileService
+                .updateMedicationProfile(medicationProfileId, cmd);
 
         return ResponseEntity.ok(response);
 
@@ -81,8 +88,10 @@ public class MedicationController {
     }
 
     @GetMapping(value = "/schedules/event")
-    public ResponseEntity<List<ScheduleEventResponse>> getMedicationsScheduleEvents(@AuthenticationPrincipal UserDetails userDetails,
-                                                                                    @RequestParam String eventDate) {
+    public ResponseEntity<List<ScheduleEventResponse>> getMedicationsScheduleEvents(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam String eventDate) {
+
         UserPrincipal principal = (UserPrincipal) userDetails;
 
         List<ScheduleEventResponse> response = scheduleEventService
@@ -92,9 +101,33 @@ public class MedicationController {
     }
 
     @PostMapping(value = "/packs")
-    public ResponseEntity<Map<String, String>> createMedicationPack(@RequestBody AddMedicationPack addMedicationPack){
+    public ResponseEntity<Map<String, String>> createMedicationPack(
+            @RequestBody AddMedicationPackRequest addMedicationPackRequest){
 
-        Map<String, String> response = medicationProfileService.createMedicationPack(addMedicationPack);
+        Map<String, String> response = medicationProfileService
+                .createMedicationPack(addMedicationPackRequest);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/packs/refill")
+    public ResponseEntity<RefillMedicationPackResponse> refillMedicationPack(
+            @RequestBody RefillMedicationPackRequest refillMedicationPackRequest) {
+
+        RefillMedicationPackResponse response = medicationProfileService
+                .refillMedicationPack(refillMedicationPackRequest);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping(value = "/packs/refill")
+    public ResponseEntity<List<RefillMedicationPackResponse>> getRefillMedicationPacks(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        UserPrincipal principal = (UserPrincipal) userDetails;
+
+        List<RefillMedicationPackResponse> response = medicationProfileService
+                .getRefillMedicationPacks(principal.getId());
 
         return ResponseEntity.ok(response);
     }

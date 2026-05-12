@@ -38,8 +38,6 @@ public class MedReminderServerApplication {
 
 
 
-
-
 //SUBSCRIPTION AND PAYMENT SET UP
 // 1. A user can have multiple payments
 // 2. Subscription should be created once for the period it will last.

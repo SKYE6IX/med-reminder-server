@@ -52,10 +52,11 @@ public class Helper {
         MedicationPack medicationPack = new MedicationPack(null,
                 new BigDecimal(pack.totalQuantity()),
                 new BigDecimal(pack.totalQuantity()),
-                pack.notifyRule(),
+                pack.reminderDays(),
                 LocalDateTime.now(),
                 null,
-                MedicationPackStatus.ACTIVE);
+                MedicationPackStatus.ACTIVE,
+                false);
 
         return Optional.of(medicationPack);
     }
@@ -87,6 +88,7 @@ public class Helper {
 //        Acquire the schedule and create an object and attached it to the response
         MedicationScheduleEntity schedule = smp.getMedicationSchedule();
 
+        response.setAmountTaken(schedule.getTakenQuantity().stripTrailingZeros().toPlainString());
         response.setSchedule(new MedScheduleResponse(
                 schedule.getId(),
                 schedule.getDoseQuantity().stripTrailingZeros().toPlainString(),
@@ -108,10 +110,8 @@ public class Helper {
         return response;
     }
 
-
     public static void syncMedicationProfiles(List<MedicationProfile> domainMedicationProfiles,
                                         ProfileEntity managedProfile) {
-
      final MedicationMapper medicationMapper = new MedicationMapper();
 
         Map<String, MedicationProfileEntity> existingMedicationProfiles = new HashMap<>();
