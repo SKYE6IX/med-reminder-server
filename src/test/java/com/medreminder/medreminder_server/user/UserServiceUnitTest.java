@@ -1,6 +1,7 @@
 package com.medreminder.medreminder_server.user;
 
 import com.medreminder.medreminder_server.application.dtos.user.*;
+import com.medreminder.medreminder_server.domain.models.users.UserProvider;
 import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
@@ -49,15 +50,17 @@ public class UserServiceUnitTest {
                 "test user", "12345678");
 
         User testUser = new User(userId.toString(),
-                registerUserRequest.getEmail(), registerUserRequest.getName(),
-                registerUserRequest.getPassword());
+                registerUserRequest.getEmail(),
+                registerUserRequest.getName(),
+                registerUserRequest.getPassword(),
+                UserProvider.LOCAL);
 
         testUser.addProfiles(new Profile(null, registerUserRequest.getName(), Relation.SELF, true));
 
         when(userRepository.saveUser(any(UserEntity.class)))
                 .thenReturn(userMapper.toEntity(testUser));
 
-        User user = userService.createUser(registerUserRequest);
+        UserEntity user = userService.createUser(registerUserRequest, UserProvider.LOCAL);
 
         assertThat(user.getId()).isNotNull().isEqualTo(userId.toString());
 
@@ -75,7 +78,7 @@ public class UserServiceUnitTest {
         UUID profileId = UUID.randomUUID();
 
         User testUser = new User(userId.toString(), "test@email.com",
-                "test user", "testhashpassword");
+                "test user", "testhashpassword",UserProvider.LOCAL);
         Profile testProfile = new Profile(profileId.toString(),
                 testUser.getName(),Relation.SELF, true);
 
@@ -84,7 +87,7 @@ public class UserServiceUnitTest {
         UserEntity userEntity = userMapper.toEntity(testUser);
 
         UpdateUserCommand updateUserCommand = new UpdateUserCommand("updatetest@mail.com",
-                null, "1992-07-27", "Male");
+                null, "27.07.1992", "Male");
 
         when(userRepository.findUserById(any(String.class)))
                 .thenReturn(Optional.of(userEntity));
@@ -108,7 +111,7 @@ public class UserServiceUnitTest {
         UUID profileId = UUID.randomUUID();
 
         User testUser = new User(userId.toString(), "test@email.com",
-                "test user", "testhashpassword");
+                "test user", "testhashpassword",UserProvider.LOCAL);
 
         ProfileRequest profileRequest = new ProfileRequest("James","BROTHER");
 
@@ -140,7 +143,7 @@ public class UserServiceUnitTest {
         UUID profileId = UUID.randomUUID();
 
         User testUser = new User(userId.toString(), "test@email.com",
-                "test user", "testhashpassword");
+                "test user", "testhashpassword", UserProvider.LOCAL);
 
         Profile testProfile = new Profile(profileId.toString(),
                 "James",Relation.valueOf("BROTHER"), false);

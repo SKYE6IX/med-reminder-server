@@ -13,9 +13,8 @@ public class MedReminderServerApplication {
 }
 
 
-
 //TODO 1:
-// 1. Social authorization controller and updated record for it.
+// 1. Social authorization controller and updated record for it.✅
 // 2. Subscription base setup. ✅
 // 3. Payment system setup after the subscription base is done.
 // 4. Schedule background work process for creating new Schedule events

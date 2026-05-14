@@ -35,6 +35,12 @@ public class AuthController {
         return  ResponseEntity.ok(response);
     }
 
+    @PostMapping(value = "/social")
+    ResponseEntity<AuthResponse> authorizedUserWithSocial(@RequestBody SocialAuthRequest socialAuthRequest) {
+
+        return ResponseEntity.ok(authService.authorizeUserWithSocial(socialAuthRequest));
+    }
+
     @PostMapping(value = "/logout")
     ResponseEntity<?> logout(@AuthenticationPrincipal UserDetails userDetails) {
 

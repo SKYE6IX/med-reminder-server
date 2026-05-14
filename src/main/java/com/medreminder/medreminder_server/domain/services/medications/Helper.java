@@ -88,14 +88,14 @@ public class Helper {
 //        Acquire the schedule and create an object and attached it to the response
         MedicationScheduleEntity schedule = smp.getMedicationSchedule();
 
-        response.setAmountTaken(schedule.getTakenQuantity().stripTrailingZeros().toPlainString());
         response.setSchedule(new MedScheduleResponse(
                 schedule.getId(),
                 schedule.getDoseQuantity().stripTrailingZeros().toPlainString(),
                 smp.getMedication().getMeasurementUnit().getSymbol(),
                 schedule.getRecurrenceRule(),
                 schedule.getStartTime().toString(),
-                schedule.getStartDate().toString())
+                schedule.getStartDate().toString(),
+                schedule.getTakenQuantity().stripTrailingZeros().toPlainString())
         );
 
         if(!smp.getMedicationPacks().isEmpty()){
@@ -103,9 +103,12 @@ public class Helper {
                     .stream()
                     .filter(packEntity -> packEntity.getStatus().equals("ACTIVE"))
                     .findFirst()
-                    .ifPresent(medicationPack ->
-                            response.setAmountInPack(medicationPack.getTotalQuantity()
-                                    .stripTrailingZeros().toPlainString()));
+                    .ifPresent(medicationPack -> {
+                        response.setTotalAmountInPack(medicationPack.getTotalQuantity()
+                                .stripTrailingZeros().toPlainString());
+                        response.setCurrentAmountInPack(medicationPack.getCurrentQuantity()
+                                .stripTrailingZeros().toPlainString());
+                    });
         }
         return response;
     }

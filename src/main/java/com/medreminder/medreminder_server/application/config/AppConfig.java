@@ -1,6 +1,7 @@
 package com.medreminder.medreminder_server.application.config;
 
 
+import com.medreminder.medreminder_server.application.security.AppleTokenVerifier;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
 import com.medreminder.medreminder_server.domain.services.UseCase;
 import com.medreminder.medreminder_server.domain.services.medications.*;
@@ -32,12 +33,6 @@ import java.util.List;
 public class AppConfig {
 
     @Bean
-    public TransactionInterceptor txInterceptor(TransactionManager txManager) {
-        TransactionAttributeSource source = getAttributeSource();
-        return new TransactionInterceptor(txManager, source);
-    }
-
-    @Bean
     UserService userService(UserRepository userRepository,
                             UserMapper userMapper,
                             PlanMapper planMapper,
@@ -52,19 +47,19 @@ public class AppConfig {
     AuthService authService(AuthenticationManager authenticationManager,
                             UserService userService,
                             PasswordEncoder passwordEncoder,
-                            JwtUtil jwtUtil,
                             UserMapper userMapper,
-                            JpaRefreshTokenRepository jpaRefreshTokenRepository,
                             UserRepository userRepository,
+                            TokenManager tokenManager,
                             TransactionInterceptor txInterceptor) {
 
         AuthService authService = new AuthServiceImpl(
                 authenticationManager,
-                userService, passwordEncoder,
-                jwtUtil, userMapper,
-                jpaRefreshTokenRepository, userRepository
+                userService,
+                passwordEncoder,
+                userMapper,
+                userRepository,
+                tokenManager
         );
-
         return createProxyFactory(authService, AuthService.class,txInterceptor);
     }
 
@@ -82,6 +77,7 @@ public class AppConfig {
                 medicationMapper,
                 scheduleEventService,
                 userMapper);
+
         return createProxyFactory(medicationProfileService, MedicationProfileService.class, txInterceptor);
     }
 
@@ -101,6 +97,19 @@ public class AppConfig {
         return new DataSourceTransactionManager(dataSource);
     }
 
+    @Bean
+    TokenManager tokenManager(JwtUtil jwtUtil,
+                              JpaRefreshTokenRepository jpaRefreshTokenRepository,
+                              AppleTokenVerifier appleTokenVerifier) {
+        return new TokenManager(jwtUtil, jpaRefreshTokenRepository, appleTokenVerifier);
+    }
+
+
+    @Bean
+    public TransactionInterceptor txInterceptor(TransactionManager txManager) {
+        TransactionAttributeSource source = getAttributeSource();
+        return new TransactionInterceptor(txManager, source);
+    }
 
     private TransactionAttributeSource getAttributeSource() {
         return new TransactionAttributeSource() {

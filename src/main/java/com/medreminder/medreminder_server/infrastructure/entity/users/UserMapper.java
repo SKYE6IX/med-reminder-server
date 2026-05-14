@@ -1,17 +1,13 @@
 package com.medreminder.medreminder_server.infrastructure.entity.users;
 
 
-import com.medreminder.medreminder_server.domain.models.medication.MedicationProfile;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
+import com.medreminder.medreminder_server.domain.models.users.UserProvider;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class UserMapper {
@@ -23,7 +19,8 @@ public class UserMapper {
                 user.getId(),
                 user.getEmail(),
                 user.getName(),
-                user.getHashPassword());
+                user.getHashPassword(),
+                user.getProvider().toString());
 
         List<ProfileEntity> profileEntities = user
                 .getProfiles()
@@ -57,7 +54,10 @@ public class UserMapper {
                 userEntity.getHashPassword(),
                 userEntity.getName(),
                 userEntity.getDateOfBirth(),
-                userEntity.getGender());
+                userEntity.getGender(),
+                UserProvider.valueOf(userEntity.getProvider()),
+                userEntity.getProviderId(),
+                userEntity.getLastLoginAt());
 
         List<Profile> profiles = userEntity
                 .getProfiles()

@@ -17,6 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "USERS")
+@Table(indexes = {
+        @Index(name = "idx_user_email", columnList = "email"),
+        @Index(name = "idx_user_provider_id", columnList = "provider_id")
+})
 public class UserEntity {
     @Id
     @GeneratedValue()
@@ -35,6 +39,14 @@ public class UserEntity {
     private LocalDate dateOfBirth;
 
     private String gender;
+
+    private String provider;
+
+    @Column(name = "provider_id")
+    private String providerId;
+
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
 
     @Column(name = "password_reset_token")
     private String passwordResetToken;
@@ -93,11 +105,13 @@ public class UserEntity {
     public UserEntity(String id,
                       String email,
                       String name,
-                      String hashPassword) {
+                      String hashPassword,
+                      String provider) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.hashPassword = hashPassword;
+        this.provider = provider;
     }
 
     public String getId() {
@@ -132,6 +146,18 @@ public class UserEntity {
         return profiles;
     }
 
+    public String getProvider() {
+        return provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public LocalDateTime getLastLoginAt() {
+        return lastLoginAt;
+    }
+
     public String getPasswordResetToken() {
         return passwordResetToken;
     }
@@ -152,6 +178,10 @@ public class UserEntity {
         return subscription;
     }
 
+    public List<PaymentEntity> getPayments() {
+        return payments;
+    }
+
     public void setPlan(PlanEntity plan) {
         this.plan = plan;
     }
@@ -160,8 +190,12 @@ public class UserEntity {
         this.subscription = subscription;
     }
 
-    public List<PaymentEntity> getPayments() {
-        return payments;
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
+
+    public void  updateLastLoginAt(LocalDateTime lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
     }
 
     public void syncUserData(User domain){

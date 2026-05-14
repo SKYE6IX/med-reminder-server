@@ -6,6 +6,7 @@ import com.medreminder.medreminder_server.domain.models.billing.PlanType;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
+import com.medreminder.medreminder_server.domain.models.users.UserProvider;
 import com.medreminder.medreminder_server.infrastructure.entity.billing.PlanEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.billing.mappers.PlanMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
@@ -32,12 +33,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(RegisterUserRequest registerUserRequest) {
+    public UserEntity createUser(RegisterUserRequest registerUserRequest,
+                           UserProvider userProvider) {
 
         User user = new User(null,
                 registerUserRequest.getEmail(),
                 registerUserRequest.getName(),
-                registerUserRequest.getPassword());
+                registerUserRequest.getPassword(),
+                userProvider);
 
 //        Create a self profile for new user.
         Profile profile = new Profile(null, user.getName(), Relation.SELF, true);
@@ -55,9 +58,7 @@ public class UserServiceImpl implements UserService {
         PlanEntity planEntity = planMapper.toEntity(freePlan, userEntity);
         userEntity.setPlan(planEntity);
 
-        UserEntity newUser = userRepository.saveUser(userEntity);
-
-        return userMapper.toDomain(newUser);
+        return userRepository.saveUser(userEntity);
     }
 
     @Override

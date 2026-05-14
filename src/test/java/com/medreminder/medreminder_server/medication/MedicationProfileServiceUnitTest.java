@@ -104,7 +104,7 @@ public class MedicationProfileServiceUnitTest {
         verify(profileRepository).saveProfile(any(ProfileEntity.class));
 
         assertThat(response).isNotNull();
-        assertThat(response.getAmountInPack()).isEqualTo(pack.totalQuantity());
+        assertThat(response.getTotalAmountInPack()).isEqualTo(pack.totalQuantity());
     }
 
     @Test

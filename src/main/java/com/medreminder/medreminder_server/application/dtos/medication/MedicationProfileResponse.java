@@ -9,18 +9,18 @@ public class MedicationProfileResponse {
     private String medicationUnit;
     private String status;
     private String note;
-    private String amountTaken;
-    private String amountInPack;
+    private String currentAmountInPack;
+    private String totalAmountInPack;
     private ProfileResponse profile;
     private MedScheduleResponse schedule;
-
 
     public MedicationProfileResponse() {
     }
 
     public MedicationProfileResponse(String id,
                                      String medicationName,
-                                     String medicationUnit, String status,
+                                     String medicationUnit,
+                                     String status,
                                      String note) {
         this.id = id;
         this.medicationName = medicationName;
@@ -57,12 +57,12 @@ public class MedicationProfileResponse {
         return schedule;
     }
 
-    public String getAmountTaken() {
-        return amountTaken;
+    public String getCurrentAmountInPack() {
+        return currentAmountInPack;
     }
 
-    public String getAmountInPack() {
-        return amountInPack;
+    public String getTotalAmountInPack() {
+        return totalAmountInPack;
     }
 
     public void setProfile(ProfileResponse profile) {
@@ -73,11 +73,11 @@ public class MedicationProfileResponse {
         this.schedule = schedule;
     }
 
-    public void setAmountTaken(String amountTaken) {
-        this.amountTaken = amountTaken;
+    public void setCurrentAmountInPack(String currentAmountInPack) {
+        this.currentAmountInPack = currentAmountInPack;
     }
 
-    public void setAmountInPack(String amountInPack) {
-        this.amountInPack = amountInPack;
+    public void setTotalAmountInPack(String totalAmountInPack) {
+        this.totalAmountInPack = totalAmountInPack;
     }
 }

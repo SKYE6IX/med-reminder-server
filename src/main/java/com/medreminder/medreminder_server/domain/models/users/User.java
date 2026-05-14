@@ -18,30 +18,43 @@ public class User  {
     private String name;
     private LocalDate dateOfBirth;
     private String gender;
+    private final UserProvider provider;
+    private String providerId;
+    private LocalDateTime lastLoginAt;
+    private Plan plan;
     private String passwordResetToken;
     private LocalDateTime passwordResetIssuedAt;
     private LocalDateTime passwordResetRedeemedAt;
     private final List<Profile> profiles = new ArrayList<>();
 
-    public User( String id,
-                 String email,
-                 String name,
-                 String hashPassword ) {
+    public User(String id,
+                String email,
+                String name,
+                String hashPassword,
+                UserProvider provider) {
         this.id = id;
         this.email = Objects.requireNonNull(email, "Email cannot be null");
         this.name = Objects.requireNonNull(name, "Name cannot be null");
-        this.hashPassword = Objects.requireNonNull(hashPassword, "Password cannot be null");
+        this.hashPassword = hashPassword;
+        this.provider = provider;
     }
 
-    public User(String id, String email, String hashPassword,
-                String name, LocalDate dateOfBirth,
-                String gender) {
+    public User(String id,
+                String email,
+                String hashPassword,
+                String name,
+                LocalDate dateOfBirth,
+                String gender,
+                UserProvider provider, String providerId, LocalDateTime lastLoginAt) {
         this.id = id;
         this.email = email;
         this.hashPassword = hashPassword;
         this.name = name;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
+        this.provider = provider;
+        this.providerId = providerId;
+        this.lastLoginAt = lastLoginAt;
     }
 
     public String getId() { return id; }
@@ -66,6 +79,18 @@ public class User  {
 
     public List<Profile> getProfiles() {
         return profiles;
+    }
+
+    public UserProvider getProvider() {
+        return provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public LocalDateTime getLastLoginAt() {
+        return lastLoginAt;
     }
 
     public String getPasswordResetToken() {

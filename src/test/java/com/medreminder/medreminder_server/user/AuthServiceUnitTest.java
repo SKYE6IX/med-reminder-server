@@ -5,6 +5,7 @@ import com.medreminder.medreminder_server.application.security.JwtUtil;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
+import com.medreminder.medreminder_server.domain.models.users.UserProvider;
 import com.medreminder.medreminder_server.domain.services.users.*;
 import com.medreminder.medreminder_server.infrastructure.entity.billing.mappers.PlanMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
@@ -53,13 +54,18 @@ public class AuthServiceUnitTest {
         PlanMapper planMapper = new PlanMapper();
         JwtUtil jwtUtil = new JwtUtil(env);
         UserService userService = new UserServiceImpl(userRepository, userMapper, planMapper);
+        TokenManager tokenManager = new TokenManager(jwtUtil, jpaRefreshTokenRepository,null);
 
         userMapper = new UserMapper();
         passwordEncoder = new BCryptPasswordEncoder();
-        authService = new AuthServiceImpl(authenticationManager,
-                userService, passwordEncoder,
-                jwtUtil, userMapper, jpaRefreshTokenRepository
-                ,userRepository);
+
+        authService = new AuthServiceImpl(
+                authenticationManager,
+                userService,
+                passwordEncoder,
+                userMapper,
+                userRepository,
+                tokenManager);
     }
 
     @Test
@@ -70,7 +76,7 @@ public class AuthServiceUnitTest {
         String hashedPassword = passwordEncoder.encode("testhashpassword");
 
         User testUser = new User(userId.toString(), "test@email.com",
-                "test user", hashedPassword);
+                "test user", hashedPassword, UserProvider.LOCAL);
         Profile testProfile = new Profile(profileId.toString(),
                 testUser.getName(), Relation.SELF, true);
 

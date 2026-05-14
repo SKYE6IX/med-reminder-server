@@ -18,33 +18,22 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<UserEntity> findUserById(String id) {
-
-        UserEntity userEntity = jpaUserRepository.findById(id).orElse(null);
-
-        if(userEntity != null){
-
-            return Optional.of(userEntity);
-        }
-        return Optional.empty();
+        return  jpaUserRepository.findById(id);
     }
 
     @Override
     public Optional<UserEntity> findUserByEmail(String email) {
+       return jpaUserRepository.findByEmail(email);
+    }
 
-        UserEntity userEntity = jpaUserRepository.findByEmail(email).orElse(null);
-
-        if(userEntity != null){
-            return Optional.of(userEntity);
-        }
-
-        return Optional.empty();
+    @Override
+    public Optional<UserEntity> findUserByProviderId(String providerId) {
+        return jpaUserRepository.findByProviderId(providerId);
     }
 
     @Override
     public UserEntity saveUser(UserEntity userEntity) {
-
        return  jpaUserRepository.save(userEntity);
-
     }
 
     @Override
