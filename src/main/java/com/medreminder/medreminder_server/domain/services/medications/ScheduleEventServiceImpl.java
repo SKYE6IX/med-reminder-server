@@ -120,8 +120,8 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 //            flip to in_active if the currentQuantity is lower than the
 //            incoming dosage.
             if(!managedMedicationProfile.getMedicationPacks().isEmpty()){
-                MedicationPack activeMedicationPack = getPackByStatus(managedMedicationProfile,
-                        MedicationPackStatus.ACTIVE.toString());
+                MedicationPack activeMedicationPack = Helper.getPackByStatus(managedMedicationProfile,
+                        MedicationPackStatus.ACTIVE.toString(), medicationMapper);
 
                 if(activeMedicationPack != null){
                     BigDecimal remainingQuantity = activeMedicationPack.getCurrentQuantity()
@@ -131,11 +131,11 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 //                      End the pack and start a new one if user refill;
                         activeMedicationPack.updateStatus(MedicationPackStatus.COMPLETED);
                         activeMedicationPack.updateEndedAt(LocalDateTime.now());
-                        syncMedicationPack(managedMedicationProfile, activeMedicationPack);
+                        Helper.syncMedicationPack(managedMedicationProfile, activeMedicationPack);
 
 //                        Get a pending pack from the list
-                        MedicationPack pendingMedicationPack = getPackByStatus(managedMedicationProfile,
-                                MedicationPackStatus.PENDING.toString());
+                        MedicationPack pendingMedicationPack = Helper.getPackByStatus(managedMedicationProfile,
+                                MedicationPackStatus.PENDING.toString(), medicationMapper);
                         if( pendingMedicationPack != null){
                             BigDecimal newRemainingQuantity = activeMedicationPack
                                     .getCurrentQuantity().add(remainingQuantity);
@@ -143,11 +143,11 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                             pendingMedicationPack.updateStatus(MedicationPackStatus.ACTIVE);
                             pendingMedicationPack.updateCurrentQuantity(newRemainingQuantity);
                             pendingMedicationPack.updateStartedAt(LocalDateTime.now());
-                            syncMedicationPack(managedMedicationProfile, pendingMedicationPack);
+                            Helper.syncMedicationPack(managedMedicationProfile, pendingMedicationPack);
                         }
                     } else {
                         activeMedicationPack.updateCurrentQuantity(remainingQuantity);
-                        syncMedicationPack(managedMedicationProfile, activeMedicationPack);
+                        Helper.syncMedicationPack(managedMedicationProfile, activeMedicationPack);
                     }
                 }
             }
@@ -191,15 +191,16 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         MedicationScheduleEntity medicationSchedule =
                 managedScheduleEvent.getMedicationSchedule();
 
-        MedicationEntity medication = medicationSchedule
-                .getMedicationProfile().getMedication();
+        MedicationProfileEntity mpe = medicationSchedule.getMedicationProfile();
+        MedicationEntity medication = mpe.getMedication();
+        ProfileEntity profile = mpe.getProfile();
 
-        ProfileEntity profile = medicationSchedule.getMedicationProfile().getProfile();
-
-        ScheduleEventResponse response = new ScheduleEventResponse(managedScheduleEvent.getId(),
+        ScheduleEventResponse response = new ScheduleEventResponse(
+                managedScheduleEvent.getId(),
                 managedScheduleEvent.getStatus(),
                 medication.getName(),
                 "",
+                mpe.getId(),
                 medicationSchedule.getDoseQuantity().stripTrailingZeros().toPlainString(),
                 medication.getMeasurementUnit().getSymbol(),
                 managedScheduleEvent.getScheduleAt().toString());
@@ -232,27 +233,5 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         Recur<LocalDateTime> recur = new Recur<>(schedule.getRecurrenceRule());
 
         return recur.getDates(windowStart, windowStart, windowEnd);
-    }
-
-
-    private void syncMedicationPack(MedicationProfileEntity managedMedicationProfile,
-                                    MedicationPack medicationPack) {
-
-        managedMedicationProfile.getMedicationPacks()
-                .stream()
-                .filter(mpe->  mpe.getId().equals(medicationPack.getId()))
-                .findFirst()
-                .ifPresent(mpe-> mpe.updateMedicationPack(medicationPack));
-    }
-
-    private MedicationPack getPackByStatus(MedicationProfileEntity managedMedicationProfile,
-                                           String status) {
-        return  managedMedicationProfile
-                .getMedicationPacks()
-                .stream()
-                .filter(mpe -> mpe.getStatus().equals(status))
-                .findFirst()
-                .map(medicationMapper::toDomain)
-                .orElse(null);
     }
 }

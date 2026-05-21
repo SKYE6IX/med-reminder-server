@@ -18,4 +18,3 @@ public interface ScheduleEventService extends UseCase {
 
     List<ScheduleEventResponse> getScheduleEvents(String userId, String eventDate);
 }
-

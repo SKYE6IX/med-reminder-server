@@ -8,6 +8,7 @@ public class ScheduleEventResponse {
     private final String status;
     private final String medicationName;
     private final String medicationImageUrl;
+    private final String medicationProfileId;
     private final String dosage;
     private final String measurement;
     private final String scheduleAt;
@@ -18,6 +19,7 @@ public class ScheduleEventResponse {
                                  String status,
                                  String medicationName,
                                  String medicationImageUrl,
+                                 String medicationProfileId,
                                  String dosage,
                                  String measurement,
                                  String scheduleAt) {
@@ -25,6 +27,7 @@ public class ScheduleEventResponse {
         this.status = status;
         this.medicationName = medicationName;
         this.medicationImageUrl = medicationImageUrl;
+        this.medicationProfileId = medicationProfileId;
         this.dosage = dosage;
         this.measurement = measurement;
         this.scheduleAt = scheduleAt;
@@ -40,6 +43,10 @@ public class ScheduleEventResponse {
 
     public String getMedicationName() {
         return medicationName;
+    }
+
+    public String getMedicationProfileId() {
+        return medicationProfileId;
     }
 
     public String getMeasurement() {

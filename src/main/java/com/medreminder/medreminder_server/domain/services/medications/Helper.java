@@ -61,7 +61,6 @@ public class Helper {
         return Optional.of(medicationPack);
     }
 
-
     public static MedicationProfileResponse getMedicationProfileResponse(MedicationProfileEntity smp) {
         return getMedicationProfileResponse(smp, smp.getProfile());
     }
@@ -152,5 +151,26 @@ public class Helper {
 
             managedProfile.getMedicationProfile().addAll(syncedMedicationProfiles);
         }
+    }
+
+    public static void syncMedicationPack(MedicationProfileEntity managedMedicationProfile,
+                                    MedicationPack medicationPack) {
+        managedMedicationProfile.getMedicationPacks()
+                .stream()
+                .filter(mpe->  mpe.getId().equals(medicationPack.getId()))
+                .findFirst()
+                .ifPresent(mpe-> mpe.updateMedicationPack(medicationPack));
+    }
+
+    public static MedicationPack getPackByStatus(MedicationProfileEntity managedMedicationProfile,
+                                           String status,
+                                           MedicationMapper medicationMapper) {
+        return  managedMedicationProfile
+                .getMedicationPacks()
+                .stream()
+                .filter(mpe -> mpe.getStatus().equals(status))
+                .findFirst()
+                .map(medicationMapper::toDomain)
+                .orElse(null);
     }
 }
