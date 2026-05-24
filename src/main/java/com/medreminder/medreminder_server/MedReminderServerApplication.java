@@ -21,6 +21,9 @@ public class MedReminderServerApplication {
 //		for another seven days for medication profiles that are only still active.
 //	But would it be better if we control this from front end and set up a background work
 //	that will send the post request. OR we should do everything on Backend.
+// This will be called from frontend, to identify the user, and to make sure user is
+// still an active user, and we are not creating data for user that stopped using
+// the app.
 // 5. Mailing system set up.
 
 // TODO 2:
@@ -28,13 +31,11 @@ public class MedReminderServerApplication {
 // 2. Set up service and controller for creating medication pack directly and refill process. ✅
 // 3. Update the event schedules so that when the medicationProfile is not active, it shouldn't
 //		return it.✅
-
 //CASE WITH PACK:
 // When user adding a new pack when they didn't initially add it when they are creating
 // the schedule profile, we need to:
 //			Get the track amount of the current amountTaken. ✅
 //			Subtract it from the total and then save it into the currentQuantity. ✅
-
 
 
 //SUBSCRIPTION AND PAYMENT SET UP
@@ -45,7 +46,6 @@ public class MedReminderServerApplication {
 // 4. Each subscription will reuse a plan. On initial, we create a free plan entity,
 //	but when user pay for subscription, we create a new pro plan which we will use
 // for the period of the subscription.
-
 
 // User -> Plan (OneToOne)
 // User -> Subscription (OneToOne)

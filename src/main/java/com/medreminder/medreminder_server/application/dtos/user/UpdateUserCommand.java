@@ -13,8 +13,10 @@ public class UpdateUserCommand {
     public UpdateUserCommand() {
     }
 
-    public UpdateUserCommand(String email, String name,
-                             String dateOfBirth, String gender) {
+    public UpdateUserCommand(String email,
+                             String name,
+                             String dateOfBirth,
+                             String gender) {
         this.email = email;
         this.name = name;
         this.dateOfBirth = dateOfBirth;

@@ -103,10 +103,12 @@ public class Helper {
                     .filter(packEntity -> packEntity.getStatus().equals("ACTIVE"))
                     .findFirst()
                     .ifPresent(medicationPack -> {
-                        response.setTotalAmountInPack(medicationPack.getTotalQuantity()
-                                .stripTrailingZeros().toPlainString());
-                        response.setCurrentAmountInPack(medicationPack.getCurrentQuantity()
-                                .stripTrailingZeros().toPlainString());
+                        PackResponse packResponse = new PackResponse(
+                                medicationPack.getTotalQuantity().stripTrailingZeros().toPlainString(),
+                                medicationPack.getCurrentQuantity().stripTrailingZeros().toPlainString(),
+                                medicationPack.getReminderDays()
+                                );
+                        response.setPack(packResponse);
                     });
         }
         return response;
