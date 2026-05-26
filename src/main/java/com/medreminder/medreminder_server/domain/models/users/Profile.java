@@ -15,7 +15,10 @@ public class Profile {
     private User user;
     private final List<MedicationProfile> medicationProfiles = new ArrayList<>();
 
-    public Profile(String id, String name, Relation relation, boolean isSelf) {
+    public Profile(String id,
+                   String name,
+                   Relation relation,
+                   boolean isSelf) {
         this.id = id;
         this.name = name;
         this.relation = relation;

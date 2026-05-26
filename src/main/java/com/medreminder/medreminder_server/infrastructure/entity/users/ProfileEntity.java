@@ -1,6 +1,7 @@
 package com.medreminder.medreminder_server.infrastructure.entity.users;
 
 
+import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
@@ -25,6 +26,9 @@ public class ProfileEntity {
 
     @Column(name = "is_self")
     private boolean isSelf;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -85,11 +89,19 @@ public class ProfileEntity {
         return isSelf;
     }
 
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
     public UserEntity getUser() {
         return user;
     }
 
     public List<MedicationProfileEntity> getMedicationProfile() {
         return medicationProfile;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

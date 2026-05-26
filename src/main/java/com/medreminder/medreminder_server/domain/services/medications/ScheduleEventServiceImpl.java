@@ -205,10 +205,12 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 medication.getMeasurementUnit().getSymbol(),
                 managedScheduleEvent.getScheduleAt().toString());
 
-        response.setProfile(new ProfileResponse(profile.getId(),
+        response.setProfile(new ProfileResponse(
+                profile.getId(),
+                profile.getAvatarUrl(),
                 profile.getName(),
-                profile.getRelation(), profile.isSelf()));
-
+                profile.getRelation(),
+                profile.isSelf()));
         if(managedScheduleEvent.getTakenAt() != null){
             response.setTakenAt(managedScheduleEvent.getTakenAt().toString());
         }

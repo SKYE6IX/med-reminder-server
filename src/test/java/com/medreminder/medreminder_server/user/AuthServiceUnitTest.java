@@ -2,6 +2,7 @@ package com.medreminder.medreminder_server.user;
 
 import com.medreminder.medreminder_server.application.dtos.user.ResetPasswordResponse;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
+import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
@@ -53,7 +54,8 @@ public class AuthServiceUnitTest {
     void setUp(){
         PlanMapper planMapper = new PlanMapper();
         JwtUtil jwtUtil = new JwtUtil(env);
-        UserService userService = new UserServiceImpl(userRepository, userMapper, planMapper);
+        S3Service s3Service = new S3Service(null);
+        UserService userService = new UserServiceImpl(userRepository, userMapper, planMapper,s3Service);
         TokenManager tokenManager = new TokenManager(jwtUtil, jpaRefreshTokenRepository,null);
 
         userMapper = new UserMapper();

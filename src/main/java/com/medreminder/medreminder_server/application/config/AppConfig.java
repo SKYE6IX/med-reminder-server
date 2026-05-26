@@ -3,6 +3,7 @@ package com.medreminder.medreminder_server.application.config;
 
 import com.medreminder.medreminder_server.application.security.AppleTokenVerifier;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
+import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.services.UseCase;
 import com.medreminder.medreminder_server.domain.services.medications.*;
 import com.medreminder.medreminder_server.domain.services.users.*;
@@ -13,8 +14,10 @@ import com.medreminder.medreminder_server.infrastructure.repository.users.JpaRef
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,22 +26,36 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.interceptor.*;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.List;
 
 @Configuration
 @EnableTransactionManagement
 public class AppConfig {
 
+    private final Environment env;
+
+    @Autowired
+    public AppConfig(Environment env) {
+        this.env = env;
+    }
+
     @Bean
     UserService userService(UserRepository userRepository,
                             UserMapper userMapper,
                             PlanMapper planMapper,
+                            S3Service s3Service,
                             TransactionInterceptor txInterceptor ) {
 
-        UserService userService = new UserServiceImpl(userRepository, userMapper, planMapper);
+        UserService userService = new UserServiceImpl(userRepository, userMapper, planMapper,s3Service);
 
         return createProxyFactory(userService,UserService.class,txInterceptor);
     }
@@ -104,6 +121,19 @@ public class AppConfig {
         return new TokenManager(jwtUtil, jpaRefreshTokenRepository, appleTokenVerifier);
     }
 
+    @Bean
+    public S3Client s3Client() {
+        return S3Client.builder()
+                .region(Region.of(env.getProperty("yc.s3.region")))
+                .endpointOverride(URI.create(env.getProperty("yc.s3.private.endpoint")))
+                .credentialsProvider(
+                        StaticCredentialsProvider.create(
+                                AwsBasicCredentials.create(
+                                        env.getProperty("yc.s3.key.id"),env.getProperty("yc.s3.secret.key"))
+                        )
+                )
+                .build();
+    }
 
     @Bean
     public TransactionInterceptor txInterceptor(TransactionManager txManager) {

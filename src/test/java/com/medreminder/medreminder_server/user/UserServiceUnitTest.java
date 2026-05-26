@@ -1,6 +1,7 @@
 package com.medreminder.medreminder_server.user;
 
 import com.medreminder.medreminder_server.application.dtos.user.*;
+import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.models.users.UserProvider;
 import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
@@ -37,7 +38,8 @@ public class UserServiceUnitTest {
     void setUp(){
         userMapper = new UserMapper();
         PlanMapper planMapper = new PlanMapper();
-        userService = new UserServiceImpl(userRepository, userMapper, planMapper);
+        S3Service s3Service = new S3Service(null);
+        userService = new UserServiceImpl(userRepository, userMapper, planMapper, s3Service);
     }
 
     @Test

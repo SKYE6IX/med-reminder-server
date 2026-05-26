@@ -80,6 +80,7 @@ public class Helper {
 //        Attach the selected profile to the response
         response.setProfile(new ProfileResponse(
                 profileEntity.getId(),
+                profileEntity.getAvatarUrl(),
                 profileEntity.getName(),
                 profileEntity.getRelation(),
                 profileEntity.isSelf()));

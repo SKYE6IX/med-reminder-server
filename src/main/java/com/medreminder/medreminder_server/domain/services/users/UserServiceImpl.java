@@ -1,6 +1,8 @@
 package com.medreminder.medreminder_server.domain.services.users;
 
 import com.medreminder.medreminder_server.application.dtos.user.*;
+import com.medreminder.medreminder_server.application.exceptions.ResourceNotFoundException;
+import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.models.billing.Plan;
 import com.medreminder.medreminder_server.domain.models.billing.PlanType;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
@@ -13,7 +15,9 @@ import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEnt
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,13 +27,16 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PlanMapper planMapper;
+    private final S3Service s3Service;
 
     public UserServiceImpl(UserRepository userRepository,
                            UserMapper userMapper,
-                           PlanMapper planMapper) {
+                           PlanMapper planMapper,
+                           S3Service s3Service) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.planMapper = planMapper;
+        this.s3Service = s3Service;
     }
 
     @Override
@@ -97,8 +104,11 @@ public class UserServiceImpl implements UserService {
 
         ProfileEntity newProfile = userRepository.saveUser(managedUser).getProfiles().getLast();
 
-        return new ProfileResponse(newProfile.getId(),
-                newProfile.getName(), newProfile.getRelation(),
+        return new ProfileResponse(
+                newProfile.getId(),
+                newProfile.getAvatarUrl(),
+                newProfile.getName(),
+                newProfile.getRelation(),
                 newProfile.isSelf());
     }
 
@@ -112,12 +122,55 @@ public class UserServiceImpl implements UserService {
         return  profileEntities
                 .stream()
                 .map((profileEntity ->
-                        new ProfileResponse(profileEntity.getId(),
+                        new ProfileResponse(
+                                profileEntity.getId(),
+                                profileEntity.getAvatarUrl(),
                                 profileEntity.getName(),
                                 profileEntity.getRelation(),
                                 profileEntity.isSelf())))
                 .toList();
     }
+
+    @Override
+    public Map<String, String> uploadProfileImage(MultipartFile file, String userId, String profileId) {
+
+        UserEntity managedUser = getUserEntity(userId);
+        Map<String, String> map = new HashMap<>();
+
+        managedUser.getProfiles()
+                .stream()
+                .filter((profileEntity -> profileEntity.getId().equals(profileId)))
+                .findFirst()
+                .ifPresentOrElse(profileEntity -> {
+                    if(profileEntity.getAvatarUrl() != null) {
+                        s3Service.deleteFile(profileEntity.getAvatarUrl());
+                    }
+                    String url = s3Service.uploadFile(file);
+                    map.put("url", url);
+                    profileEntity.setAvatarUrl(url);
+                    },
+                        ()-> {throw new ResourceNotFoundException("Profile is not found!");}
+                );
+        userRepository.saveUser(managedUser);
+        return map;
+    }
+
+    @Override
+    public void deleteProfileImage(String userId, String profileId) {
+        UserEntity managedUser = getUserEntity(userId);
+        managedUser.getProfiles()
+                .stream()
+                .filter((profileEntity -> profileEntity.getId().equals(profileId)))
+                .findFirst()
+                .ifPresent(profileEntity -> {
+                    if(profileEntity.getAvatarUrl() != null) {
+                        s3Service.deleteFile(profileEntity.getAvatarUrl());
+                        profileEntity.setAvatarUrl(null);
+                    }
+                });
+        userRepository.saveUser(managedUser);
+    }
+
 
     @Override
     public void deleteUser(String userId) {

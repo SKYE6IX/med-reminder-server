@@ -1,25 +1,22 @@
 package com.medreminder.medreminder_server.application.controllers;
 
 
-import com.medreminder.medreminder_server.application.dtos.error.AppErrorResponse;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileRequest;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
 import com.medreminder.medreminder_server.application.dtos.user.UpdateUserCommand;
 import com.medreminder.medreminder_server.application.dtos.user.UserResponse;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
-import com.medreminder.medreminder_server.domain.models.users.Profile;
-import com.medreminder.medreminder_server.domain.services.users.UserRepository;
+import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.services.users.UserService;
-import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -88,6 +85,31 @@ public class UserController {
         var principal = getPrincipal(userDetails);
 
       userService.deleteProfile(principal.getId(), profileId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(value = "/profiles/images")
+    public ResponseEntity<Map<String, String>> uploadProfileImage(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("profileId") String profileId) {
+
+        var principal = getPrincipal(userDetails);
+
+        Map<String, String> response = userService.uploadProfileImage(file,principal.getId(),profileId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping(value = "/profiles/images/{profileId}")
+    public ResponseEntity<?> deleteProfileImage(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String profileId) {
+
+        var principal = getPrincipal(userDetails);
+
+        userService.deleteProfileImage(principal.getId(), profileId);
 
         return ResponseEntity.noContent().build();
     }
