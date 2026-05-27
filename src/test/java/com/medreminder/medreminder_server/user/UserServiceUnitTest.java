@@ -9,6 +9,7 @@ import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.services.users.UserServiceImpl;
 import com.medreminder.medreminder_server.infrastructure.entity.billing.mappers.PlanMapper;
+import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,9 +38,9 @@ public class UserServiceUnitTest {
     @BeforeEach
     void setUp(){
         userMapper = new UserMapper();
-        PlanMapper planMapper = new PlanMapper();
+        SubscriptionMapper subscriptionMapper = new SubscriptionMapper();
         S3Service s3Service = new S3Service(null);
-        userService = new UserServiceImpl(userRepository, userMapper, planMapper, s3Service);
+        userService = new UserServiceImpl(userRepository, userMapper, subscriptionMapper, s3Service);
     }
 
     @Test

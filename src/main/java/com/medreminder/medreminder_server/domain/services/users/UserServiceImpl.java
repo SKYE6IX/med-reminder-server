@@ -3,14 +3,15 @@ package com.medreminder.medreminder_server.domain.services.users;
 import com.medreminder.medreminder_server.application.dtos.user.*;
 import com.medreminder.medreminder_server.application.exceptions.ResourceNotFoundException;
 import com.medreminder.medreminder_server.application.services.S3Service;
-import com.medreminder.medreminder_server.domain.models.billing.Plan;
-import com.medreminder.medreminder_server.domain.models.billing.PlanType;
+import com.medreminder.medreminder_server.domain.models.subscription.Plan;
+import com.medreminder.medreminder_server.domain.models.subscription.PlanType;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.models.users.UserProvider;
-import com.medreminder.medreminder_server.infrastructure.entity.billing.PlanEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.subscription.PlanEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.billing.mappers.PlanMapper;
+import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
@@ -26,16 +27,16 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final PlanMapper planMapper;
+    private final SubscriptionMapper subscriptionMapper;
     private final S3Service s3Service;
 
     public UserServiceImpl(UserRepository userRepository,
                            UserMapper userMapper,
-                           PlanMapper planMapper,
+                           SubscriptionMapper subscriptionMapper,
                            S3Service s3Service) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
-        this.planMapper = planMapper;
+        this.subscriptionMapper = subscriptionMapper;
         this.s3Service = s3Service;
     }
 
@@ -62,7 +63,7 @@ public class UserServiceImpl implements UserService {
                 false);
 
         UserEntity userEntity = userMapper.toEntity(user);
-        PlanEntity planEntity = planMapper.toEntity(freePlan, userEntity);
+        PlanEntity planEntity = subscriptionMapper.toEntity(freePlan, userEntity);
         userEntity.setPlan(planEntity);
 
         return userRepository.saveUser(userEntity);
@@ -176,7 +177,12 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(String userId) {
 
         UserEntity managedUser = getUserEntity(userId);
-
+        managedUser.getProfiles()
+                .forEach(profileEntity -> {
+                    if(profileEntity.getAvatarUrl() != null) {
+                        s3Service.deleteFile(profileEntity.getAvatarUrl());
+                    }
+                });
         userRepository.deleteUser(managedUser.getId());
     }
 
@@ -185,12 +191,19 @@ public class UserServiceImpl implements UserService {
 
         UserEntity managedUser = getUserEntity(userId);
 
-        User domainUser = userMapper.toDomain(managedUser);
-
-        domainUser.getProfiles()
+        Profile profileToRemove = managedUser.getProfiles()
                 .stream()
-                .filter(profile -> profile.getId().equals(profileId))
-                .findFirst().ifPresent(domainUser::removeProfiles);
+                .filter((profileEntity -> profileEntity.getId().equals(profileId)))
+                .findFirst()
+                .map(profileEntity -> {
+                    if(profileEntity.getAvatarUrl() != null) {
+                        s3Service.deleteFile(profileEntity.getAvatarUrl());
+                    }
+                    return userMapper.toDomain(profileEntity);
+                }).orElse(null);
+
+        User domainUser = userMapper.toDomain(managedUser);
+        domainUser.removeProfiles(profileToRemove);
 
         syncProfiles(domainUser.getProfiles(), managedUser);
 
@@ -226,7 +239,8 @@ public class UserServiceImpl implements UserService {
         List<ProfileEntity> syncedProfiles = domainProfiles
                 .stream()
                 .map(p -> existingProfiles
-                        .getOrDefault(p.getId(), userMapper.toEntity(p, managedEntity)))
+                        .getOrDefault(p.getId(),
+                                userMapper.toEntity(p, managedEntity)))
                 .toList();
 
         managedEntity.getProfiles().clear();

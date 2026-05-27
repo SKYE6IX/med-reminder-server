@@ -1,19 +1,17 @@
-package com.medreminder.medreminder_server.infrastructure.entity.billing.mappers;
+package com.medreminder.medreminder_server.infrastructure.entity.subscription;
 
-import com.medreminder.medreminder_server.domain.models.billing.Plan;
-import com.medreminder.medreminder_server.domain.models.billing.PlanType;
-import com.medreminder.medreminder_server.infrastructure.entity.billing.PlanEntity;
+import com.medreminder.medreminder_server.domain.models.subscription.Plan;
+import com.medreminder.medreminder_server.domain.models.subscription.PlanType;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import org.springframework.stereotype.Component;
 
-
 @Component
-public class PlanMapper {
-
+public class SubscriptionMapper {
     public PlanEntity toEntity(Plan plan, UserEntity user) {
         if (plan == null) {
             return null;
         }
+
         return new PlanEntity(
                 plan.getId(),
                 plan.getPlanType().toString(),

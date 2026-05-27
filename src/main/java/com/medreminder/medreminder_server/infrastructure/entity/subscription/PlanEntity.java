@@ -1,6 +1,6 @@
-package com.medreminder.medreminder_server.infrastructure.entity.billing;
+package com.medreminder.medreminder_server.infrastructure.entity.subscription;
 
-import com.medreminder.medreminder_server.domain.models.billing.Plan;
+import com.medreminder.medreminder_server.domain.models.subscription.Plan;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;

@@ -1,7 +1,7 @@
 package com.medreminder.medreminder_server.domain.models.users;
 
 import com.medreminder.medreminder_server.application.dtos.user.UpdateUserCommand;
-import com.medreminder.medreminder_server.domain.models.billing.Plan;
+import com.medreminder.medreminder_server.domain.models.subscription.Plan;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

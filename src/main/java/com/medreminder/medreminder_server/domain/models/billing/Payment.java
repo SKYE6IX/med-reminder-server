@@ -1,5 +1,6 @@
 package com.medreminder.medreminder_server.domain.models.billing;
 
+import com.medreminder.medreminder_server.domain.models.subscription.SubscriptionPeriod;
 import com.medreminder.medreminder_server.domain.models.users.User;
 
 import java.math.BigDecimal;

@@ -3,8 +3,8 @@ package com.medreminder.medreminder_server.infrastructure.entity.users;
 
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.infrastructure.entity.billing.PaymentEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.billing.PlanEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.billing.SubscriptionEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.subscription.PlanEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionEntity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;

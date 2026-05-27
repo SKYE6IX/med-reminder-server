@@ -1,6 +1,7 @@
-package com.medreminder.medreminder_server.infrastructure.entity.billing;
+package com.medreminder.medreminder_server.infrastructure.entity.subscription;
 
-import com.medreminder.medreminder_server.domain.models.billing.SubscriptionPeriod;
+import com.medreminder.medreminder_server.domain.models.subscription.SubscriptionPeriod;
+import com.medreminder.medreminder_server.infrastructure.entity.billing.PaymentEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import org.hibernate.annotations.*;

@@ -1,4 +1,4 @@
-package com.medreminder.medreminder_server.domain.models.billing;
+package com.medreminder.medreminder_server.domain.models.subscription;
 
 import com.medreminder.medreminder_server.domain.models.users.User;
 

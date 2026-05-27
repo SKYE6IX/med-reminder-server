@@ -6,9 +6,13 @@ import com.medreminder.medreminder_server.application.security.JwtUtil;
 import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.services.UseCase;
 import com.medreminder.medreminder_server.domain.services.medications.*;
+import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionRepository;
+import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionService;
+import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionServiceImpl;
 import com.medreminder.medreminder_server.domain.services.users.*;
 import com.medreminder.medreminder_server.infrastructure.entity.billing.mappers.PlanMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
+import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import com.medreminder.medreminder_server.infrastructure.repository.users.JpaRefreshTokenRepository;
 import org.jspecify.annotations.NonNull;
@@ -51,11 +55,11 @@ public class AppConfig {
     @Bean
     UserService userService(UserRepository userRepository,
                             UserMapper userMapper,
-                            PlanMapper planMapper,
+                            SubscriptionMapper subscriptionMapper,
                             S3Service s3Service,
                             TransactionInterceptor txInterceptor ) {
 
-        UserService userService = new UserServiceImpl(userRepository, userMapper, planMapper,s3Service);
+        UserService userService = new UserServiceImpl(userRepository, userMapper,subscriptionMapper,s3Service);
 
         return createProxyFactory(userService,UserService.class,txInterceptor);
     }
@@ -107,6 +111,14 @@ public class AppConfig {
                 medicationMapper);
 
         return createProxyFactory(scheduleEventService, ScheduleEventService.class, txInterceptor);
+    }
+
+    @Bean
+    SubscriptionService subscriptionService(SubscriptionRepository subscriptionRepository,
+                                            TransactionInterceptor txInterceptor){
+        SubscriptionService subscriptionService = new SubscriptionServiceImpl(subscriptionRepository);
+
+        return createProxyFactory(subscriptionService, SubscriptionService.class, txInterceptor);
     }
 
     @Bean
