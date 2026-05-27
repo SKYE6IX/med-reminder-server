@@ -10,7 +10,6 @@ import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.models.users.UserProvider;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.PlanEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.billing.mappers.PlanMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;

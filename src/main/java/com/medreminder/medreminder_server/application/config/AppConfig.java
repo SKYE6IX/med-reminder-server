@@ -10,7 +10,6 @@ import com.medreminder.medreminder_server.domain.services.subscription.Subscript
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionService;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionServiceImpl;
 import com.medreminder.medreminder_server.domain.services.users.*;
-import com.medreminder.medreminder_server.infrastructure.entity.billing.mappers.PlanMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
