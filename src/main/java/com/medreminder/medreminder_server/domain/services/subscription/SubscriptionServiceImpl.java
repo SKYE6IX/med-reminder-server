@@ -55,11 +55,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     public SubscriptionServiceImpl(SubscriptionRepository subscriptionRepository,
                                    UserRepository userRepository,
-                                   PaymentService paymentService1,
+                                   PaymentService paymentService,
                                    SubscriptionMapper subscriptionMapper) {
         this.subscriptionRepository = subscriptionRepository;
         this.userRepository = userRepository;
-        this.paymentService = paymentService1;
+        this.paymentService = paymentService;
         this.subscriptionMapper = subscriptionMapper;
     }
 

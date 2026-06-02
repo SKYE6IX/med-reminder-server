@@ -20,6 +20,7 @@ public class S3Service {
     private String bucket;
     @Value("${yc.s3.private.endpoint}")
     private String endpoint;
+
     private final S3Client client;
 
     public S3Service(S3Client s3Client) {

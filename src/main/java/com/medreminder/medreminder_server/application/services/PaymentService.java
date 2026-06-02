@@ -12,14 +12,10 @@ import ru.loolzaaa.youkassa.processors.PaymentProcessor;
 @Service
 public class PaymentService {
 
-    @Value("${yokassa.shop.id}")
-    private String shopId;
-    @Value("${yokassa.secret.key}")
-    private String secretKey;
-
     private final PaymentProcessor paymentProcessor;
 
-    public PaymentService() {
+    public PaymentService(@Value("${yookassa.shop.id}") String shopId,
+                            @Value("${yookassa.secret.key}") String secretKey) {
         ApiClient apiClient = ApiClientBuilder
                 .newBuilder()
                 .configureBasicAuth(shopId, secretKey)
