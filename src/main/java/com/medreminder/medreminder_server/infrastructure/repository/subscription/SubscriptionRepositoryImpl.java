@@ -26,6 +26,11 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
     }
 
     @Override
+    public Optional<SubscriptionEntity> getSubscriptionByUserId(String userId) {
+        return jpaSubscriptionRepository.findByUserId(userId);
+    }
+
+    @Override
     public Optional<PlanEntity> getPlanByUserId(String userId) {
         return jpaPlanRepository.findByUserId(userId);
     }

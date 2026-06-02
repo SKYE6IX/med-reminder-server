@@ -65,23 +65,19 @@ public class Plan {
         this.user = user;
     }
 
-    public void updatePlanType(PlanType planType) {
-        this.planType = planType;
+    public void toFreePlan(){
+        this.planType = PlanType.FREE;
+        this.maxMedications = 1;
+        this.managedRelation = false;
+        this.refillReminders = false;
+        this.reminderPreference = false;
     }
 
-    public void updateMaxMedications(Integer maxMedications) {
-        this.maxMedications = maxMedications;
-    }
-
-    public void updateManagedRelation(boolean managedRelation) {
-        this.managedRelation = managedRelation;
-    }
-
-    public void updateRefillReminders(boolean refillReminders) {
-        this.refillReminders = refillReminders;
-    }
-
-    public void updateReminderPreference(boolean reminderPreference) {
-        this.reminderPreference = reminderPreference;
+    public void toProPlan(){
+        this.planType = PlanType.PRO;
+        this.maxMedications = null;
+        this.managedRelation = true;
+        this.refillReminders = true;
+        this.reminderPreference = true;
     }
 }

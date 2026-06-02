@@ -6,21 +6,21 @@ import com.medreminder.medreminder_server.domain.models.users.User;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class Payment {
+public class Billing {
 
     private final String id;
     private final BigDecimal amount;
     private final String method;
-    private PaymentStatus status;
+    private final BillingStatus status;
     private LocalDateTime paidAt;
 
     private final User user;
     private final SubscriptionPeriod subscriptionPeriod;
 
-    public Payment(String id,
+    public Billing(String id,
                    BigDecimal amount,
                    String method,
-                   PaymentStatus status,
+                   BillingStatus status,
                    User user,
                    SubscriptionPeriod subscriptionPeriod) {
         this.id = id;
@@ -47,7 +47,7 @@ public class Payment {
         return paidAt;
     }
 
-    public PaymentStatus getPaymentStatus() {
+    public BillingStatus getPaymentStatus() {
         return status;
     }
 
@@ -57,13 +57,5 @@ public class Payment {
 
     public SubscriptionPeriod getSubscriptionPeriod() {
         return subscriptionPeriod;
-    }
-
-    public void updatePaymentStatus(PaymentStatus paymentStatus) {
-        this.status = paymentStatus;
-    }
-
-    public void updatePaidAt(LocalDateTime paidAt) {
-        this.paidAt = paidAt;
     }
 }

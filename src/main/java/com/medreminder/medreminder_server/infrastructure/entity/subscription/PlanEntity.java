@@ -20,7 +20,7 @@ public class PlanEntity {
     private String planType;
 
     @Column(name = "max_medications")
-    private int maxMedications;
+    private Integer maxMedications;
 
     @Column(name = "managed_relation")
     private boolean managedRelation;
@@ -78,7 +78,7 @@ public class PlanEntity {
         return planType;
     }
 
-    public int getMaxMedications() {
+    public Integer getMaxMedications() {
         return maxMedications;
     }
 
@@ -96,6 +96,10 @@ public class PlanEntity {
 
     public UserEntity getUser() {
         return user;
+    }
+
+    public SubscriptionEntity getSubscription() {
+        return subscription;
     }
 
     public void syncPlanData(Plan domainPlan) {

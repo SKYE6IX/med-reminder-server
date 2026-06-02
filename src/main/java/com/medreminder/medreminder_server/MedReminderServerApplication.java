@@ -15,7 +15,7 @@ public class MedReminderServerApplication {
 //TODO 1:
 // 1. Social authorization controller and updated record for it.✅
 // 2. Subscription base setup. ✅
-// 3. Payment system setup after the subscription base is done.
+// 3. Payment system setup after the subscription base is done. ✅
 // 4. Schedule background work process for creating new Schedule events
 //		for another seven days for medication profiles that are only still active.
 //	But would it be better if we control this from front end and set up a background work

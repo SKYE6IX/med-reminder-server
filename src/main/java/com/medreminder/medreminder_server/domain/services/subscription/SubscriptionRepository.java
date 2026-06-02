@@ -9,5 +9,7 @@ public interface SubscriptionRepository {
 
     SubscriptionEntity saveSubscription(SubscriptionEntity subscriptionEntity);
 
-   Optional<PlanEntity> getPlanByUserId(String userId);
+    Optional<SubscriptionEntity> getSubscriptionByUserId(String userId);
+
+    Optional<PlanEntity> getPlanByUserId(String userId);
 }

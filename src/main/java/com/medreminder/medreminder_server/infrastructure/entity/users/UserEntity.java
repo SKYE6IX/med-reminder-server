@@ -2,7 +2,7 @@ package com.medreminder.medreminder_server.infrastructure.entity.users;
 
 
 import com.medreminder.medreminder_server.domain.models.users.User;
-import com.medreminder.medreminder_server.infrastructure.entity.billing.PaymentEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.billing.BillingEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.PlanEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionEntity;
 import jakarta.persistence.*;
@@ -90,7 +90,10 @@ public class UserEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<PaymentEntity> payments = new ArrayList<>();
+    private List<BillingEntity> billings = new ArrayList<>();
+
+    @Column(name = "payment_method_id")
+    private String paymentMethodId;
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -178,8 +181,12 @@ public class UserEntity {
         return subscription;
     }
 
-    public List<PaymentEntity> getPayments() {
-        return payments;
+    public List<BillingEntity> getBillings() {
+        return billings;
+    }
+
+    public String getPaymentMethodId() {
+        return paymentMethodId;
     }
 
     public void setPlan(PlanEntity plan) {
@@ -194,8 +201,12 @@ public class UserEntity {
         this.providerId = providerId;
     }
 
-    public void  updateLastLoginAt(LocalDateTime lastLoginAt) {
+    public void updateLastLoginAt(LocalDateTime lastLoginAt) {
         this.lastLoginAt = lastLoginAt;
+    }
+
+    public void updatePaymentMethodId(String paymentMethodId) {
+        this.paymentMethodId = paymentMethodId;
     }
 
     public void syncUserData(User domain){

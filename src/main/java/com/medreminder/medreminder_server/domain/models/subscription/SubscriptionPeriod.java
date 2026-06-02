@@ -8,15 +8,18 @@ public class SubscriptionPeriod {
     private Subscription subscription;
     private final LocalDateTime startTime;
     private final LocalDateTime endTime;
-    private SubscriptionPeriodPaymentStatus paymentStatus;
+    private final SubscriptionPeriodStatus status;
+    private final SubscriptionPeriodPaymentStatus paymentStatus;
 
     public SubscriptionPeriod(String id,
                               LocalDateTime startTime,
                               LocalDateTime endTime,
+                              SubscriptionPeriodStatus status,
                               SubscriptionPeriodPaymentStatus paymentStatus) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.status = status;
         this.paymentStatus = paymentStatus;
     }
 
@@ -40,11 +43,11 @@ public class SubscriptionPeriod {
         return paymentStatus;
     }
 
-    public void setSubscription(Subscription subscription) {
-        this.subscription = subscription;
+    public SubscriptionPeriodStatus getStatus() {
+        return status;
     }
 
-    public void updatePaymentStatus(SubscriptionPeriodPaymentStatus status) {
-        this.paymentStatus = status;
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
     }
 }

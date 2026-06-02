@@ -47,6 +47,7 @@ public class SubscriptionEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @OrderBy("createdAt ASC")
     private final List<SubscriptionPeriodEntity> periods = new ArrayList<>();
 
     @Column(name = "created_at")
@@ -120,10 +121,19 @@ public class SubscriptionEntity {
         return updatedAt;
     }
 
-    public void syncSubscriptionData(Subscription subscription) {
-        this.status = subscription.getStatus().toString();
-        this.canceledAt = subscription.getCanceledAt();
-        this.billingCycle = subscription.getBillingCycle().toString();
-        this.autoRenewal = subscription.isAutoRenewal();
+    public void updateStatus(String status) {
+        this.status = status;
+    }
+
+    public void updateStartedAt(LocalDateTime startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public void updateCanceledAt(LocalDateTime canceledAt) {
+        this.canceledAt = canceledAt;
+    }
+
+    public void updateBillingCycle(String billingCycle) {
+        this.billingCycle = billingCycle;
     }
 }

@@ -3,6 +3,7 @@ package com.medreminder.medreminder_server.application.config;
 
 import com.medreminder.medreminder_server.application.security.AppleTokenVerifier;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
+import com.medreminder.medreminder_server.application.services.PaymentService;
 import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.services.UseCase;
 import com.medreminder.medreminder_server.domain.services.medications.*;
@@ -114,8 +115,12 @@ public class AppConfig {
 
     @Bean
     SubscriptionService subscriptionService(SubscriptionRepository subscriptionRepository,
+                                            UserRepository userRepository,
+                                            PaymentService paymentService,
+                                            SubscriptionMapper subscriptionMapper,
                                             TransactionInterceptor txInterceptor){
-        SubscriptionService subscriptionService = new SubscriptionServiceImpl(subscriptionRepository);
+        SubscriptionService subscriptionService = new
+                SubscriptionServiceImpl(subscriptionRepository,userRepository,paymentService,subscriptionMapper);
 
         return createProxyFactory(subscriptionService, SubscriptionService.class, txInterceptor);
     }

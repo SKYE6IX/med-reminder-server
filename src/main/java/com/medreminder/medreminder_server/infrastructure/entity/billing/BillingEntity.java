@@ -1,6 +1,6 @@
 package com.medreminder.medreminder_server.infrastructure.entity.billing;
 
-import com.medreminder.medreminder_server.domain.models.billing.Payment;
+import com.medreminder.medreminder_server.domain.models.billing.Billing;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionPeriodEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import jakarta.persistence.*;
@@ -9,8 +9,8 @@ import org.hibernate.annotations.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Entity(name = "PAYMENTS")
-public class PaymentEntity {
+@Entity(name = "BILLINGS")
+public class BillingEntity {
 
     @Id
     @GeneratedValue()
@@ -43,19 +43,21 @@ public class PaymentEntity {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public PaymentEntity() {
+    public BillingEntity() {
     }
 
-    public PaymentEntity(String id,
+    public BillingEntity(String id,
                          BigDecimal amount,
                          String method,
                          String status,
+                         LocalDateTime paidAt,
                          UserEntity user,
                          SubscriptionPeriodEntity subscriptionPeriod) {
         this.id = id;
         this.amount = amount;
         this.method = method;
         this.status = status;
+        this.paidAt = paidAt;
         this.user = user;
         this.subscriptionPeriod = subscriptionPeriod;
     }
@@ -88,8 +90,11 @@ public class PaymentEntity {
         return subscriptionPeriod;
     }
 
-    public void syncPaymentData(Payment domainPayment){
-        this.status = domainPayment.getPaymentStatus().toString();
-        this.paidAt = domainPayment.getPaidAt();
+    public void updateStatus(String status) {
+        this.status = status;
+    }
+
+    public void updatePaidAt(LocalDateTime paidAt) {
+        this.paidAt = paidAt;
     }
 }

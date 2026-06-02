@@ -1,7 +1,7 @@
 package com.medreminder.medreminder_server.infrastructure.entity.subscription;
 
 import com.medreminder.medreminder_server.domain.models.subscription.SubscriptionPeriod;
-import com.medreminder.medreminder_server.infrastructure.entity.billing.PaymentEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.billing.BillingEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import org.hibernate.annotations.*;
@@ -25,6 +25,8 @@ public class SubscriptionPeriodEntity {
     @Column(name = "payment_status")
     private String paymentStatus;
 
+    private String status;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -35,7 +37,7 @@ public class SubscriptionPeriodEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private PaymentEntity payment;
+    private BillingEntity billing;
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -52,11 +54,13 @@ public class SubscriptionPeriodEntity {
                                     LocalDateTime startTime,
                                     LocalDateTime endTime,
                                     String paymentStatus,
+                                    String status,
                                     SubscriptionEntity subscription) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
         this.paymentStatus = paymentStatus;
+        this.status = status;
         this.subscription = subscription;
     }
 
@@ -76,19 +80,23 @@ public class SubscriptionPeriodEntity {
         return endTime;
     }
 
-    public String getStatus() {
+    public String getPaymentStatus() {
         return paymentStatus;
     }
 
-    public PaymentEntity getPayment() {
-        return payment;
+    public String getStatus() {
+        return status;
     }
 
-    public void setPayment(PaymentEntity payment) {
-        this.payment = payment;
+    public BillingEntity getPayment() {
+        return billing;
     }
 
-    public void syncSubscriptionPeriodData(SubscriptionPeriod  subscriptionPeriod) {
-        this.paymentStatus = subscriptionPeriod.getPaymentStatus().toString();
+    public void setPayment(BillingEntity payment) {
+        this.billing = payment;
+    }
+
+    public void updatePaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 }
