@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface JpaScheduleEventRepository extends BaseJpaRepository<ScheduleEventEntity, String> {
+public interface JpaScheduleEventRepo extends BaseJpaRepository<ScheduleEventEntity, String> {
 
     @Query("""
         SELECT se FROM SCHEDULE_EVENTS se

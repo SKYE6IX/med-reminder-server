@@ -26,14 +26,17 @@ public class MedicationSchedule {
                               String recurrenceRule,
                               LocalDate startDate,
                               String timeZone,
-                              BigDecimal takenQuantity) {
+                              BigDecimal takenQuantity,
+                              LocalDateTime lastExpandedUntil) {
         this.id = id;
         this.doseQuantity = doseQuantity;
         this.recurrenceRule = recurrenceRule;
         this.startDate = startDate;
         this.timeZone = timeZone;
         this.takenQuantity = takenQuantity;
+        this.lastExpandedUntil = lastExpandedUntil;
     }
+
 
     public String getId() {
         return id;
@@ -95,8 +98,11 @@ public class MedicationSchedule {
         this.scheduleEvents.add(scheduleEvent);
         scheduleEvent.setMedicationSchedule(this);
     }
-
     public void addMedicationProfile(MedicationProfile medicationProfile) {
         this.medicationProfile = medicationProfile;
+    }
+
+    public void  updateLastExpandedUntil(LocalDateTime lastExpandedUntil) {
+        this.lastExpandedUntil = lastExpandedUntil;
     }
 }

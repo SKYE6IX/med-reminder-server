@@ -34,11 +34,11 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
     @Override
     public List<ScheduleEvent> createScheduleEvents(MedicationSchedule schedule) {
-
         LocalDateTime now = LocalDateTime.now(ZoneId.of(schedule.getTimeZone()));
 
+        final int MAX_EXPANSION_DAY = 7;
         List<LocalDateTime> times = generateSchedulesDateTime(schedule,
-                7)
+                MAX_EXPANSION_DAY)
                 .stream()
                 .sorted()
                 .toList();
@@ -231,6 +231,8 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         LocalDateTime windowEnd = windowStart.plusDays(expansionWindowDays - 1)
                 .toLocalDate()
                 .atTime(23, 59, 59);
+
+        schedule.updateLastExpandedUntil(windowEnd);
 
         Recur<LocalDateTime> recur = new Recur<>(schedule.getRecurrenceRule());
 

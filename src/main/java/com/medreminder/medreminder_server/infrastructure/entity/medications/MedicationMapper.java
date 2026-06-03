@@ -71,6 +71,7 @@ public class MedicationMapper {
                 medicationSchedule.getStartTime(),
                 medicationSchedule.getStartDate(),
                 medicationSchedule.getTimeZone(),
+                medicationSchedule.getLastExpandedUntil(),
                 mpe
         );
 
@@ -161,7 +162,8 @@ public class MedicationMapper {
                 mse.getRecurrenceRule(),
                 mse.getStartDate(),
                 mse.getTimeZone(),
-                mse.getTakenQuantity());
+                mse.getTakenQuantity(),
+                mse.getLastExpandedUntil());
 
         medicationSchedule.updateStartTime(mse.getStartTime());
 

@@ -7,6 +7,7 @@ import com.medreminder.medreminder_server.domain.models.medication.*;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
+import com.medreminder.medreminder_server.user.UserStubData;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,14 +18,6 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 
 public class MedicationStubFactory {
-
-    public static ProfileEntity createProfileEntity() {
-        return createProfileEntity(UUID.randomUUID());
-    }
-
-    public static ProfileEntity createProfileEntity(UUID profileId) {
-        return new ProfileEntity(profileId.toString(), "test profile", "BROTHER", true);
-    }
 
     public static CreateMedicationCommand createMedicationCommand(String profileId, String rrule) {
         return new CreateMedicationCommand.Builder()
@@ -77,7 +70,8 @@ public class MedicationStubFactory {
                 cmd.getSchedule().recurrenceRule(),
                 LocalDate.parse(cmd.getSchedule().startDate(), formatter),
                 cmd.getSchedule().timeZone(),
-                new BigDecimal("0")
+                new BigDecimal("0"),
+                null
         );
 
         medicationSchedule.updateStartTime(LocalDateTime.now());
@@ -93,8 +87,7 @@ public class MedicationStubFactory {
     ) {
 
         UUID medicationId = UUID.randomUUID();
-
-        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
 
         MedicationProfileEntity mpe = new MedicationProfileEntity(
                 medicationId.toString(),
@@ -104,6 +97,7 @@ public class MedicationStubFactory {
         );
 
         mpe.setMedication(medicationMapper.toEntity(createMedication(cmd),mpe));
+
         mpe.setMedicationSchedule(medicationMapper.toEntity(createMedicationSchedule(cmd), mpe));
 
         snubProfileEntity.getMedicationProfile().add(mpe);

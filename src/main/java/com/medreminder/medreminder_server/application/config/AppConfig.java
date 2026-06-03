@@ -44,7 +44,6 @@ import java.util.List;
 @Configuration
 @EnableTransactionManagement
 public class AppConfig {
-
     private final Environment env;
 
     @Autowired
@@ -60,8 +59,7 @@ public class AppConfig {
                             TransactionInterceptor txInterceptor ) {
 
         UserService userService = new UserServiceImpl(userRepository, userMapper,subscriptionMapper,s3Service);
-
-        return createProxyFactory(userService,UserService.class,txInterceptor);
+        return createProxyFactory(userService,UserService.class, txInterceptor);
     }
 
     @Bean
@@ -91,7 +89,6 @@ public class AppConfig {
                                                ScheduleEventService scheduleEventService,
                                                UserMapper userMapper,
                                                TransactionInterceptor txInterceptor) {
-
         MedicationProfileService medicationProfileService = new MedicationProfileServiceImpl(
                 medicationRepository,
                 profileRepository,
@@ -106,7 +103,6 @@ public class AppConfig {
     ScheduleEventService scheduleEventService(MedicationRepository medicationRepository,
                                               MedicationMapper medicationMapper,
                                               TransactionInterceptor txInterceptor) {
-
         ScheduleEventService scheduleEventService = new ScheduleEventServiceImpl(medicationRepository,
                 medicationMapper);
 

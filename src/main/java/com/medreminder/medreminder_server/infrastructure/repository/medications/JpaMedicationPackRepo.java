@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface JpaMedicationPackRepository extends BaseJpaRepository<MedicationPackEntity, String> {
+public interface JpaMedicationPackRepo extends BaseJpaRepository<MedicationPackEntity, String> {
 
     @Query("""
     SELECT packs FROM MEDICATION_PACKS packs

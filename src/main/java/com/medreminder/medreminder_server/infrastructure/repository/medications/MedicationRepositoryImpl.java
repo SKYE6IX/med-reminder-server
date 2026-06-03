@@ -10,44 +10,43 @@ import java.util.List;
 @Repository
 public class MedicationRepositoryImpl implements MedicationRepository {
 
+    private final JpaMedicationProfileRepo jpaMedicationProfileRepo;
+    private final JpaScheduleEventRepo jpaScheduleEventRepo;
+    private final JpaMedicationPackRepo jpaMedicationPackRepo;
 
-    private final JpaMedicationProfileRepository jpaMedicationProfileRepository;
-    private final JpaScheduleEventRepository jpaScheduleEventRepository;
-    private final JpaMedicationPackRepository jpaMedicationPackRepository;
-
-    public MedicationRepositoryImpl(JpaMedicationProfileRepository jpaMedicationProfileRepository,
-                                    JpaScheduleEventRepository jpaScheduleEventRepository,
-                                    JpaMedicationPackRepository jpaMedicationPackRepository) {
-        this.jpaMedicationProfileRepository = jpaMedicationProfileRepository;
-        this.jpaScheduleEventRepository = jpaScheduleEventRepository;
-        this.jpaMedicationPackRepository = jpaMedicationPackRepository;
+    public MedicationRepositoryImpl(JpaMedicationProfileRepo jpaMedicationProfileRepo,
+                                    JpaScheduleEventRepo jpaScheduleEventRepo,
+                                    JpaMedicationPackRepo jpaMedicationPackRepo) {
+        this.jpaMedicationProfileRepo = jpaMedicationProfileRepo;
+        this.jpaScheduleEventRepo = jpaScheduleEventRepo;
+        this.jpaMedicationPackRepo = jpaMedicationPackRepo;
     }
 
     @Override
     public MedicationProfileEntity saveMedicationProfile(MedicationProfileEntity medicationProfileEntity) {
-        return jpaMedicationProfileRepository.save(medicationProfileEntity);
+        return jpaMedicationProfileRepo.save(medicationProfileEntity);
     }
 
     @Override
     public MedicationProfileEntity getMedicationProfileById(String id) {
 
-        return jpaMedicationProfileRepository
+        return jpaMedicationProfileRepo
                 .findByIdWithScheduleAndEvents(id).orElse(null);
     }
 
     @Override
     public List<MedicationProfileEntity> getAllMedicationProfilesByUserId(String userId) {
-        return jpaMedicationProfileRepository.findAllByUserId(userId);
+        return jpaMedicationProfileRepo.findAllByUserId(userId);
     }
 
     @Override
     public void saveScheduleEvent(ScheduleEventEntity scheduleEvent) {
-        jpaScheduleEventRepository.save(scheduleEvent);
+        jpaScheduleEventRepo.save(scheduleEvent);
     }
 
     @Override
     public ScheduleEventEntity getScheduleEventById(String id) {
-        return jpaScheduleEventRepository.findByIdWithDetails(id)
+        return jpaScheduleEventRepo.findByIdWithDetails(id)
                 .orElse(null);
     }
 
@@ -55,13 +54,13 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     public List<ScheduleEventEntity> getScheduleEventsByUserIdAndDates(String userId,
                                                                        LocalDateTime startOfDay,
                                                                        LocalDateTime endOfDay) {
-        return  jpaScheduleEventRepository.findByUserIdAndDates(userId, startOfDay, endOfDay);
+        return  jpaScheduleEventRepo.findByUserIdAndDates(userId, startOfDay, endOfDay);
     }
 
     @Override
     public List<MedicationPackEntity> getAllMedicationPacksByUserId(String userId) {
 
-        return jpaMedicationPackRepository.findAllByUserId(userId);
+        return jpaMedicationPackRepo.findAllByUserId(userId);
     }
 
 }

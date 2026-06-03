@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public class SubscriptionServiceStubFactory {
 
-    public static UserEntity createMockUserEntity() {
+    public static UserEntity createStubUserWithPlan() {
         UserEntity userEntity = new UserEntity(
                 UUID.randomUUID().toString(),
                 "mock@mail.com",
@@ -41,8 +41,8 @@ public class SubscriptionServiceStubFactory {
                 null,
                 "ANNUAL",
                 true,
-                SubscriptionServiceStubFactory.createMockUserEntity(),
-                SubscriptionServiceStubFactory.createMockUserEntity().getPlan()
+                SubscriptionServiceStubFactory.createStubUserWithPlan(),
+                SubscriptionServiceStubFactory.createStubUserWithPlan().getPlan()
         );
     }
 

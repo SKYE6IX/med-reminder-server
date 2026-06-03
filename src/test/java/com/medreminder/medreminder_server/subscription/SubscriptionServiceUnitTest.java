@@ -5,6 +5,7 @@ import com.medreminder.medreminder_server.application.dtos.subscription.PaidSubs
 import com.medreminder.medreminder_server.application.dtos.subscription.SubscriptionPlanResponse;
 import com.medreminder.medreminder_server.application.services.PaymentService;
 import com.medreminder.medreminder_server.domain.models.subscription.PlanType;
+import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionRepository;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionService;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionServiceImpl;
@@ -12,6 +13,7 @@ import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
+import com.medreminder.medreminder_server.user.UserStubData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +55,7 @@ public class SubscriptionServiceUnitTest {
     @Test
     void shouldCreateSubscription() {
         UserEntity mockUser = SubscriptionServiceStubFactory
-                .createMockUserEntity();
+                .createStubUserWithPlan();
 
         SubscriptionEntity mockSubscription = SubscriptionServiceStubFactory
                 .createMockSubscriptionEntity();

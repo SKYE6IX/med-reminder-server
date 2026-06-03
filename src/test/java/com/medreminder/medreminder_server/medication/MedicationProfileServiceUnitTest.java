@@ -13,6 +13,7 @@ import com.medreminder.medreminder_server.infrastructure.entity.medications.Medi
 import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
+import com.medreminder.medreminder_server.user.UserStubData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,7 +63,7 @@ public class MedicationProfileServiceUnitTest {
     @Test
     void shouldCreateMedication_Profile_thenSaveIt() {
 
-        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
 
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
                 "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0");
@@ -86,7 +87,7 @@ public class MedicationProfileServiceUnitTest {
     @Test
     void shouldCreateMedication_Profile_WithPack(){
 
-        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
 
         CreateMedicationPack pack = new CreateMedicationPack("30",7);
 
@@ -110,7 +111,7 @@ public class MedicationProfileServiceUnitTest {
     @Test
     void shouldUpdateMedication_Profile_thenSaveIt(){
 
-        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
                 "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0");
 
@@ -137,7 +138,7 @@ public class MedicationProfileServiceUnitTest {
     @Test
     void shouldUpdateScheduleRule_thenSaveIt(){
 
-        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
                 "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0");
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -165,7 +166,7 @@ public class MedicationProfileServiceUnitTest {
 
     @Test
     void shouldUpdateDosage_thenSaveIt(){
-        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
                 "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0");
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -189,7 +190,7 @@ public class MedicationProfileServiceUnitTest {
     @Test
     void shouldDeleteMedicationProfile(){
 
-        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
                 "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0");
 
@@ -214,7 +215,7 @@ public class MedicationProfileServiceUnitTest {
     @Test
     void shouldUpdateScheduleEvent_thenSaveIt(){
 
-        ProfileEntity snubProfileEntity = MedicationStubFactory.createProfileEntity();
+        ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
                 "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0");
 

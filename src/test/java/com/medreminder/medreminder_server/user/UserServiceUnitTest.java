@@ -9,6 +9,7 @@ import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.services.users.UserServiceImpl;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
+import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,61 +45,40 @@ public class UserServiceUnitTest {
 
     @Test
     void shouldCreateUser_thenSaveIt(){
+        User snubUser = UserStubData
+                .createStubUser("test@mail.com","test user", "12345678");
 
-        UUID userId = UUID.randomUUID();
-
-//        Stub DATA...
-        RegisterUserRequest registerUserRequest = new RegisterUserRequest("test@mail.com",
-                "test user", "12345678");
-
-        User testUser = new User(userId.toString(),
-                registerUserRequest.getEmail(),
-                registerUserRequest.getName(),
-                registerUserRequest.getPassword(),
-                UserProvider.LOCAL);
-
-        testUser.addProfiles(new Profile(null, registerUserRequest.getName(), Relation.SELF, true));
 
         when(userRepository.saveUser(any(UserEntity.class)))
-                .thenReturn(userMapper.toEntity(testUser));
+                .thenReturn(userMapper.toEntity(snubUser));
 
-        UserEntity user = userService.createUser(registerUserRequest, UserProvider.LOCAL);
+        UserEntity user = userService.createUser(
+                new RegisterUserRequest("test@mail.com","test user", "12345678")
+                ,UserProvider.LOCAL);
 
-        assertThat(user.getId()).isNotNull().isEqualTo(userId.toString());
+        assertThat(user.getId()).isNotNull().isEqualTo(snubUser.getId());
 
         assertThat(user.getName()).isEqualTo("test user");
 
         assertThat(user.getHashPassword()).isEqualTo("12345678");
-
-
     }
 
     @Test
     void shouldUpdateUser_thenSaveIt(){
-
-        UUID userId = UUID.randomUUID();
-        UUID profileId = UUID.randomUUID();
-
-        User testUser = new User(userId.toString(), "test@email.com",
-                "test user", "testhashpassword",UserProvider.LOCAL);
-        Profile testProfile = new Profile(profileId.toString(),
-                testUser.getName(),Relation.SELF, true);
-
-        testUser.addProfiles(testProfile);
-
-        UserEntity userEntity = userMapper.toEntity(testUser);
+        User snubUser = UserStubData
+                .createStubUser("test@mail.com","test user", "12345678");
 
         UpdateUserCommand updateUserCommand = new UpdateUserCommand("updatetest@mail.com",
                 null, "27.07.1992", "Male");
 
         when(userRepository.findUserById(any(String.class)))
-                .thenReturn(Optional.of(userEntity));
+                .thenReturn(Optional.of(userMapper.toEntity(snubUser)));
 
-        UserResponse response = userService.updateUser(userEntity.getId(), updateUserCommand);
+        UserResponse response = userService.updateUser(snubUser.getId(), updateUserCommand);
 
         verify(userRepository).saveUser(any(UserEntity.class));
 
-        assertThat(response.id()).isNotNull().isEqualTo(userId.toString());
+        assertThat(response.id()).isNotNull().isEqualTo(snubUser.getId());
 
         assertThat(response.email()).isEqualTo("updatetest@mail.com");
 
@@ -109,62 +89,50 @@ public class UserServiceUnitTest {
 
     @Test
     void shouldCreateProfile_thenSaveIt(){
-        UUID userId = UUID.randomUUID();
-        UUID profileId = UUID.randomUUID();
+        User snubUser = UserStubData
+                .createStubUser("test@mail.com","test user", "12345678");
+        Profile snubProfile = UserStubData
+                .createStubProfile("John", Relation.BROTHER.toString(),false);
 
-        User testUser = new User(userId.toString(), "test@email.com",
-                "test user", "testhashpassword",UserProvider.LOCAL);
-
-        ProfileRequest profileRequest = new ProfileRequest("James","BROTHER");
-
-        Profile testProfile = new Profile(
-                profileId.toString(),
-                profileRequest.name(),
-                Relation.valueOf(profileRequest.relation()),
-                false);
-
-        testUser.addProfiles(testProfile);
+        snubUser.addProfiles(snubProfile);
 
         when(userRepository.findUserById(any(String.class)))
-                .thenReturn(Optional.of(userMapper.toEntity(testUser)));
+                .thenReturn(Optional.of(userMapper.toEntity(snubUser)));
 
         when(userRepository.saveUser(any(UserEntity.class)))
-                .thenReturn(userMapper.toEntity(testUser));
+                .thenReturn(userMapper.toEntity(snubUser));
 
-        ProfileResponse response = userService.createProfile(testUser.getId(), profileRequest);
+        ProfileResponse response = userService.createProfile(snubProfile.getId(),
+                new ProfileRequest("John",Relation.BROTHER.toString()));
 
-        assertThat(response.id()).isNotNull().isEqualTo(profileId.toString());
-        assertThat(response.name()).isEqualTo(profileRequest.name());
+        assertThat(response.id()).isNotNull().isEqualTo(snubProfile.getId());
+        assertThat(response.name()).isEqualTo(snubProfile.getName());
         assertThat(response.relation()).isEqualTo("BROTHER");
     }
 
 
     @Test
     void shouldDeleteProfile_thenSaveIt(){
-        UUID userId = UUID.randomUUID();
-        UUID profileId = UUID.randomUUID();
+        User snubUser = UserStubData
+                .createStubUser("test@mail.com","test user", "12345678");
 
-        User testUser = new User(userId.toString(), "test@email.com",
-                "test user", "testhashpassword", UserProvider.LOCAL);
+        Profile snubProfile = UserStubData
+                .createStubProfile("John", Relation.BROTHER.toString(),false);
 
-        Profile testProfile = new Profile(profileId.toString(),
-                "James",Relation.valueOf("BROTHER"), false);
+        snubUser.addProfiles(snubProfile);
 
-        testUser.addProfiles(testProfile);
-
-        UserEntity userEntity = userMapper.toEntity(testUser);
+        UserEntity userEntity = userMapper.toEntity(snubUser);
 
         when(userRepository.findUserById(any(String.class)))
                 .thenReturn(Optional.of(userEntity));
 
+        assertThat(userEntity.getProfiles().size()).isEqualTo(2);
 
-        assertThat(userEntity.getProfiles().size()).isEqualTo(1);
-
-        userService.deleteProfile(testUser.getId(), testProfile.getId());
+        userService.deleteProfile(userEntity.getId(), snubProfile.getId());
 
         verify(userRepository).saveUser(any(UserEntity.class));
 
-        assertThat(userEntity.getProfiles()).isEmpty();
+        assertThat(userEntity.getProfiles().size()).isEqualTo(1);
     }
 
 

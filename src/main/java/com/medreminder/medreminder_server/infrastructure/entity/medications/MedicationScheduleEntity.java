@@ -70,7 +70,9 @@ public class MedicationScheduleEntity {
                                     LocalDateTime startTime,
                                     LocalDate startDate,
                                     String timeZone,
-                                    MedicationProfileEntity medicationProfile) {
+                                    LocalDateTime lastExpandedUntil,
+                                    MedicationProfileEntity medicationProfile
+                                    ) {
         this.id = id;
         this.doseQuantity = doseQuantity;
         this.takenQuantity = takenQuantity;
@@ -78,6 +80,7 @@ public class MedicationScheduleEntity {
         this.startTime = startTime;
         this.startDate = startDate;
         this.timeZone = timeZone;
+        this.lastExpandedUntil = lastExpandedUntil;
         this.medicationProfile = medicationProfile;
     }
 
@@ -121,10 +124,11 @@ public class MedicationScheduleEntity {
         return scheduleEvents;
     }
 
-    public void updateMedicationSchedule(MedicationSchedule medicationSchedule){
-        this.doseQuantity = medicationSchedule.getDoseQuantity();
-        this.takenQuantity = medicationSchedule.getTakenQuantity();
-        this.recurrenceRule = medicationSchedule.getRecurrenceRule();
-        this.startTime = medicationSchedule.getStartTime();
+    public void updateMedicationSchedule(MedicationSchedule domainMedicationSchedule){
+        this.doseQuantity = domainMedicationSchedule.getDoseQuantity();
+        this.takenQuantity = domainMedicationSchedule.getTakenQuantity();
+        this.recurrenceRule = domainMedicationSchedule.getRecurrenceRule();
+        this.startTime = domainMedicationSchedule.getStartTime();
+        this.lastExpandedUntil = domainMedicationSchedule.getLastExpandedUntil();
     }
 }

@@ -40,7 +40,8 @@ public class Helper {
                 schedule.recurrenceRule(),
                 LocalDate.parse(schedule.startDate(), dateFormatter),
                 schedule.timeZone(),
-                new BigDecimal("0"));
+                new BigDecimal("0"),
+                null);
     }
 
    public static Optional<MedicationPack> createMedicationPack(CreateMedicationPack pack) {
