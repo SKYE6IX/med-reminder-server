@@ -19,20 +19,23 @@ import java.util.stream.IntStream;
 
 public class MedicationStubFactory {
 
-    public static CreateMedicationCommand createMedicationCommand(String profileId, String rrule) {
+    public static CreateMedicationCommand createMedicationCommand(String profileId,
+                                                                  String rrule,
+                                                                  String startDate) {
         return new CreateMedicationCommand.Builder()
                 .profileId(profileId)
                 .medicationName("Paracetamol")
                 .medicationUnit("TABLET")
                 .medicationMeasurement("CAPSULE")
                 .medicationNote("Take on time")
-                .schedule(createMedSchedule(rrule))
+                .schedule(createMedSchedule(rrule,startDate))
                 .medicationPack(null)
                 .build();
     }
 
     public static CreateMedicationCommand createMedicationCommand(String profileId,
                                                                   String rrule,
+                                                                  String stratDate,
                                                                   CreateMedicationPack createMedicationPack) {
         return new CreateMedicationCommand.Builder()
                 .profileId(profileId)
@@ -40,7 +43,7 @@ public class MedicationStubFactory {
                 .medicationUnit("TABLET")
                 .medicationMeasurement("CAPSULE")
                 .medicationNote("Take on time")
-                .schedule(createMedSchedule(rrule))
+                .schedule(createMedSchedule(rrule,stratDate))
                 .medicationPack(createMedicationPack)
                 .build();
     }
@@ -64,6 +67,8 @@ public class MedicationStubFactory {
     public static MedicationSchedule createMedicationSchedule(CreateMedicationCommand cmd) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
+        LocalDateTime mockLastUntilWindow = LocalDateTime.now().plusDays(1);
+
         MedicationSchedule medicationSchedule = new MedicationSchedule(
                 null,
                 new BigDecimal(cmd.getSchedule().dosage()),
@@ -71,44 +76,37 @@ public class MedicationStubFactory {
                 LocalDate.parse(cmd.getSchedule().startDate(), formatter),
                 cmd.getSchedule().timeZone(),
                 new BigDecimal("0"),
-                null
+                mockLastUntilWindow
         );
-
         medicationSchedule.updateStartTime(LocalDateTime.now());
-
         createScheduleEvents().forEach(medicationSchedule::addScheduleEvent);
-
         return medicationSchedule;
     }
 
     public static MedicationProfileEntity createMedicationProfileEntity(
             CreateMedicationCommand cmd,
-            MedicationMapper medicationMapper
+            MedicationMapper medicationMapper,
+            String defaultId
     ) {
-
-        UUID medicationId = UUID.randomUUID();
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
 
         MedicationProfileEntity mpe = new MedicationProfileEntity(
-                medicationId.toString(),
+                defaultId,
                 true,
                 cmd.getMedicationNote(),
                 snubProfileEntity
         );
-
         mpe.setMedication(medicationMapper.toEntity(createMedication(cmd),mpe));
-
         mpe.setMedicationSchedule(medicationMapper.toEntity(createMedicationSchedule(cmd), mpe));
-
         snubProfileEntity.getMedicationProfile().add(mpe);
         return mpe;
     }
 
-    private static CreateMedSchedule createMedSchedule(String rrule) {
+    private static CreateMedSchedule createMedSchedule(String rrule, String startDate) {
         return new CreateMedSchedule(
                 "1.2",
                 rrule,
-                "15.06.2026",
+                startDate,
                 "Europe/Moscow"
         );
     }
@@ -116,7 +114,7 @@ public class MedicationStubFactory {
     private static List<ScheduleEvent> createScheduleEvents() {
         return IntStream
                 .range(1, 7)
-                .mapToObj(i -> new ScheduleEvent(UUID.randomUUID().toString(),
+                .mapToObj(i -> new ScheduleEvent(null,
                         new BigDecimal("1.2"),
                         LocalDateTime.now().plusDays(i)))
                 .toList();

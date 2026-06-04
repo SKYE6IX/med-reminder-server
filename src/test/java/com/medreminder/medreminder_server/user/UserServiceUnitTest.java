@@ -9,7 +9,6 @@ import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.services.users.UserServiceImpl;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
-import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,7 +44,7 @@ public class UserServiceUnitTest {
     @Test
     void shouldCreateUser_thenSaveIt(){
         User snubUser = UserStubData
-                .createStubUser("test@mail.com","test user", "12345678");
+                .createStubUserWithId("test@mail.com","test user", "12345678");
 
 
         when(userRepository.saveUser(any(UserEntity.class)))
@@ -66,7 +64,7 @@ public class UserServiceUnitTest {
     @Test
     void shouldUpdateUser_thenSaveIt(){
         User snubUser = UserStubData
-                .createStubUser("test@mail.com","test user", "12345678");
+                .createStubUserWithId("test@mail.com","test user", "12345678");
 
         UpdateUserCommand updateUserCommand = new UpdateUserCommand("updatetest@mail.com",
                 null, "27.07.1992", "Male");
@@ -90,9 +88,9 @@ public class UserServiceUnitTest {
     @Test
     void shouldCreateProfile_thenSaveIt(){
         User snubUser = UserStubData
-                .createStubUser("test@mail.com","test user", "12345678");
+                .createStubUserWithId("test@mail.com","test user", "12345678");
         Profile snubProfile = UserStubData
-                .createStubProfile("John", Relation.BROTHER.toString(),false);
+                .createStubProfileWithId("John", Relation.BROTHER.toString(),false);
 
         snubUser.addProfiles(snubProfile);
 
@@ -114,10 +112,10 @@ public class UserServiceUnitTest {
     @Test
     void shouldDeleteProfile_thenSaveIt(){
         User snubUser = UserStubData
-                .createStubUser("test@mail.com","test user", "12345678");
+                .createStubUserWithId("test@mail.com","test user", "12345678");
 
         Profile snubProfile = UserStubData
-                .createStubProfile("John", Relation.BROTHER.toString(),false);
+                .createStubProfileWithId("John", Relation.BROTHER.toString(),false);
 
         snubUser.addProfiles(snubProfile);
 

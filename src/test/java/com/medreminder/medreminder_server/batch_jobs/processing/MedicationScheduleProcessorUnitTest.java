@@ -52,9 +52,12 @@ public class MedicationScheduleProcessorUnitTest {
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
 
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0");
+                "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0","15.06.2026");
+
+        UUID uuid = UUID.randomUUID();
         MedicationProfileEntity snubMedicationProfile = MedicationStubFactory
-                .createMedicationProfileEntity(cmd, medicationMapper);
+                .createMedicationProfileEntity(cmd,
+                        medicationMapper, uuid.toString());
 
         MedicationScheduleEntity result = processor.process(snubMedicationProfile.getMedicationSchedule());
 

@@ -12,7 +12,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 
-public class MedicationScheduleEventProcessor implements ItemProcessor<MedicationScheduleEntity, MedicationScheduleEntity> {
+public class MedicationScheduleEventProcessor implements ItemProcessor<MedicationScheduleEntity,
+        MedicationScheduleEntity> {
 
     private static final Logger log = LoggerFactory
             .getLogger(MedicationScheduleEventProcessor.class);
@@ -30,17 +31,19 @@ public class MedicationScheduleEventProcessor implements ItemProcessor<Medicatio
     public MedicationScheduleEntity process(MedicationScheduleEntity scheduleEntity) {
         MedicationSchedule domainMedicationSchedule = medicationMapper.toDomain(scheduleEntity);
 
+        System.out.println("Processing Medication Schedule: " + domainMedicationSchedule);
+
         List<ScheduleEventEntity> newWindowEvents = scheduleEventService
                 .createScheduleEvents(domainMedicationSchedule)
                 .stream()
-                .map(localEvent -> medicationMapper.toEntity(localEvent, scheduleEntity))
+                .map(localEvent -> medicationMapper.toEntity(localEvent,
+                        scheduleEntity))
                 .toList();
 
         scheduleEntity.updateMedicationSchedule(domainMedicationSchedule);
         scheduleEntity.getScheduleEvents().addAll(newWindowEvents);
 
         log.info("Added new schedule events window ({})", newWindowEvents);
-
         return scheduleEntity;
     }
 }

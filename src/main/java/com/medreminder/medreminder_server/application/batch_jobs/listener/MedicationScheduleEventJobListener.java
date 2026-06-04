@@ -21,6 +21,7 @@ public class MedicationScheduleEventJobListener implements JobExecutionListener 
                     .mapToLong(StepExecution::getWriteCount).sum();
 
             log.info("Medication Schedule Event job completed. {} created coming days events.", count);
+
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("Medication Schedule Event job FAILED: {}", jobExecution.getAllFailureExceptions());
             // Send alert to Slack / PagerDuty / email here

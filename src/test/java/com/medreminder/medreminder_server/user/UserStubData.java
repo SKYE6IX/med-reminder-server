@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class UserStubData {
 
-    public static User createStubUser(String email, String name, String password) {
+    public static User createStubUserWithId(String email, String name, String password) {
         UUID userId = UUID.randomUUID();
         UUID profileId = UUID.randomUUID();
         RegisterUserRequest registerUserRequest = new RegisterUserRequest(email,name,password);
@@ -23,13 +23,17 @@ public class UserStubData {
                 registerUserRequest.getName(),
                 registerUserRequest.getPassword(),
                 UserProvider.LOCAL);
-        snubUser.addProfiles(new Profile(profileId.toString(), registerUserRequest.getName(), Relation.SELF, true));
+
+        snubUser.addProfiles(new Profile(profileId.toString(),
+                registerUserRequest.getName(), Relation.SELF, true));
+
         return snubUser;
     }
 
-    public static Profile createStubProfile(String name,
-                                                   String relation,
-                                                   boolean isSelf) {
+
+    public static Profile createStubProfileWithId(String name,
+                                                  String relation,
+                                                  boolean isSelf) {
         UUID profileId = UUID.randomUUID();
         ProfileRequest profileRequest = new ProfileRequest(name,relation);
         return new Profile(
@@ -42,7 +46,7 @@ public class UserStubData {
     public static ProfileEntity createStubProfileEntity(){
         UserMapper userMapper = new UserMapper();
         return userMapper
-                .toEntity(UserStubData.createStubProfile("John",
+                .toEntity(UserStubData.createStubProfileWithId("John",
                         "BROTHER", false), null);
     }
 }

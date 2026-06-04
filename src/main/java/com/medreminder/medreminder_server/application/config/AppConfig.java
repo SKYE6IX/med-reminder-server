@@ -52,7 +52,7 @@ public class AppConfig {
     }
 
     @Bean
-    UserService userService(UserRepository userRepository,
+    public UserService userService(UserRepository userRepository,
                             UserMapper userMapper,
                             SubscriptionMapper subscriptionMapper,
                             S3Service s3Service,
@@ -63,7 +63,7 @@ public class AppConfig {
     }
 
     @Bean
-    AuthService authService(AuthenticationManager authenticationManager,
+    public AuthService authService(AuthenticationManager authenticationManager,
                             UserService userService,
                             PasswordEncoder passwordEncoder,
                             UserMapper userMapper,
@@ -83,7 +83,7 @@ public class AppConfig {
     }
 
     @Bean
-    MedicationProfileService medicationService(MedicationRepository medicationRepository,
+    public MedicationProfileService medicationService(MedicationRepository medicationRepository,
                                                ProfileRepository profileRepository,
                                                MedicationMapper medicationMapper,
                                                ScheduleEventService scheduleEventService,
@@ -100,7 +100,7 @@ public class AppConfig {
     }
 
     @Bean
-    ScheduleEventService scheduleEventService(MedicationRepository medicationRepository,
+    public ScheduleEventService scheduleEventService(MedicationRepository medicationRepository,
                                               MedicationMapper medicationMapper,
                                               TransactionInterceptor txInterceptor) {
         ScheduleEventService scheduleEventService = new ScheduleEventServiceImpl(medicationRepository,
@@ -110,7 +110,7 @@ public class AppConfig {
     }
 
     @Bean
-    SubscriptionService subscriptionService(SubscriptionRepository subscriptionRepository,
+    public SubscriptionService subscriptionService(SubscriptionRepository subscriptionRepository,
                                             UserRepository userRepository,
                                             PaymentService paymentService,
                                             SubscriptionMapper subscriptionMapper,
@@ -119,11 +119,6 @@ public class AppConfig {
                 SubscriptionServiceImpl(subscriptionRepository,userRepository,paymentService,subscriptionMapper);
 
         return createProxyFactory(subscriptionService, SubscriptionService.class, txInterceptor);
-    }
-
-    @Bean
-    public PlatformTransactionManager transactionManager(DataSource dataSource) {
-        return new DataSourceTransactionManager(dataSource);
     }
 
     @Bean

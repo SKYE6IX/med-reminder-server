@@ -25,7 +25,6 @@ public class MedicationScheduleEventScheduler extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-
         JobParameters params = new JobParametersBuilder()
                 .addLocalDate("runDate", LocalDate.now())
                 .toJobParameters();
