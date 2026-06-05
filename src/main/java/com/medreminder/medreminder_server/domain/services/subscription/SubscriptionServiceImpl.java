@@ -31,29 +31,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final PaymentService paymentService;
     private final SubscriptionMapper subscriptionMapper;
 
-//    TODO:
-//    A scheduler that flip Plan from PRO to FREE.
-//    > This will look for subscription period that the current day
-//    has passed the endTime and status still ACTIVE.
-//    > If found, we check if the subscription status is cancelled
-//    > If cancelled? we flip the Plan from PRO to FREE.
-//    > and flip the Period status to Completed.
-
-
-//    A scheduler that renew Subscription.
-//    > This will look for subscription period which the current day
-//      is the same as the end time OR is greater than it.(RETRY CASE FOR FAILED PAYMENT)
-//      and status still ACTIVE.
-//    > If found, we check if the subscription is still in active status,
-//      meaning user hasn't canceled.
-//    > We then get the paymentMethodId that is stored in the user data
-//    > We create a payment with it.
-//    > if succeeded, we create a new subscription period, and flip the
-//      status of the old one to Completed
-//    > same process will repeat if payment failed and only retry twice.
-//    > if failed the second time, we flip the Subscription to Cancel.
-
-
     public SubscriptionServiceImpl(SubscriptionRepository subscriptionRepository,
                                    UserRepository userRepository,
                                    PaymentService paymentService,
@@ -75,18 +52,23 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 request.billingCycle());
 
 //      Create a period for the subscription
-        SubscriptionPeriodEntity periodEntity = createSubscriptionPeriod(
+        SubscriptionPeriodEntity periodEntity = SubscriptionServiceHelper.createSubscriptionPeriod(
                 subscription,request.billingCycle(), request.zoneId()
         );
 
 //        Start a payment process
 //        If payment method is BANK_CARD, we can process all in one go.
-        if(request.paymentMethod().equals("BANK_CARD")){
-            BigDecimal amount = new BigDecimal(request.amount());
-            BigDecimal paddedAmount = amount.setScale(2, RoundingMode.HALF_UP);
+        if(request.paymentMethod().equals("BANK_CARD")) {
 
-            Payment proccessPayment = paymentService.processPayment(request.paymentToken(),
-                    paddedAmount.toPlainString());
+            final String amount = SubscriptionServiceHelper
+                    .getBillingCycleAmount(BillingCycle.valueOf(request.billingCycle()));
+
+            if(amount == null) {
+                throw new PaymentFailedException("Payment method not supported!");
+            }
+
+            Payment proccessPayment = paymentService.processNewPayment(request.paymentToken(),
+                    amount);
 
             if(proccessPayment == null || proccessPayment.getStatus().equals(Payment.Status.CANCELED)){
                 throw new PaymentFailedException("Payment failed!");
@@ -99,6 +81,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
                 periodEntity.updatePaymentStatus(SubscriptionPeriodPaymentStatus.PAID.toString());
                 subscription.updateStartedAt(LocalDateTime.now(ZoneId.of(request.zoneId())));
+
                 if(subscription.getStatus().equals(SubscriptionStatus.CANCELED.toString())){
                     subscription.updateStatus(SubscriptionStatus.ACTIVE.toString());
                 }
@@ -117,7 +100,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 //          Create a new billing for user.
                 BillingEntity newBilling = new BillingEntity(
                         null,
-                        new BigDecimal(request.amount()),
+                        new BigDecimal(amount),
                         proccessPayment.getPaymentMethod().getStatus(),
                         BillingStatus.SUCCEEDED.toString(),
                         LocalDateTime.now(ZoneId.of(request.zoneId())),
@@ -126,7 +109,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 );
                 userEntity.getBillings().add(newBilling);
                 userRepository.saveUser(userEntity);
-                return getSubscriptionPlanResponse(
+                return SubscriptionServiceHelper.getSubscriptionPlanResponse(
                         subscription.getPlan(),
                         savedPeriodEntity.getEndTime().toString(),
                         subscription.getBillingCycle(),
@@ -184,17 +167,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     .findFirst()
                     .orElse(null);
             if (periodEntity != null) {
-                return getSubscriptionPlanResponse(planEntity,
+                return SubscriptionServiceHelper.getSubscriptionPlanResponse(planEntity,
                         periodEntity.getEndTime().toString(),
                         subscription.getBillingCycle(),
                         subscription.getStatus()
                         );
             } else {
-                return getSubscriptionPlanResponse(planEntity,
+                return SubscriptionServiceHelper.getSubscriptionPlanResponse(planEntity,
                         null,null,SubscriptionStatus.CANCELED.toString());
             }
         } else {
-            return getSubscriptionPlanResponse(planEntity,
+            return SubscriptionServiceHelper.getSubscriptionPlanResponse(planEntity,
                     null,null, null);
         }
     }
@@ -215,42 +198,5 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     return subscriptionRepository
                     .saveSubscription(subscriptionMapper.toEntity(subscription, userEntity));
                 });
-    }
-
-    private SubscriptionPeriodEntity createSubscriptionPeriod(
-            SubscriptionEntity subscriptionEntity,
-            String billingCycle,
-            String zoneId) {
-
-        boolean isMonthly = billingCycle.equals(BillingCycle.MONTHLY.toString());
-        boolean isAnnual = billingCycle.equals(BillingCycle.ANNUAL.toString());
-
-        LocalDateTime startTime = LocalDateTime.now(ZoneId.of(zoneId));
-        LocalDateTime endTime = isMonthly ? startTime.plusDays(30): isAnnual ? startTime.plusYears(1): startTime;
-
-        SubscriptionPeriod newPeriod = new SubscriptionPeriod(
-                null,
-                startTime,
-                endTime,
-                SubscriptionPeriodStatus.ACTIVE,
-                SubscriptionPeriodPaymentStatus.PENDING
-        );
-        return subscriptionMapper.toEntity(newPeriod, subscriptionEntity);
-    }
-
-    private SubscriptionPlanResponse getSubscriptionPlanResponse(PlanEntity planEntity,
-                                                                 String endAt,
-                                                                 String billingCycle,
-                                                                 String subscriptionStatus) {
-        return new SubscriptionPlanResponse(
-                planEntity.getId(),
-                PlanType.valueOf(planEntity.getPlanType()),
-                planEntity.getMaxMedications(),
-                planEntity.isManagedRelation(),
-                planEntity.isRefillReminders(),
-                planEntity.isReminderPreference(),
-                endAt,
-                billingCycle,
-                subscriptionStatus);
     }
 }

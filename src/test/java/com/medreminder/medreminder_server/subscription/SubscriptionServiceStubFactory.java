@@ -61,4 +61,22 @@ public class SubscriptionServiceStubFactory {
                 .paymentMethod(paymentMethod)
                 .build();
     }
+
+    public static Payment createMockUnSuccessfulPayment() {
+        Amount amount = Amount.builder()
+                .currency("RUB")
+                .value("3050.00")
+                .build();
+        Payment.PaymentMethod paymentMethod = Payment.PaymentMethod.builder()
+                .id(UUID.randomUUID().toString())
+                .status(Payment.Status.CANCELED)
+                .type("BANK_CARD")
+                .build();
+
+        return Payment.builder()
+                .amount(amount)
+                .status(Payment.Status.CANCELED)
+                .paymentMethod(paymentMethod)
+                .build();
+    }
 }

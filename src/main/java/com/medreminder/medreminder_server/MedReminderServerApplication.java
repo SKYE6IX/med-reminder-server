@@ -19,7 +19,7 @@ public class MedReminderServerApplication {
 // 4. Schedule background work: ✅
 //	Items:
 //	Medication schedule events ✅
-//	Renew Subscriptions fee for due
+//	Renew Subscriptions fee for due ✅
 //	Downgrade plan for cancelled subscription. ✅
 // 5. Mailing system set up
 

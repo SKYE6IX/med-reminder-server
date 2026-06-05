@@ -3,8 +3,11 @@ package com.medreminder.medreminder_server;
 
 import com.medreminder.medreminder_server.application.batch_jobs.listener.DowngradePlanJobListener;
 import com.medreminder.medreminder_server.application.batch_jobs.listener.MedicationScheduleEventJobListener;
+import com.medreminder.medreminder_server.application.batch_jobs.listener.RenewPaidPlanJobListener;
+import com.medreminder.medreminder_server.application.services.PaymentService;
 import com.medreminder.medreminder_server.batch_jobs.config.DowngradePlanSchedulerTestConfig;
 import com.medreminder.medreminder_server.batch_jobs.config.MedScheduleEventSchedulerTestConfig;
+import com.medreminder.medreminder_server.batch_jobs.config.RenewPaidPlanSchedulerTestConfig;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventService;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventServiceImpl;
@@ -12,6 +15,7 @@ import com.medreminder.medreminder_server.infrastructure.entity.medications.Medi
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import jakarta.persistence.EntityManagerFactory;
+import org.mockito.Mockito;
 import org.springframework.context.annotation.*;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -31,6 +35,7 @@ import java.util.Properties;
 @Import({
         MedScheduleEventSchedulerTestConfig.class,
         DowngradePlanSchedulerTestConfig.class,
+        RenewPaidPlanSchedulerTestConfig.class,
 })
 @ActiveProfiles("test")
 public class TestConfig {
@@ -70,6 +75,12 @@ public class TestConfig {
     }
 
     @Bean
+    @Primary
+    public PaymentService paymentService() {
+        return Mockito.mock(PaymentService.class);
+    }
+
+    @Bean
     public MedicationScheduleEventJobListener listener(){
         return new MedicationScheduleEventJobListener();
     }
@@ -77,6 +88,11 @@ public class TestConfig {
     @Bean
     public DowngradePlanJobListener downgradePlanListener(){
         return new DowngradePlanJobListener();
+    }
+
+    @Bean
+    public RenewPaidPlanJobListener renewPaidPlanListener(){
+        return new RenewPaidPlanJobListener();
     }
 
 //    HELPER BEANS

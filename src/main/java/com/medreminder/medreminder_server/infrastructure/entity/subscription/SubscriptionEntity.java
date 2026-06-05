@@ -33,6 +33,9 @@ public class SubscriptionEntity {
     @Column(name = "auto_renewal")
     private boolean autoRenewal;
 
+    @Column(name = "time_zone")
+    private String timeZone;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -106,6 +109,10 @@ public class SubscriptionEntity {
         return autoRenewal;
     }
 
+    public String getTimeZone() {
+        return timeZone;
+    }
+
     public UserEntity getUser() {
         return user;
     }
@@ -136,5 +143,9 @@ public class SubscriptionEntity {
 
     public void updateBillingCycle(String billingCycle) {
         this.billingCycle = billingCycle;
+    }
+
+    public void updateTimeZone(String timeZone) {
+        this.timeZone = timeZone;
     }
 }

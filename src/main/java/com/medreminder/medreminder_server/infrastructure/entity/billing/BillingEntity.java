@@ -90,6 +90,10 @@ public class BillingEntity {
         return subscriptionPeriod;
     }
 
+    public void setSubscriptionPeriod(SubscriptionPeriodEntity subscriptionPeriod) {
+        this.subscriptionPeriod = subscriptionPeriod;
+    }
+
     public void updateStatus(String status) {
         this.status = status;
     }

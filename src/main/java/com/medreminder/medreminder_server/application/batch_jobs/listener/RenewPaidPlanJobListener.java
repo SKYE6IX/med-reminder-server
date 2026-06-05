@@ -9,9 +9,8 @@ import org.springframework.batch.core.step.StepExecution;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DowngradePlanJobListener implements JobExecutionListener {
-
-    private static final Logger log = LoggerFactory.getLogger(DowngradePlanJobListener.class);
+public class RenewPaidPlanJobListener implements JobExecutionListener {
+    private static final Logger log = LoggerFactory.getLogger(RenewPaidPlanJobListener.class);
 
     @Override
     public void afterJob(JobExecution jobExecution) {
@@ -19,10 +18,10 @@ public class DowngradePlanJobListener implements JobExecutionListener {
             long count = jobExecution.getStepExecutions().stream()
                     .mapToLong(StepExecution::getWriteCount).sum();
 
-            log.info("Downgrade Plan job completed. {} total plan downgraded.", count);
+            log.info("Renew Paid Plan job completed. {} total subscription renewed", count);
 
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
-            log.error("Downgrade Plan job FAILED: {}", jobExecution.getAllFailureExceptions());
+            log.error("Renew Paid Plan job FAILED: {}", jobExecution.getAllFailureExceptions());
             // Send alert to Slack / PagerDuty / email here
         }
     }

@@ -33,8 +33,8 @@ public class DowngradePlanBatchConfig {
 
     @Bean
     public Job downgradePlanJob(JobRepository jobRepository,
-                                          Step downgradePlanStep,
-                                          DowngradePlanJobListener downgradePlanJobListener){
+                                Step downgradePlanStep,
+                                DowngradePlanJobListener downgradePlanJobListener){
         return new JobBuilder("downgrade_plan_job", jobRepository)
                 .listener(downgradePlanJobListener)
                 .start(downgradePlanStep)

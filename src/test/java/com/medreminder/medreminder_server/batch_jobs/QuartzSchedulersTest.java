@@ -23,13 +23,23 @@ public class QuartzSchedulersTest {
     @Qualifier("downgradePlanSchedulerFactoryBean")
     private Scheduler downgradePlanScheduler;
 
+
+    @Autowired
+    @Qualifier("renewPaidPlanSchedulerFactoryBean")
+    private Scheduler renewPaidPlanScheduler;
+
+
+
     @Test
     void allNightlyJobsShouldBeRegistered() throws Exception {
         JobKey medScheduleEventSchedulerKey = JobKey.jobKey("medication_schedule_event_job_detail");
         JobKey downgradePlanSchedulerKey = JobKey.jobKey("downgrade_plan_job_detail");
+        JobKey renewPaidPlanSchedulerKey = JobKey.jobKey("renew_paid_plan_job_detail");
+
 
         assertThat(medScheduleEventScheduler.checkExists(medScheduleEventSchedulerKey)).isTrue();
         assertThat(downgradePlanScheduler.checkExists(downgradePlanSchedulerKey)).isTrue();
+        assertThat(renewPaidPlanScheduler.checkExists(renewPaidPlanSchedulerKey)).isTrue();
     }
 
     @Test
@@ -40,8 +50,13 @@ public class QuartzSchedulersTest {
         TriggerKey triggerKey2 = TriggerKey.triggerKey("downgrade_plan_trigger");
         Trigger trigger2 = downgradePlanScheduler.getTrigger(triggerKey2);
 
+
+        TriggerKey triggerKey3 = TriggerKey.triggerKey("renew_paid_plan_trigger");
+        Trigger trigger3 = renewPaidPlanScheduler.getTrigger(triggerKey3);
+
         assertThat(trigger.getJobKey()).isEqualTo(JobKey.jobKey("medication_schedule_event_job_detail"));
         assertThat(trigger2.getJobKey()).isEqualTo(JobKey.jobKey("downgrade_plan_job_detail"));
+        assertThat(trigger3.getJobKey()).isEqualTo(JobKey.jobKey("renew_paid_plan_job_detail"));
     }
 
     @Test
@@ -60,5 +75,14 @@ public class QuartzSchedulersTest {
 
         assertThat(trigger).isNotNull();
         assertThat(trigger.getCronExpression()).isEqualTo("0 0 2 * * ?");
+    }
+
+    @Test
+    void renewPaidPlanTriggerShouldFireAt7AM() throws Exception {
+        TriggerKey triggerKey = TriggerKey.triggerKey("renew_paid_plan_trigger");
+        CronTrigger trigger = (CronTrigger) renewPaidPlanScheduler.getTrigger(triggerKey);
+
+        assertThat(trigger).isNotNull();
+        assertThat(trigger.getCronExpression()).isEqualTo("0 0 7 * * ?");
     }
 }

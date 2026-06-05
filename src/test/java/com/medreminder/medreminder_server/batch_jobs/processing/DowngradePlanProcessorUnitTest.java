@@ -54,6 +54,7 @@ public class DowngradePlanProcessorUnitTest {
 
         var stubSubscriptionEntity = subscriptionMapper
                 .toEntity(stubSubscription, stubUserEntity);
+        stubSubscriptionEntity.updateTimeZone("Europe/Moscow");
 
         var stubPeriod = SubscriptionServiceStubFactory
                 .createSubscriptionPeriod(UUID.randomUUID().toString(),

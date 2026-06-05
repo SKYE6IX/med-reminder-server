@@ -3,6 +3,7 @@ package com.medreminder.medreminder_server.application.batch_jobs.config;
 
 import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.DowngradePlanScheduler;
 import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.MedicationScheduleEventScheduler;
+import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.RenewPaidPlanScheduler;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -65,6 +66,25 @@ public class QuartzSchedulerConfig {
                 .withIdentity("downgrade_plan_trigger")
                 .withSchedule(CronScheduleBuilder
                         .cronSchedule("0 0 2 * * ?")
+                        .inTimeZone(TimeZone.getTimeZone("UTC")))
+                .build();
+    }
+
+    @Bean
+    public JobDetail renewPaidPlanJobDetail() {
+        return JobBuilder.newJob(RenewPaidPlanScheduler.class)
+                .withIdentity("renew_paid_plan_job_detail")
+                .storeDurably()
+                .build();
+    }
+
+    @Bean
+    public Trigger renewPaidPlanTrigger(@Qualifier("renewPaidPlanJobDetail") JobDetail detail) {
+        return TriggerBuilder.newTrigger()
+                .forJob(detail)
+                .withIdentity("renew_paid_plan_trigger")
+                .withSchedule(CronScheduleBuilder
+                        .cronSchedule("0 0 7 * * ?")
                         .inTimeZone(TimeZone.getTimeZone("UTC")))
                 .build();
     }

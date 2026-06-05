@@ -23,8 +23,7 @@ public class PaymentService {
         paymentProcessor = new PaymentProcessor(apiClient);
     }
 
-    public Payment processPayment(String paymentToken, String amount) {
-
+    public Payment processNewPayment(String paymentToken, String amount) {
         return paymentProcessor.create(Payment.builder()
                 .amount(Amount.builder().value(amount).currency(Currency.RUB).build())
                 .paymentToken(paymentToken)
@@ -32,6 +31,16 @@ public class PaymentService {
                 .savePaymentMethod(true)
                 .test(true)
                 .build(), null
+        );
+    }
+
+    public Payment processRenewPayment(String paymentMethodId, String amount) {
+        return paymentProcessor.create(Payment.builder()
+                .amount(Amount.builder().value(amount).currency(Currency.RUB).build())
+                .paymentMethodId(paymentMethodId)
+                .capture(true)
+                .build(),
+                null
         );
     }
 }

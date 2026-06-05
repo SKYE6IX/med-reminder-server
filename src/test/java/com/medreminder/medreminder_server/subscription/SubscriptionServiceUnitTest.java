@@ -54,7 +54,7 @@ public class SubscriptionServiceUnitTest {
         subscriptionService = new SubscriptionServiceImpl(
                 subscriptionRepository,userRepository,paymentService,subscriptionMapper);
 
-        when(paymentService.processPayment(any(),any()))
+        when(paymentService.processNewPayment(any(),any()))
                 .thenReturn(SubscriptionServiceStubFactory.createMockSuccessfulPayment());
     }
 
@@ -77,7 +77,6 @@ public class SubscriptionServiceUnitTest {
         PaidSubscriptionRequest request = new PaidSubscriptionRequest(
                 UUID.randomUUID().toString(),
                 "BANK_CARD",
-                "3050",
                 "ANNUAL",
                 "Europe/Moscow"
         );
