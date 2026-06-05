@@ -22,10 +22,10 @@ public class SubscriptionPeriodEntity {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
+    private String status;
+
     @Column(name = "payment_status")
     private String paymentStatus;
-
-    private String status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_id")
@@ -53,14 +53,14 @@ public class SubscriptionPeriodEntity {
     public SubscriptionPeriodEntity(String id,
                                     LocalDateTime startTime,
                                     LocalDateTime endTime,
-                                    String paymentStatus,
                                     String status,
+                                    String paymentStatus,
                                     SubscriptionEntity subscription) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.paymentStatus = paymentStatus;
         this.status = status;
+        this.paymentStatus = paymentStatus;
         this.subscription = subscription;
     }
 
@@ -80,12 +80,12 @@ public class SubscriptionPeriodEntity {
         return endTime;
     }
 
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
-
     public String getStatus() {
         return status;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
     }
 
     public BillingEntity getPayment() {
@@ -98,5 +98,9 @@ public class SubscriptionPeriodEntity {
 
     public void updatePaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public void updateStatus(String status) {
+        this.status = status;
     }
 }

@@ -38,7 +38,8 @@ public class SubscriptionEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private UserEntity user;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY,
+            cascade = CascadeType.MERGE)
     @JoinColumn(name = "plan_id")
     private PlanEntity plan;
 

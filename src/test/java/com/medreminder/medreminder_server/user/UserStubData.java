@@ -1,7 +1,5 @@
 package com.medreminder.medreminder_server.user;
 
-import com.medreminder.medreminder_server.application.dtos.user.ProfileRequest;
-import com.medreminder.medreminder_server.application.dtos.user.RegisterUserRequest;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
@@ -13,40 +11,52 @@ import java.util.UUID;
 
 public class UserStubData {
 
-    public static User createStubUserWithId(String email, String name, String password) {
+    public static User createUserWithId(String email, String name, String password) {
         UUID userId = UUID.randomUUID();
         UUID profileId = UUID.randomUUID();
-        RegisterUserRequest registerUserRequest = new RegisterUserRequest(email,name,password);
-        User snubUser = new User(
-                userId.toString(),
-                registerUserRequest.getEmail(),
-                registerUserRequest.getName(),
-                registerUserRequest.getPassword(),
-                UserProvider.LOCAL);
 
-        snubUser.addProfiles(new Profile(profileId.toString(),
-                registerUserRequest.getName(), Relation.SELF, true));
-
+        User snubUser = UserStubData
+                .createUser(userId.toString(), email, name, password);
+        snubUser.addProfiles(UserStubData
+                .createProfile(profileId.toString(), snubUser.getName(), "SELF", true));
         return snubUser;
     }
 
-
-    public static Profile createStubProfileWithId(String name,
-                                                  String relation,
-                                                  boolean isSelf) {
+    public static Profile createProfileWithId(String name,
+                                              String relation,
+                                              boolean isSelf) {
         UUID profileId = UUID.randomUUID();
-        ProfileRequest profileRequest = new ProfileRequest(name,relation);
-        return new Profile(
-                profileId.toString(),
-                profileRequest.name(),
-                Relation.valueOf(profileRequest.relation()),
-                isSelf);
+        return UserStubData.createProfile(profileId.toString(), name, relation, isSelf);
     }
 
     public static ProfileEntity createStubProfileEntity(){
         UserMapper userMapper = new UserMapper();
         return userMapper
-                .toEntity(UserStubData.createStubProfileWithId("John",
+                .toEntity(UserStubData.createProfileWithId("John",
                         "BROTHER", false), null);
+    }
+
+    public static User createUser(String id,
+                                  String email,
+                                  String name,
+                                  String password) {
+        return new User(
+                id,
+                email,
+                name,
+                password,
+                UserProvider.LOCAL);
+    }
+
+    public static Profile createProfile(
+            String id,
+            String name,
+            String relation,
+            boolean isSelf) {
+        return new Profile(
+                id,
+                name,
+                Relation.valueOf(relation),
+                isSelf);
     }
 }

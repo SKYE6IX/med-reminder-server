@@ -11,10 +11,8 @@ import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
 import com.medreminder.medreminder_server.medication.MedicationStubFactory;
 import com.medreminder.medreminder_server.user.UserStubData;
-import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.BatchStatus;
@@ -23,23 +21,15 @@ import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.parameters.JobParametersBuilder;
 import org.springframework.batch.core.step.StepExecution;
-import org.springframework.batch.infrastructure.item.database.JpaCursorItemReader;
 import org.springframework.batch.test.JobOperatorTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.transaction.TestTransaction;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -49,7 +39,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
         MedicationScheduleEventBatchConfig.class
 })
 @ActiveProfiles("test")
-public class MedicationScheduleEventsJobTest {
+public class MedicationScheduleEventsJobUnitTest {
 
     @Autowired
     private JobOperatorTestUtils jobOperatorTestUtils;
@@ -73,14 +63,13 @@ public class MedicationScheduleEventsJobTest {
     }
 
     @Test
-    void jobShouldCompleteSuccessfully() throws Exception {
-        Profile snubProfile = UserStubData.createStubProfileWithId("John",
+    void jobShouldProcessOnlyEligibleAndCompleteSuccessfully() throws Exception {
+        Profile snubProfile = UserStubData.createProfileWithId("John",
                 Relation.BROTHER.toString(), false);
 
         CreateMedicationCommand cmd = MedicationStubFactory
                 .createMedicationCommand(snubProfile.getId(),
                         "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0", "15.06.2026");
-
         Medication stubMed = MedicationStubFactory.createMedication(cmd);
         MedicationSchedule stubMedicationSchedule = MedicationStubFactory.createMedicationSchedule(cmd);
         MedicationProfileEntity stubMedicationProfile = new MedicationProfileEntity(
@@ -91,7 +80,6 @@ public class MedicationScheduleEventsJobTest {
         );
         stubMedicationProfile.setMedication(medicationMapper.toEntity(stubMed,stubMedicationProfile));
         stubMedicationProfile.setMedicationSchedule(medicationMapper.toEntity(stubMedicationSchedule, stubMedicationProfile));
-
         medicationRepository.saveMedicationProfile(stubMedicationProfile);
 
         jobOperatorTestUtils.setJob(medicationScheduleEventJob);
@@ -101,7 +89,6 @@ public class MedicationScheduleEventsJobTest {
                         .addLocalDate("runDate", LocalDate.now())
                         .toJobParameters()
         );
-
         StepExecution stepExecution = execution.getStepExecutions().iterator().next();
 
         assertThat(execution.getStatus()).isEqualTo(BatchStatus.COMPLETED);

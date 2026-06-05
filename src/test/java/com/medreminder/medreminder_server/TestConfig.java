@@ -1,17 +1,17 @@
 package com.medreminder.medreminder_server;
 
 
+import com.medreminder.medreminder_server.application.batch_jobs.listener.DowngradePlanJobListener;
 import com.medreminder.medreminder_server.application.batch_jobs.listener.MedicationScheduleEventJobListener;
-import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.MedicationScheduleEventScheduler;
-import com.medreminder.medreminder_server.batch_jobs.config.MedicationScheduleEventSchedulerConfig;
+import com.medreminder.medreminder_server.batch_jobs.config.DowngradePlanSchedulerTestConfig;
+import com.medreminder.medreminder_server.batch_jobs.config.MedScheduleEventSchedulerTestConfig;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventService;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventServiceImpl;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
+import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
+import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import jakarta.persistence.EntityManagerFactory;
-import org.quartz.*;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -19,23 +19,22 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.util.Properties;
-import java.util.TimeZone;
 
 @Configuration()
 @EnableJpaRepositories("com.medreminder.medreminder_server.infrastructure.repository")
 @ComponentScan("com.medreminder.medreminder_server.infrastructure.repository")
 @Import({
-        MedicationScheduleEventSchedulerConfig.class
+        MedScheduleEventSchedulerTestConfig.class,
+        DowngradePlanSchedulerTestConfig.class,
 })
 @ActiveProfiles("test")
 public class TestConfig {
+
     @Bean
     public DataSource dataSource() {
         return new EmbeddedDatabaseBuilder()
@@ -71,12 +70,29 @@ public class TestConfig {
     }
 
     @Bean
+    public MedicationScheduleEventJobListener listener(){
+        return new MedicationScheduleEventJobListener();
+    }
+
+    @Bean
+    public DowngradePlanJobListener downgradePlanListener(){
+        return new DowngradePlanJobListener();
+    }
+
+//    HELPER BEANS
+    @Bean
     public MedicationMapper medicationMapper() {
         return new MedicationMapper();
     }
 
     @Bean
-    public MedicationScheduleEventJobListener listener(){
-        return new MedicationScheduleEventJobListener();
+    public UserMapper userMapper() {
+        return new UserMapper();
     }
+
+    @Bean
+    public SubscriptionMapper subscriptionMapper() {
+        return new SubscriptionMapper();
+    }
+
 }

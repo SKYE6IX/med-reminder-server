@@ -6,6 +6,5 @@ import com.medreminder.medreminder_server.infrastructure.repository.BaseJpaRepos
 import java.util.Optional;
 
 public interface JpaSubscriptionRepository extends BaseJpaRepository<SubscriptionEntity, String> {
-
     Optional<SubscriptionEntity > findByUserId(String userId);
 }

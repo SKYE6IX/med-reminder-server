@@ -44,7 +44,7 @@ public class UserServiceUnitTest {
     @Test
     void shouldCreateUser_thenSaveIt(){
         User snubUser = UserStubData
-                .createStubUserWithId("test@mail.com","test user", "12345678");
+                .createUserWithId("test@mail.com","test user", "12345678");
 
 
         when(userRepository.saveUser(any(UserEntity.class)))
@@ -64,7 +64,7 @@ public class UserServiceUnitTest {
     @Test
     void shouldUpdateUser_thenSaveIt(){
         User snubUser = UserStubData
-                .createStubUserWithId("test@mail.com","test user", "12345678");
+                .createUserWithId("test@mail.com","test user", "12345678");
 
         UpdateUserCommand updateUserCommand = new UpdateUserCommand("updatetest@mail.com",
                 null, "27.07.1992", "Male");
@@ -88,9 +88,9 @@ public class UserServiceUnitTest {
     @Test
     void shouldCreateProfile_thenSaveIt(){
         User snubUser = UserStubData
-                .createStubUserWithId("test@mail.com","test user", "12345678");
+                .createUserWithId("test@mail.com","test user", "12345678");
         Profile snubProfile = UserStubData
-                .createStubProfileWithId("John", Relation.BROTHER.toString(),false);
+                .createProfileWithId("John", Relation.BROTHER.toString(),false);
 
         snubUser.addProfiles(snubProfile);
 
@@ -112,10 +112,10 @@ public class UserServiceUnitTest {
     @Test
     void shouldDeleteProfile_thenSaveIt(){
         User snubUser = UserStubData
-                .createStubUserWithId("test@mail.com","test user", "12345678");
+                .createUserWithId("test@mail.com","test user", "12345678");
 
         Profile snubProfile = UserStubData
-                .createStubProfileWithId("John", Relation.BROTHER.toString(),false);
+                .createProfileWithId("John", Relation.BROTHER.toString(),false);
 
         snubUser.addProfiles(snubProfile);
 

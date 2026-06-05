@@ -34,4 +34,9 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
     public Optional<PlanEntity> getPlanByUserId(String userId) {
         return jpaPlanRepository.findByUserId(userId);
     }
+
+    @Override
+    public void savePlan(PlanEntity planEntity) {
+        jpaPlanRepository.save(planEntity);
+    }
 }

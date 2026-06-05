@@ -12,4 +12,6 @@ public interface SubscriptionRepository {
     Optional<SubscriptionEntity> getSubscriptionByUserId(String userId);
 
     Optional<PlanEntity> getPlanByUserId(String userId);
+
+    void savePlan(PlanEntity planEntity);
 }

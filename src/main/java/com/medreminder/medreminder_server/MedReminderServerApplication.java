@@ -16,19 +16,12 @@ public class MedReminderServerApplication {
 // 1. Social authorization controller and updated record for it.✅
 // 2. Subscription base setup. ✅
 // 3. Payment system setup after the subscription base is done. ✅
-// 4. Schedule background work:
+// 4. Schedule background work: ✅
 //	Items:
-//	Medication schedule events
+//	Medication schedule events ✅
 //	Renew Subscriptions fee for due
-//	Downgrade plan for cancelled subscription.
+//	Downgrade plan for cancelled subscription. ✅
 // 5. Mailing system set up
-
-
-
-
-
-
-
 
 
 

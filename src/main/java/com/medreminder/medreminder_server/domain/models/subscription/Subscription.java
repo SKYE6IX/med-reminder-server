@@ -66,9 +66,4 @@ public class Subscription {
     public User getUser() {
         return user;
     }
-
-    public void addPeriod(SubscriptionPeriod period) {
-        periods.add(period);
-        period.setSubscription(this);
-    }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SubscriptionMapper {
+
     public PlanEntity toEntity(Plan plan, UserEntity user) {
         if (plan == null) {
             return null;

@@ -1,48 +1,45 @@
 package com.medreminder.medreminder_server.subscription;
 
-import com.medreminder.medreminder_server.infrastructure.entity.subscription.PlanEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionEntity;
-import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
+import com.medreminder.medreminder_server.domain.models.billing.BillingCycle;
+import com.medreminder.medreminder_server.domain.models.subscription.*;
 import ru.loolzaaa.youkassa.model.Payment;
 import ru.loolzaaa.youkassa.pojo.Amount;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class SubscriptionServiceStubFactory {
 
-    public static UserEntity createStubUserWithPlan() {
-        UserEntity userEntity = new UserEntity(
-                UUID.randomUUID().toString(),
-                "mock@mail.com",
-                "mock user",
-                null,
-                "mock provider"
+    public static Plan createPlan(String id) {
+        return new Plan(
+                id,
+                PlanType.FREE,
+                2,
+                false,
+                false,
+                false
         );
-
-        PlanEntity planEntity = new PlanEntity(
-                UUID.randomUUID().toString(),
-                "FREE",
-                1,
-                false,
-                false,
-                false,
-                userEntity
-        );
-
-        userEntity.setPlan(planEntity);
-        return userEntity;
     }
 
-
-    public static SubscriptionEntity createMockSubscriptionEntity() {
-        return new SubscriptionEntity(
-                UUID.randomUUID().toString(),
-                "ACTIVE",
+    public static Subscription createSubscription(String id) {
+        return new Subscription(
+                id,
+                SubscriptionStatus.ACTIVE,
                 null,
-                "ANNUAL",
-                true,
-                SubscriptionServiceStubFactory.createStubUserWithPlan(),
-                SubscriptionServiceStubFactory.createStubUserWithPlan().getPlan()
+                BillingCycle.ANNUAL,
+                true
+        );
+    }
+
+    public static SubscriptionPeriod createSubscriptionPeriod(String id,
+                                                              LocalDateTime start,
+                                                              LocalDateTime end) {
+        return new SubscriptionPeriod(
+                id,
+                start,
+                end,
+                SubscriptionPeriodStatus.ACTIVE,
+                SubscriptionPeriodPaymentStatus.PAID
         );
     }
 
@@ -58,13 +55,10 @@ public class SubscriptionServiceStubFactory {
                 .type("BANK_CARD")
                 .build();
 
-
         return Payment.builder()
                 .amount(amount)
                 .status(Payment.Status.SUCCEEDED)
                 .paymentMethod(paymentMethod)
                 .build();
     }
-
-
 }

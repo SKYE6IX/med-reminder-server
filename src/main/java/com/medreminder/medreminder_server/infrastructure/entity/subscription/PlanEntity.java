@@ -1,6 +1,7 @@
 package com.medreminder.medreminder_server.infrastructure.entity.subscription;
 
 import com.medreminder.medreminder_server.domain.models.subscription.Plan;
+import com.medreminder.medreminder_server.domain.models.subscription.PlanType;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
@@ -56,7 +57,7 @@ public class PlanEntity {
 
     public PlanEntity(String id,
                       String planType,
-                      int maxMedications,
+                      Integer maxMedications,
                       boolean managedRelation,
                       boolean refillReminders,
                       boolean reminderPreference,

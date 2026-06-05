@@ -16,17 +16,13 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.batch.infrastructure.item.database.JpaCursorItemReader;
 import org.springframework.batch.infrastructure.item.database.builder.JpaCursorItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.sql.DataSource;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Map;
 
 @Configuration
@@ -36,9 +32,9 @@ public class MedicationScheduleEventBatchConfig {
     @Bean
     public Job medicationScheduleEventJob(JobRepository jobRepository,
                                           Step medicationScheduleEventStep,
-                                          MedicationScheduleEventJobListener listener){
-        return new JobBuilder("medicationScheduleEventJob", jobRepository)
-                .listener(listener)
+                                          MedicationScheduleEventJobListener medScheduleEventListener) {
+        return new JobBuilder("medication_schedule_event_job", jobRepository)
+                .listener(medScheduleEventListener)
                 .start(medicationScheduleEventStep)
                 .build();
     }
@@ -46,25 +42,24 @@ public class MedicationScheduleEventBatchConfig {
     @Bean
     public Step medicationScheduleEventStep(JobRepository jobRepository,
                                             PlatformTransactionManager transactionManager,
-                                            JpaCursorItemReader<MedicationScheduleEntity> reader,
-                                            MedicationScheduleEventProcessor processor,
-                                            ItemWriter<MedicationScheduleEntity> writer
+                                            JpaCursorItemReader<MedicationScheduleEntity> medScheduleEventItemReader,
+                                            MedicationScheduleEventProcessor medScheduleEventProcessor,
+                                            ItemWriter<MedicationScheduleEntity> medScheduleEventWriter
                                             ) {
         return new StepBuilder("medication_schedule_event_step", jobRepository)
                 .<MedicationScheduleEntity, MedicationScheduleEntity>chunk(50)
                 .transactionManager(transactionManager)
-                .reader(reader)
-                .processor(processor)
-                .writer(writer)
+                .reader(medScheduleEventItemReader)
+                .processor(medScheduleEventProcessor)
+                .writer(medScheduleEventWriter)
                 .build();
     }
 
     @Bean
-    public JpaCursorItemReader<MedicationScheduleEntity> reader(EntityManagerFactory entityManagerFactory){
+    public JpaCursorItemReader<MedicationScheduleEntity> medScheduleEventItemReader(EntityManagerFactory entityManagerFactory){
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         LocalDateTime start = tomorrow.atStartOfDay();
         LocalDateTime end   = tomorrow.plusDays(1).atStartOfDay();
-
         return new JpaCursorItemReaderBuilder<MedicationScheduleEntity>()
                 .name("medication_schedule_reader")
                 .entityManagerFactory(entityManagerFactory)
@@ -84,13 +79,13 @@ public class MedicationScheduleEventBatchConfig {
     }
 
     @Bean
-    public MedicationScheduleEventProcessor processor(ScheduleEventService scheduleEventService,
+    public MedicationScheduleEventProcessor medScheduleEventProcessor(ScheduleEventService scheduleEventService,
                                                       MedicationMapper medicationMapper){
         return new MedicationScheduleEventProcessor(scheduleEventService, medicationMapper);
     }
 
     @Bean
-    public ItemWriter<MedicationScheduleEntity> writer(JpaMedicationScheduleRepo medicationScheduleRepo){
+    public ItemWriter<MedicationScheduleEntity> medScheduleEventWriter(JpaMedicationScheduleRepo medicationScheduleRepo){
         return (items) -> {
             medicationScheduleRepo.saveAll(items.getItems());
         };

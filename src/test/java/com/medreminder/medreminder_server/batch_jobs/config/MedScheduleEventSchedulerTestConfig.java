@@ -13,10 +13,10 @@ import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 import java.util.TimeZone;
 
 @Configuration
-public class MedicationScheduleEventSchedulerConfig {
+public class MedScheduleEventSchedulerTestConfig {
 
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean(
+    public SchedulerFactoryBean medScheduleEventSchedulerFactoryBean(
             ApplicationContext context,
             JobDetail medicationEventSchedulerJobDetail,
             Trigger medicationTrigger) {
@@ -35,7 +35,7 @@ public class MedicationScheduleEventSchedulerConfig {
     @Bean
     public JobDetail medicationEventSchedulerJobDetail() {
         return JobBuilder.newJob(MedicationScheduleEventScheduler.class)
-                .withIdentity("medicationScheduleEventScheduler")
+                .withIdentity("medication_schedule_event_job_detail")
                 .storeDurably()
                 .build();
     }
@@ -45,7 +45,7 @@ public class MedicationScheduleEventSchedulerConfig {
             @Qualifier("medicationEventSchedulerJobDetail") JobDetail detail) {
         return TriggerBuilder.newTrigger()
                 .forJob(detail)
-                .withIdentity("medicationScheduleEventTrigger")
+                .withIdentity("medication_schedule_event_trigger")
                 .withSchedule(CronScheduleBuilder
                         .cronSchedule("0 0 1 * * ?")
                         .inTimeZone(TimeZone.getTimeZone("UTC")))

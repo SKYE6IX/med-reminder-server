@@ -4,7 +4,9 @@ package com.medreminder.medreminder_server.subscription;
 import com.medreminder.medreminder_server.application.dtos.subscription.PaidSubscriptionRequest;
 import com.medreminder.medreminder_server.application.dtos.subscription.SubscriptionPlanResponse;
 import com.medreminder.medreminder_server.application.services.PaymentService;
+import com.medreminder.medreminder_server.domain.models.subscription.Plan;
 import com.medreminder.medreminder_server.domain.models.subscription.PlanType;
+import com.medreminder.medreminder_server.domain.models.subscription.Subscription;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionRepository;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionService;
@@ -13,6 +15,7 @@ import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import com.medreminder.medreminder_server.user.UserStubData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +45,9 @@ public class SubscriptionServiceUnitTest {
 
     private SubscriptionService subscriptionService;
 
+    private final UserMapper userMapper = new UserMapper();
+    private final SubscriptionMapper subscriptionMapper = new SubscriptionMapper();
+
     @BeforeEach
     void setUp() {
         SubscriptionMapper subscriptionMapper = new SubscriptionMapper();
@@ -54,11 +60,19 @@ public class SubscriptionServiceUnitTest {
 
     @Test
     void shouldCreateSubscription() {
-        UserEntity mockUser = SubscriptionServiceStubFactory
-                .createStubUserWithPlan();
+        User stubUser = UserStubData
+                .createUserWithId("email", "Test User", null);
+        Plan plan = SubscriptionServiceStubFactory
+                .createPlan(UUID.randomUUID().toString());
 
-        SubscriptionEntity mockSubscription = SubscriptionServiceStubFactory
-                .createMockSubscriptionEntity();
+        UserEntity stubUserEntity = userMapper.toEntity(stubUser);
+        stubUserEntity.setPlan(subscriptionMapper.toEntity(plan,stubUserEntity));
+
+        Subscription stubSubscription = SubscriptionServiceStubFactory
+                .createSubscription(UUID.randomUUID().toString());
+
+        SubscriptionEntity stubSubscriptionEntity = subscriptionMapper
+                .toEntity(stubSubscription,stubUserEntity);
 
         PaidSubscriptionRequest request = new PaidSubscriptionRequest(
                 UUID.randomUUID().toString(),
@@ -69,13 +83,13 @@ public class SubscriptionServiceUnitTest {
         );
 
         when(userRepository.findUserById(any(String.class)))
-                .thenReturn(Optional.of(mockUser));
+                .thenReturn(Optional.of(stubUserEntity));
 
         when(subscriptionRepository.saveSubscription(any(SubscriptionEntity.class)))
-                .thenReturn(mockSubscription);
+                .thenReturn(stubSubscriptionEntity);
 
         SubscriptionPlanResponse response = subscriptionService
-                .createPaidSubscriptionPlan(request, mockUser.getId());
+                .createPaidSubscriptionPlan(request, stubUserEntity.getId());
 
         assertThat(response).isNotNull();
         assertThat(response.billingCycle()).isEqualTo(request.billingCycle());

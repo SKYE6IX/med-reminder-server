@@ -39,6 +39,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 //    > If cancelled? we flip the Plan from PRO to FREE.
 //    > and flip the Period status to Completed.
 
+
 //    A scheduler that renew Subscription.
 //    > This will look for subscription period which the current day
 //      is the same as the end time OR is greater than it.(RETRY CASE FOR FAILED PAYMENT)
@@ -75,7 +76,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
 //      Create a period for the subscription
         SubscriptionPeriodEntity periodEntity = createSubscriptionPeriod(
-                subscription,request.billingCycle(),request.zoneId()
+                subscription,request.billingCycle(), request.zoneId()
         );
 
 //        Start a payment process
@@ -125,7 +126,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 );
                 userEntity.getBillings().add(newBilling);
                 userRepository.saveUser(userEntity);
-                return getSubscriptionPlanResponse(subscription.getPlan(),
+                return getSubscriptionPlanResponse(
+                        subscription.getPlan(),
                         savedPeriodEntity.getEndTime().toString(),
                         subscription.getBillingCycle(),
                         subscription.getStatus());
