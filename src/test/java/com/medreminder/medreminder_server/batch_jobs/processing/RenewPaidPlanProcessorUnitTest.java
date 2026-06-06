@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +31,6 @@ public class RenewPaidPlanProcessorUnitTest {
 
     private final UserMapper userMapper = new UserMapper();
     private final SubscriptionMapper subscriptionMapper = new SubscriptionMapper();
-
 
     @Mock
     private PaymentService paymentService;
@@ -77,6 +77,7 @@ public class RenewPaidPlanProcessorUnitTest {
         assertThat(result).isNotNull();
         assertThat(result.subscriptionEntity().getPeriods().size()).isGreaterThan(1);
         assertThat(result.newBillingEntity()).isNotNull();
+        assertThat(result.subscriptionEntity().getBillingRetry()).isFalse();
     }
 
 
@@ -111,6 +112,10 @@ public class RenewPaidPlanProcessorUnitTest {
 
         RenewPaidPlanResult result = processor.process(stubPeriodEntity);
 
-        assertThat(result).isNull();
+        assertThat(result).isNotNull();
+        assertThat(result.subscriptionEntity().getBillingRetry()).isTrue();
+        assertThat(result.newBillingEntity()).isNull();
+        assertThat(result.subscriptionEntity().getNextRetryBillingAt())
+                .isEqualTo(LocalDateTime.now().plusDays(2).truncatedTo(ChronoUnit.SECONDS));
     }
 }

@@ -19,7 +19,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import ru.loolzaaa.youkassa.model.Payment;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -58,8 +57,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
 //        Start a payment process
 //        If payment method is BANK_CARD, we can process all in one go.
+//        At the moment we only accept bank card only.
         if(request.paymentMethod().equals("BANK_CARD")) {
-
             final String amount = SubscriptionServiceHelper
                     .getBillingCycleAmount(BillingCycle.valueOf(request.billingCycle()));
 
@@ -72,6 +71,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
             if(proccessPayment == null || proccessPayment.getStatus().equals(Payment.Status.CANCELED)){
                 throw new PaymentFailedException("Payment failed!");
+
             } else if (proccessPayment.getStatus().equals(Payment.Status.SUCCEEDED)) {
 
 //            Update the subscription plan
@@ -115,10 +115,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         subscription.getBillingCycle(),
                         subscription.getStatus());
             }
-        } else if (request.paymentMethod().equals("SBP")) {
-//            Here we handle the payment process based on the
-//            status payment won't be immediately return to us.
-            return null;
         } else {
 //            Throw payment failed Error
 //            since we don't recognize the payment method
@@ -166,6 +162,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                             period.getStatus().equals(SubscriptionPeriodStatus.ACTIVE.toString()))
                     .findFirst()
                     .orElse(null);
+
             if (periodEntity != null) {
                 return SubscriptionServiceHelper.getSubscriptionPlanResponse(planEntity,
                         periodEntity.getEndTime().toString(),
@@ -174,14 +171,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         );
             } else {
                 return SubscriptionServiceHelper.getSubscriptionPlanResponse(planEntity,
-                        null,null,SubscriptionStatus.CANCELED.toString());
+                        null,null, SubscriptionStatus.CANCELED.toString());
             }
         } else {
             return SubscriptionServiceHelper.getSubscriptionPlanResponse(planEntity,
                     null,null, null);
         }
     }
-
 
 //    HELPER METHODS
     private SubscriptionEntity getOrCreateSubscriptionEntity(UserEntity userEntity,
@@ -193,7 +189,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                             SubscriptionStatus.ACTIVE,
                             null,
                             BillingCycle.valueOf(billingCycle),
-                            true
+                            false
                     );
                     return subscriptionRepository
                     .saveSubscription(subscriptionMapper.toEntity(subscription, userEntity));

@@ -32,7 +32,7 @@ public class SubscriptionMapper {
                 subscription.getStatus().toString(),
                 subscription.getStartedAt(),
                 subscription.getBillingCycle().toString(),
-                subscription.isAutoRenewal(),
+                subscription.getBillingRetry(),
                 user,
                 user.getPlan()
         );

@@ -88,16 +88,18 @@ public class RenewPaidPlanBatchConfig {
             for (RenewPaidPlanResult result : items.getItems()) {
                 var updatedSubscription = subscriptionRepository
                         .save(result.subscriptionEntity());
+                if(result.newBillingEntity() != null){
+//                    Meaning payment completed and a billing was created
+//                      so as new period for the billing to.
+                    var newPeriod = updatedSubscription.getPeriods().getLast();
 
-                var newPeriod = updatedSubscription.getPeriods().getLast();
+                    var newBilling = result.newBillingEntity();
+                    newBilling.setSubscriptionPeriod(newPeriod);
 
-                var newBilling = result.newBillingEntity();
-                newBilling.setSubscriptionPeriod(newPeriod);
-
-                var userEntity = updatedSubscription.getUser();
-                userEntity.getBillings().add(newBilling);
-
-                userRepository.saveUser(userEntity);
+                    var userEntity = updatedSubscription.getUser();
+                    userEntity.getBillings().add(newBilling);
+                    userRepository.saveUser(userEntity);
+                }
             }
         };
     }

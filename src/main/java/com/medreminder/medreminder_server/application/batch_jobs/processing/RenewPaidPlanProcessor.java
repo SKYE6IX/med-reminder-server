@@ -4,6 +4,7 @@ import com.medreminder.medreminder_server.application.services.PaymentService;
 import com.medreminder.medreminder_server.domain.models.billing.BillingCycle;
 import com.medreminder.medreminder_server.domain.models.billing.BillingStatus;
 import com.medreminder.medreminder_server.domain.models.subscription.SubscriptionPeriodStatus;
+import com.medreminder.medreminder_server.domain.models.subscription.SubscriptionStatus;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionServiceHelper;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionServiceImpl;
 import com.medreminder.medreminder_server.infrastructure.entity.billing.BillingEntity;
@@ -16,10 +17,7 @@ import ru.loolzaaa.youkassa.model.Payment;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-
-
-
-
+import java.time.temporal.ChronoUnit;
 
 //TODO:
 // Handle failed payment to be retried again the next two days
@@ -38,25 +36,67 @@ public class RenewPaidPlanProcessor implements ItemProcessor<SubscriptionPeriodE
         SubscriptionEntity subscriptionEntity = subscriptionPeriodEntity.getSubscription();
 
         UserEntity userEntity = subscriptionEntity.getUser();
-//        First we start with the process of Payment, we return null
-//        if payment failed also we can send a message here to user
-//        about their failed payment
+
+        Payment processRenewPayment;
+
+        final LocalDateTime now = LocalDateTime.now();
+
         final String billingAmount = SubscriptionServiceHelper
                 .getBillingCycleAmount(BillingCycle.valueOf(subscriptionEntity.getBillingCycle()));
         if (billingAmount == null) {
             return null;
         }
 
-        Payment processRenewPayment = paymentService
-                .processRenewPayment(userEntity.getPaymentMethodId(), billingAmount);
-
-        if(processRenewPayment == null || processRenewPayment.getStatus().equals(Payment.Status.CANCELED)){
-//            Send mail to user about unsuccessful payment.
-//            And figure out on how to try again by tracking how many times it has run.
-//            before we flip and cancel the subscription.
+//        Return early if subscription last payment failed.
+//          And the next retry day isn't now.
+//        By return null, indicate worker not to do anything.
+        if(subscriptionEntity.getBillingRetry()
+                && !subscriptionEntity.getNextRetryBillingAt().isBefore(now)) {
+//            Don't do anything for the particular subscription.
             return null;
+        } else if(subscriptionEntity.getBillingRetry()
+                && subscriptionEntity.getNextRetryBillingAt().isBefore(now) ){
+//            We retry payment again.
+            processRenewPayment = paymentService
+                    .processRenewPayment(userEntity.getPaymentMethodId(), billingAmount);
+        } else {
+//            A fresh renew payment
+            processRenewPayment = paymentService
+                    .processRenewPayment(userEntity.getPaymentMethodId(), billingAmount);
+        }
+
+//        We handled failed payment here.
+//        We either allowed a retry for second time, or canceled the
+//        subscription if the second time already used.
+        if(processRenewPayment == null
+                || processRenewPayment.getStatus().equals(Payment.Status.CANCELED)){
+//            Meaning failed payment is a retry one.
+            if(subscriptionEntity.getBillingRetry()){
+                subscriptionEntity.updateStatus(SubscriptionStatus.CANCELED.toString());
+                subscriptionEntity.updateStartedAt(null);
+                subscriptionEntity.updateCanceledAt(now);
+                subscriptionEntity.updateIsBillingRetry(false);
+                subscriptionEntity.updateNextRetryBillingAt(null);
+                subscriptionEntity.getPeriods()
+                        .stream()
+                        .filter(period -> period.getId().equals(subscriptionPeriodEntity.getId()))
+                        .findFirst()
+                        .ifPresent(period ->
+                                period.updateStatus(SubscriptionPeriodStatus.COMPLETED.toString()));
+            } else {
+//                Meaning failed payment isn't a retry one
+                subscriptionEntity.updateIsBillingRetry(true);
+//                Retry again in next two days.
+                subscriptionEntity.updateNextRetryBillingAt(now.plusDays(2)
+                        .truncatedTo(ChronoUnit.SECONDS));
+            }
+
+            return new RenewPaidPlanResult(subscriptionEntity, null);
+
         } else if (processRenewPayment.getStatus().equals(Payment.Status.SUCCEEDED)) {
 
+            subscriptionEntity.updateIsBillingRetry(false);
+            subscriptionEntity.updateNextRetryBillingAt(null);
 //           Update the previous period status
             subscriptionEntity.getPeriods()
                     .stream()

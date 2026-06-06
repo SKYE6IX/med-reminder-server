@@ -15,7 +15,7 @@ public class Subscription {
     private final LocalDateTime startedAt;
     private LocalDateTime canceledAt;
     private final BillingCycle billingCycle;
-    private final boolean autoRenewal;
+    private final Boolean isBillingRetry;
     private Plan plan;
     private User user;
 
@@ -23,12 +23,12 @@ public class Subscription {
                         SubscriptionStatus status,
                         LocalDateTime startedAt,
                         BillingCycle billingCycle,
-                        boolean autoRenewal) {
+                        Boolean isBillingRetry) {
         this.id = id;
         this.status = status;
         this.startedAt = startedAt;
         this.billingCycle = billingCycle;
-        this.autoRenewal = autoRenewal;
+        this.isBillingRetry = isBillingRetry;
     }
 
     public String getId() {
@@ -55,8 +55,8 @@ public class Subscription {
         return billingCycle;
     }
 
-    public boolean isAutoRenewal() {
-        return autoRenewal;
+    public Boolean getBillingRetry() {
+        return isBillingRetry;
     }
 
     public Plan getPlan() {

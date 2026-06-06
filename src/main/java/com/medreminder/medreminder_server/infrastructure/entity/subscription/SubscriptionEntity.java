@@ -1,7 +1,6 @@
 package com.medreminder.medreminder_server.infrastructure.entity.subscription;
 
 
-import com.medreminder.medreminder_server.domain.models.subscription.Subscription;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
@@ -30,11 +29,14 @@ public class SubscriptionEntity {
     @Column(name = "billing_cycle")
     private String billingCycle;
 
-    @Column(name = "auto_renewal")
-    private boolean autoRenewal;
-
     @Column(name = "time_zone")
     private String timeZone;
+
+    @Column(name = "is_billing_retry")
+    private Boolean isBillingRetry;
+
+    @Column(name = "next_retry_billing_at")
+    private LocalDateTime nextRetryBillingAt;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -69,14 +71,14 @@ public class SubscriptionEntity {
                               String status,
                               LocalDateTime startedAt,
                               String billingCycle,
-                              boolean autoRenewal,
+                              Boolean isBillingRetry,
                               UserEntity user,
                               PlanEntity plan) {
         this.id = id;
         this.status = status;
         this.startedAt = startedAt;
         this.billingCycle = billingCycle;
-        this.autoRenewal = autoRenewal;
+        this.isBillingRetry = isBillingRetry;
         this.user = user;
         this.plan = plan;
     }
@@ -105,10 +107,6 @@ public class SubscriptionEntity {
         return billingCycle;
     }
 
-    public boolean isAutoRenewal() {
-        return autoRenewal;
-    }
-
     public String getTimeZone() {
         return timeZone;
     }
@@ -119,6 +117,14 @@ public class SubscriptionEntity {
 
     public PlanEntity getPlan() {
         return plan;
+    }
+
+    public Boolean getBillingRetry() {
+        return isBillingRetry;
+    }
+
+    public LocalDateTime getNextRetryBillingAt() {
+        return nextRetryBillingAt;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -147,5 +153,13 @@ public class SubscriptionEntity {
 
     public void updateTimeZone(String timeZone) {
         this.timeZone = timeZone;
+    }
+
+    public void updateIsBillingRetry(Boolean isBillingRetry) {
+        this.isBillingRetry = isBillingRetry;
+    }
+
+    public void updateNextRetryBillingAt(LocalDateTime nextRetryBillingAt) {
+        this.nextRetryBillingAt = nextRetryBillingAt;
     }
 }

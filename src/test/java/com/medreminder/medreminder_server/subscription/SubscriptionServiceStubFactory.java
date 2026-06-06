@@ -27,7 +27,7 @@ public class SubscriptionServiceStubFactory {
                 SubscriptionStatus.ACTIVE,
                 null,
                 BillingCycle.ANNUAL,
-                true
+                false
         );
     }
 
