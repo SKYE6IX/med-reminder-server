@@ -13,10 +13,7 @@ import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEnt
 import net.fortuna.ical4j.model.Recur;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -187,6 +184,26 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 .toList();
     }
 
+    @Override
+    public List<ScheduleEventResponse> getUpcomingScheduleEvents(String userId,
+                                                         String eventDateFrom,
+                                                         int limit) {
+        OffsetDateTime offsetDateTime = OffsetDateTime
+                .parse(eventDateFrom, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+
+        LocalDateTime utcDateTime = offsetDateTime
+                .withOffsetSameInstant(ZoneOffset.UTC)
+                .toLocalDateTime();
+
+        List<ScheduleEventEntity> upcoming = medicationRepository
+                .getUpcomingScheduleEvents(userId, utcDateTime, limit);
+
+        return upcoming
+                .stream()
+                .map(this::getScheduleEventResponse)
+                .toList();
+    }
+
     private ScheduleEventResponse getScheduleEventResponse(ScheduleEventEntity managedScheduleEvent) {
         MedicationScheduleEntity medicationSchedule =
                 managedScheduleEvent.getMedicationSchedule();
@@ -201,7 +218,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 medication.getName(),
                 "",
                 mpe.getId(),
-                medicationSchedule.getDoseQuantity().stripTrailingZeros().toPlainString(),
+                managedScheduleEvent.getDosage().stripTrailingZeros().toPlainString(),
                 medication.getMeasurementUnit().getSymbol(),
                 managedScheduleEvent.getScheduleAt().toString());
 

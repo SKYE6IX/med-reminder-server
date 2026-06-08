@@ -17,4 +17,8 @@ public interface ScheduleEventService extends UseCase {
     ScheduleEventResponse updateScheduleEvent(String scheduleEventId, Map<String, String> eventBody);
 
     List<ScheduleEventResponse> getScheduleEvents(String userId, String eventDate);
+
+    List<ScheduleEventResponse> getUpcomingScheduleEvents(String userId,
+                                                  String eventDateFrom,
+                                                  int limit);
 }

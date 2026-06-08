@@ -23,10 +23,13 @@ public class QuartzSchedulersTest {
     @Qualifier("downgradePlanSchedulerFactoryBean")
     private Scheduler downgradePlanScheduler;
 
-
     @Autowired
     @Qualifier("renewPaidPlanSchedulerFactoryBean")
     private Scheduler renewPaidPlanScheduler;
+
+    @Autowired
+    @Qualifier("markMissedDosageSchedulerFactoryBean")
+    private Scheduler markMissedDosageScheduler;
 
 
 
@@ -35,11 +38,13 @@ public class QuartzSchedulersTest {
         JobKey medScheduleEventSchedulerKey = JobKey.jobKey("medication_schedule_event_job_detail");
         JobKey downgradePlanSchedulerKey = JobKey.jobKey("downgrade_plan_job_detail");
         JobKey renewPaidPlanSchedulerKey = JobKey.jobKey("renew_paid_plan_job_detail");
+        JobKey markMissedDosageSchedulerKey = JobKey.jobKey("mark_missed_dosage_job_detail");
 
 
         assertThat(medScheduleEventScheduler.checkExists(medScheduleEventSchedulerKey)).isTrue();
         assertThat(downgradePlanScheduler.checkExists(downgradePlanSchedulerKey)).isTrue();
         assertThat(renewPaidPlanScheduler.checkExists(renewPaidPlanSchedulerKey)).isTrue();
+        assertThat(markMissedDosageScheduler.checkExists(markMissedDosageSchedulerKey)).isTrue();
     }
 
     @Test
@@ -54,9 +59,13 @@ public class QuartzSchedulersTest {
         TriggerKey triggerKey3 = TriggerKey.triggerKey("renew_paid_plan_trigger");
         Trigger trigger3 = renewPaidPlanScheduler.getTrigger(triggerKey3);
 
+        TriggerKey triggerKey4 = TriggerKey.triggerKey("mark_missed_dosage_trigger");
+        Trigger trigger4 = markMissedDosageScheduler.getTrigger(triggerKey4);
+
         assertThat(trigger.getJobKey()).isEqualTo(JobKey.jobKey("medication_schedule_event_job_detail"));
         assertThat(trigger2.getJobKey()).isEqualTo(JobKey.jobKey("downgrade_plan_job_detail"));
         assertThat(trigger3.getJobKey()).isEqualTo(JobKey.jobKey("renew_paid_plan_job_detail"));
+        assertThat(trigger4.getJobKey()).isEqualTo(JobKey.jobKey("mark_missed_dosage_job_detail"));
     }
 
     @Test
@@ -84,5 +93,15 @@ public class QuartzSchedulersTest {
 
         assertThat(trigger).isNotNull();
         assertThat(trigger.getCronExpression()).isEqualTo("0 0 7 * * ?");
+    }
+
+    @Test
+    void markMissedDosageTriggerShouldFireAt3AM() throws Exception {
+        TriggerKey triggerKey = TriggerKey.triggerKey("mark_missed_dosage_trigger");
+        CronTrigger trigger = (CronTrigger) markMissedDosageScheduler.getTrigger(triggerKey);
+
+        assertThat(trigger).isNotNull();
+        assertThat(trigger.getCronExpression()).isEqualTo("0 0 3 * * ?");
+
     }
 }

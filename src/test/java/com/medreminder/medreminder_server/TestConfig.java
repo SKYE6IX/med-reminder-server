@@ -2,10 +2,12 @@ package com.medreminder.medreminder_server;
 
 
 import com.medreminder.medreminder_server.application.batch_jobs.listener.DowngradePlanJobListener;
+import com.medreminder.medreminder_server.application.batch_jobs.listener.MarkMissedDosageJobListener;
 import com.medreminder.medreminder_server.application.batch_jobs.listener.MedicationScheduleEventJobListener;
 import com.medreminder.medreminder_server.application.batch_jobs.listener.RenewPaidPlanJobListener;
 import com.medreminder.medreminder_server.application.services.PaymentService;
 import com.medreminder.medreminder_server.batch_jobs.config.DowngradePlanSchedulerTestConfig;
+import com.medreminder.medreminder_server.batch_jobs.config.MarkMissedDosageSchedulerTestConfig;
 import com.medreminder.medreminder_server.batch_jobs.config.MedScheduleEventSchedulerTestConfig;
 import com.medreminder.medreminder_server.batch_jobs.config.RenewPaidPlanSchedulerTestConfig;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
@@ -36,6 +38,7 @@ import java.util.Properties;
         MedScheduleEventSchedulerTestConfig.class,
         DowngradePlanSchedulerTestConfig.class,
         RenewPaidPlanSchedulerTestConfig.class,
+        MarkMissedDosageSchedulerTestConfig.class,
 })
 @ActiveProfiles("test")
 public class TestConfig {
@@ -93,6 +96,11 @@ public class TestConfig {
     @Bean
     public RenewPaidPlanJobListener renewPaidPlanListener(){
         return new RenewPaidPlanJobListener();
+    }
+
+    @Bean
+    public MarkMissedDosageJobListener markMissedDosageListener(){
+        return new MarkMissedDosageJobListener();
     }
 
 //    HELPER BEANS

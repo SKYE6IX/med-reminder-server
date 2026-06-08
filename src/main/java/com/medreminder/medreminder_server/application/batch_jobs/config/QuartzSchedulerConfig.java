@@ -2,6 +2,7 @@ package com.medreminder.medreminder_server.application.batch_jobs.config;
 
 
 import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.DowngradePlanScheduler;
+import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.MarkMissedDosageScheduler;
 import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.MedicationScheduleEventScheduler;
 import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.RenewPaidPlanScheduler;
 import org.quartz.*;
@@ -85,6 +86,25 @@ public class QuartzSchedulerConfig {
                 .withIdentity("renew_paid_plan_trigger")
                 .withSchedule(CronScheduleBuilder
                         .cronSchedule("0 0 7 * * ?")
+                        .inTimeZone(TimeZone.getTimeZone("UTC")))
+                .build();
+    }
+
+    @Bean
+    public JobDetail markMissedDosageJobDetail() {
+        return JobBuilder.newJob(MarkMissedDosageScheduler.class)
+                .withIdentity("mark_missed_dosage_job_detail")
+                .storeDurably()
+                .build();
+    }
+
+    @Bean
+    public Trigger markMissedDosageTrigger(@Qualifier("markMissedDosageJobDetail") JobDetail detail) {
+        return TriggerBuilder.newTrigger()
+                .forJob(detail)
+                .withIdentity("mark_missed_dosage_trigger")
+                .withSchedule(CronScheduleBuilder
+                        .cronSchedule("0 0 3 * * ?")
                         .inTimeZone(TimeZone.getTimeZone("UTC")))
                 .build();
     }

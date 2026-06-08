@@ -2,6 +2,7 @@ package com.medreminder.medreminder_server.infrastructure.repository.medications
 
 import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
 import com.medreminder.medreminder_server.infrastructure.repository.BaseJpaRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -25,6 +26,23 @@ public interface JpaScheduleEventRepo extends BaseJpaRepository<ScheduleEventEnt
     List<ScheduleEventEntity> findByUserIdAndDates(@Param("userId") String userId,
                                                    @Param("startOfDay") LocalDateTime startOfDay,
                                                    @Param("endOfDay") LocalDateTime endOfDay);
+
+    @Query("""
+        SELECT se FROM SCHEDULE_EVENTS se
+        JOIN se.medicationSchedule s
+        JOIN s.medicationProfile mp
+        JOIN mp.profile p
+        JOIN p.user u
+        WHERE u.id = :userId
+        AND mp.isActive = true
+        AND se.scheduleAt >= :eventDayFrom
+        AND se.status = 'PENDING'
+        ORDER BY se.scheduleAt ASC
+        """)
+    List<ScheduleEventEntity> findUpcomingScheduleEvents(@Param("userId") String userId,
+                                                         @Param("eventDayFrom") LocalDateTime eventDayFrom,
+                                                         Pageable pageable
+                                                         );
 
     @Query("""
     SELECT se FROM SCHEDULE_EVENTS se

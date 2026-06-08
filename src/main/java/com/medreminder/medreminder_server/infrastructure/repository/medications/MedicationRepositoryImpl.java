@@ -2,6 +2,7 @@ package com.medreminder.medreminder_server.infrastructure.repository.medications
 
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.*;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -58,9 +59,16 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     }
 
     @Override
+    public List<ScheduleEventEntity> getUpcomingScheduleEvents(String userId,
+                                                               LocalDateTime eventDateFrom,
+                                                               int limit) {
+        return jpaScheduleEventRepo
+                .findUpcomingScheduleEvents(userId, eventDateFrom, PageRequest.of(0, limit));
+    }
+
+    @Override
     public List<MedicationPackEntity> getAllMedicationPacksByUserId(String userId) {
 
         return jpaMedicationPackRepo.findAllByUserId(userId);
     }
-
 }

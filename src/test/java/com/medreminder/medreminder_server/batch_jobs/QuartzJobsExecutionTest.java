@@ -3,6 +3,7 @@ package com.medreminder.medreminder_server.batch_jobs;
 
 import com.medreminder.medreminder_server.TestConfig;
 import com.medreminder.medreminder_server.application.batch_jobs.config.DowngradePlanBatchConfig;
+import com.medreminder.medreminder_server.application.batch_jobs.config.MarkMissedDosageBatchConfig;
 import com.medreminder.medreminder_server.application.batch_jobs.config.MedicationScheduleEventBatchConfig;
 import com.medreminder.medreminder_server.application.batch_jobs.config.RenewPaidPlanBatchConfig;
 import com.medreminder.medreminder_server.application.dtos.medication.CreateMedicationCommand;
@@ -20,6 +21,7 @@ import com.medreminder.medreminder_server.domain.services.subscription.Subscript
 import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionPeriodEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
@@ -39,6 +41,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -52,7 +56,8 @@ import static org.mockito.Mockito.when;
         TestConfig.class,
         MedicationScheduleEventBatchConfig.class,
         DowngradePlanBatchConfig.class,
-        RenewPaidPlanBatchConfig.class
+        RenewPaidPlanBatchConfig.class,
+        MarkMissedDosageBatchConfig.class,
 })
 @ActiveProfiles("test")
 public class QuartzJobsExecutionTest {
@@ -74,6 +79,9 @@ public class QuartzJobsExecutionTest {
     @Qualifier("renewPaidPlanSchedulerFactoryBean")
     private Scheduler renewPaidPlanScheduler;
 
+    @Autowired
+    @Qualifier("markMissedDosageSchedulerFactoryBean")
+    private Scheduler markMissedDosageScheduler;
 
     @Autowired
     private MedicationRepository medicationRepository;
@@ -215,5 +223,32 @@ public class QuartzJobsExecutionTest {
                     long count = jpaSubscriptionPeriodRepo.count();
                     assertThat(count).isGreaterThan(1);
                 });
+    };
+
+    @Test
+    void markMissedDosageJobShouldExecuteWhenTriggeredManually() throws Exception {
+        LocalDate now = LocalDate.now();
+        LocalDateTime yesterday = now
+                .minusDays(1).atTime(6,30,0);
+        ScheduleEventEntity scheduleEventEntity = new ScheduleEventEntity(
+                null,
+                new BigDecimal("2.1"),
+                "PENDING",
+                yesterday,
+                null
+        );
+
+        var savedData = scheduleEventRepo.save(scheduleEventEntity);
+
+        markMissedDosageScheduler.triggerJob(JobKey.jobKey("mark_missed_dosage_job_detail"));
+
+        await().atMost(15, SECONDS)
+                .untilAsserted(() -> {
+                    scheduleEventRepo.findById(savedData.getId())
+                            .ifPresent(event-> {
+                                assertThat(event.getStatus()).isEqualTo("MISSED");
+                            });
+                });
+
     };
 }

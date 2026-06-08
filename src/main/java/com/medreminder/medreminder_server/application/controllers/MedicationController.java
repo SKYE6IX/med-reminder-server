@@ -100,6 +100,20 @@ public class MedicationController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping(value = "/schedules/upcoming")
+    public ResponseEntity<List<ScheduleEventResponse>> getUpcomingScheduleEvents(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam String eventDateFrom,
+            @RequestParam(defaultValue = "10") int limit) {
+
+        UserPrincipal principal = (UserPrincipal) userDetails;
+
+        List<ScheduleEventResponse> response = scheduleEventService
+                .getUpcomingScheduleEvents(principal.getId(), eventDateFrom, limit);
+
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping(value = "/packs")
     public ResponseEntity<Map<String, String>> createMedicationPack(
             @RequestBody AddMedicationPackRequest addMedicationPackRequest){

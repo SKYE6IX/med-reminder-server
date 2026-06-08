@@ -102,6 +102,7 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
         cmd.getStatus().ifPresent(domainMedicationProfile::updateActive);
         cmd.getNote().ifPresent(domainMedicationProfile::updateNote);
 
+//        If user change their events schedules
         cmd.getRecurrenceRule().ifPresent(newRules -> {
             MedicationSchedule medicationSchedule = domainMedicationProfile.getMedicationSchedule();
             medicationSchedule.updateRecurrenceRule(newRules);
@@ -134,10 +135,10 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                     );
         });
 
+//        If User update their dosage
         cmd.getDoseQuantity().ifPresent(newDoseQuantity -> {
             MedicationSchedule medicationSchedule = domainMedicationProfile.getMedicationSchedule();
             medicationSchedule.updateDoseQuantity(new BigDecimal(newDoseQuantity));
-
 //          Update medication Schedules.
             managedMedicationProfile
                     .getMedicationSchedule()
@@ -151,7 +152,6 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                     .filter(event -> event.getStatus().equals("PENDING"))
                     .forEach(event -> event.updateDosage(new BigDecimal(newDoseQuantity)));
         });
-
         managedMedicationProfile.updateMedicationProfile(domainMedicationProfile);
         medicationRepository.saveMedicationProfile(managedMedicationProfile);
 

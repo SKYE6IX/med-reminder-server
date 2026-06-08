@@ -20,6 +20,9 @@ public interface MedicationRepository {
     List<ScheduleEventEntity> getScheduleEventsByUserIdAndDates(String userId,
                                                                 LocalDateTime startOfDay,
                                                                 LocalDateTime endOfDay);
+    List<ScheduleEventEntity> getUpcomingScheduleEvents(String userId,
+                                                LocalDateTime eventDateFrom,
+                                                int limit);
 
     List<MedicationPackEntity> getAllMedicationPacksByUserId(String userId);
 }
