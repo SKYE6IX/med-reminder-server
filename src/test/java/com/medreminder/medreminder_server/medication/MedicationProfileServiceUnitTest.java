@@ -65,8 +65,10 @@ public class MedicationProfileServiceUnitTest {
     void shouldCreateMedication_Profile_thenSaveIt() {
 
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
+
+        final String rrule = "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0";
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0","15.06.2026");
+                rrule,"10.06.2026");
 
         when(profileRepository.findProfileById(any(String.class)))
                 .thenReturn(Optional.of(snubProfileEntity));
@@ -82,6 +84,7 @@ public class MedicationProfileServiceUnitTest {
         assertThat(response.getMedicationName()).isEqualTo(cmd.getMedicationName());
         assertThat(response.getMedicationUnit()).isEqualTo(cmd.getMedicationUnit());
         assertThat(response.getSchedule().dosage()).isEqualTo("1.2");
+        assertThat(response.getSchedule().recurrenceRule()).isEqualTo(rrule);
     }
 
     @Test
@@ -91,8 +94,10 @@ public class MedicationProfileServiceUnitTest {
 
         CreateMedicationPack pack = new CreateMedicationPack("30",7);
 
+        final String rrule = "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0";
+
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0","15.06.2026", pack);
+                rrule,"15.06.2026", pack);
 
         when(profileRepository.findProfileById(any(String.class)))
                 .thenReturn(Optional.of(snubProfileEntity));
@@ -112,8 +117,9 @@ public class MedicationProfileServiceUnitTest {
     void shouldUpdateMedication_Profile_thenSaveIt(){
 
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
+        final String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0","15.06.2026");
+                rrule,"10.06.2026");
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -141,8 +147,9 @@ public class MedicationProfileServiceUnitTest {
     void shouldUpdateScheduleRule_thenSaveIt(){
 
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
+        final String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0","15.06.2026");
+                rrule,"15.06.2026");
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -152,8 +159,9 @@ public class MedicationProfileServiceUnitTest {
         when(medicationRepository.getMedicationProfileById(any(String.class)))
                 .thenReturn(stubMedicationProfileEntity);
 
+        final String updateRrule = "FREQ=DAILY;BYHOUR=10,16,20;BYMINUTE=0;BYSECOND=0";
         UpdateMedicationCommand updateCmd = new UpdateMedicationCommand(null,
-                "FREQ=DAILY;BYHOUR=10,16,20;BYMINUTE=0;BYSECOND=0", null, null);
+                updateRrule, null, null);
 
         MedicationProfileResponse response = medicationProfileService
                 .updateMedicationProfile(stubMedicationProfileEntity.getId(), updateCmd);
@@ -161,12 +169,11 @@ public class MedicationProfileServiceUnitTest {
         verify(medicationRepository).saveMedicationProfile(any(MedicationProfileEntity.class));
 
         assertThat(response).isNotNull();
-
         assertThat(LocalDateTime.parse(response.getSchedule().starTime()).getHour())
                 .isEqualTo(10);
         assertThat(response.getSchedule()
                 .recurrenceRule())
-                .isEqualTo("FREQ=DAILY;BYHOUR=10,16,20;BYMINUTE=0;BYSECOND=0");
+                .isEqualTo(updateRrule);
     }
 
     @Test
@@ -226,8 +233,10 @@ public class MedicationProfileServiceUnitTest {
     void shouldUpdateScheduleEvent_thenSaveIt(){
 
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
+
+        final String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0","15.06.2026");
+                rrule,"10.06.2026");
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -237,14 +246,14 @@ public class MedicationProfileServiceUnitTest {
         ScheduleEventEntity stubScheduleEvent = stubMedicationProfileEntity
                 .getMedicationSchedule().getScheduleEvents().getFirst();
 
-        when(medicationRepository.getScheduleEventById(any(String.class)))
+        when(medicationRepository.getScheduleEventById(any()))
                 .thenReturn(stubScheduleEvent);
 
         Map<String, String> updateEventInput = new HashMap<>();
         updateEventInput.put("action", "TAKEN");
 
         ScheduleEventResponse response = scheduleEventService
-                .updateScheduleEvent(stubScheduleEvent.getId(),updateEventInput);
+                .updateScheduleEvent(stubScheduleEvent.getId(), updateEventInput);
 
         verify(medicationRepository).saveScheduleEvent(any(ScheduleEventEntity.class));
         verify(medicationRepository).saveMedicationProfile(any(MedicationProfileEntity.class));
@@ -252,6 +261,7 @@ public class MedicationProfileServiceUnitTest {
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo("TAKEN");
         assertThat(response.getTakenAt()).isNotNull();
-        assertThat(stubMedicationProfileEntity.getMedicationSchedule().getTakenQuantity().toString()).isEqualTo("1.2");
+        assertThat(stubMedicationProfileEntity.getMedicationSchedule()
+                .getTakenQuantity().toString()).isEqualTo("1.2");
     }
 }

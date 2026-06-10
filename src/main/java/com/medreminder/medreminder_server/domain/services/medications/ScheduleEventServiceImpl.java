@@ -34,16 +34,25 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         LocalDateTime now = LocalDateTime.now(ZoneId.of(schedule.getTimeZone()));
 
         final int MAX_EXPANSION_DAY = 7;
-        List<LocalDateTime> times = generateSchedulesDateTime(schedule,
-                MAX_EXPANSION_DAY)
-                .stream()
-                .sorted()
-                .toList();
+//        When creating, we need to check if we are expanding or starting new.
+        final LocalDateTime dateTimeFrom = schedule.getLastExpandedUntil()
+                != null ? schedule.getLastExpandedUntil().toLocalDate().atStartOfDay()
+                : schedule.getStartDate().atStartOfDay();
+
+        List<LocalDateTime> events = generateSchedulesEventDateTime(
+                schedule.getRecurrenceRule(),
+                dateTimeFrom,
+                schedule.getTimeZone(),
+                MAX_EXPANSION_DAY
+        ).stream().sorted().toList();
 
         //  Get the first event from the list and use it as the start time.
-        schedule.updateStartTime(times.getFirst());
+        schedule.updateStartTime(events.getFirst());
 
-        return times
+//        Get the last event from the list at the LastExpandedUntil.
+        schedule.updateLastExpandedUntil(events.getLast());
+
+        return events
         .stream()
         .filter(dateTime -> dateTime.isAfter(now))
                 .map((date)-> new ScheduleEvent(null,
@@ -54,7 +63,6 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
     @Override
     public List<ScheduleEvent> updateScheduleEventsRule(MedicationSchedule schedule) {
-
         LocalDateTime now = LocalDateTime.now(ZoneId.of(schedule.getTimeZone()));
 
 //      Collect all the pending event into list for deletion.
@@ -62,20 +70,33 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 .getScheduleEvents()
                 .stream()
                 .filter(event-> event.getStatus().equals("PENDING"))
+                .sorted(Comparator.comparing(ScheduleEvent::getScheduleAt))
                 .collect(Collectors.toCollection(
-                        ()-> new TreeSet<>(Comparator.comparing(event -> event
+                        () -> new TreeSet<>(Comparator.comparing(event -> event
                                 .getScheduleAt().toLocalDate()))
                 ));
 
-        List<LocalDateTime> times = generateSchedulesDateTime(schedule, pendingEvents.size())
+        final int MAX_EXPANSION_DAY = pendingEvents.size();
+        final LocalDateTime dateTimeFrom = pendingEvents
                 .stream()
-                .sorted()
-                .toList();
+                .findFirst()
+                .map(event -> event.getScheduleAt().toLocalDate().atStartOfDay())
+                .orElse(schedule.getStartDate().atStartOfDay());
+
+        List<LocalDateTime> updatedEvents = generateSchedulesEventDateTime(
+                schedule.getRecurrenceRule(),
+                dateTimeFrom,
+                schedule.getTimeZone(),
+                MAX_EXPANSION_DAY
+        ).stream().sorted().toList();
 
         //  Get the first event from the list and use it as the start time.
-        schedule.updateStartTime(times.getFirst());
+        schedule.updateStartTime(updatedEvents.getFirst());
 
-        return  times
+//        Get the last event from the list at the LastExpandedUntil.
+        schedule.updateLastExpandedUntil(updatedEvents.getLast());
+
+        return  updatedEvents
                 .stream()
                 .filter(dateTime -> dateTime.isAfter(now))
                 .map((date)-> new ScheduleEvent(null,
@@ -234,24 +255,21 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         return response;
     }
 
-    private List<LocalDateTime> generateSchedulesDateTime(MedicationSchedule schedule,
-                                                          int expansionWindowDays) {
-        ZoneId zoneId = ZoneId.of(schedule.getTimeZone());
+    private List<LocalDateTime> generateSchedulesEventDateTime(String rrule,
+                                                               LocalDateTime eventDateFrom,
+                                                               String timeZone,
+                                                               int expansionWindowDays) {
 
-        LocalDateTime startDateTime = schedule.getStartDate()
-                .atStartOfDay().atZone(zoneId).toLocalDateTime();
+        ZoneId zoneId = ZoneId.of(timeZone);
 
-        LocalDateTime windowStart = schedule.getLastExpandedUntil() != null ?
-                schedule.getLastExpandedUntil().toLocalDate().atStartOfDay().atZone(zoneId).toLocalDateTime()
-                : startDateTime;
+        LocalDateTime windowStart = eventDateFrom
+                .toLocalDate().atStartOfDay().atZone(zoneId).toLocalDateTime();
 
-        LocalDateTime windowEnd = windowStart.plusDays(expansionWindowDays - 1)
+        LocalDateTime windowEnd = windowStart.plusDays(expansionWindowDays)
                 .toLocalDate()
                 .atTime(23, 59, 59);
 
-        schedule.updateLastExpandedUntil(windowEnd);
-
-        Recur<LocalDateTime> recur = new Recur<>(schedule.getRecurrenceRule());
+        Recur<LocalDateTime> recur = new Recur<>(rrule);
 
         return recur.getDates(windowStart, windowStart, windowEnd);
     }
