@@ -25,6 +25,9 @@ public class MedicationProfileEntity {
 
     private String note;
 
+    @Column(name = "medication_reason")
+    private String medicationReason;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "profile_id")
@@ -65,10 +68,12 @@ public class MedicationProfileEntity {
     public MedicationProfileEntity(String id,
                                    boolean isActive,
                                    String note,
+                                   String medicationReason,
                                    ProfileEntity profile) {
         this.id = id;
         this.isActive = isActive;
         this.note = note;
+        this.medicationReason = medicationReason;
         this.profile = profile;
     }
 
@@ -82,6 +87,10 @@ public class MedicationProfileEntity {
 
     public String getNote() {
         return note;
+    }
+
+    public String getMedicationReason() {
+        return medicationReason;
     }
 
     public MedicationEntity getMedication() { return medication; }

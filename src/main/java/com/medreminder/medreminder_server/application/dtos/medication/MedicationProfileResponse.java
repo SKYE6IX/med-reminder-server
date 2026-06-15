@@ -9,6 +9,7 @@ public class MedicationProfileResponse {
     private String medicationUnit;
     private String status;
     private String note;
+    private String medicationReason;
     private PackResponse pack;
     private ProfileResponse profile;
     private MedScheduleResponse schedule;
@@ -20,12 +21,14 @@ public class MedicationProfileResponse {
                                      String medicationName,
                                      String medicationUnit,
                                      String status,
-                                     String note) {
+                                     String note,
+                                     String medicationReason) {
         this.id = id;
         this.medicationName = medicationName;
         this.medicationUnit = medicationUnit;
         this.status = status;
         this.note = note;
+        this.medicationReason = medicationReason;
     }
 
     public String getId() {
@@ -46,6 +49,10 @@ public class MedicationProfileResponse {
 
     public String getNote() {
         return note;
+    }
+
+    public String getMedicationReason() {
+        return medicationReason;
     }
 
     public ProfileResponse getProfile() {

@@ -76,6 +76,7 @@ public class MedicationScheduleEventsJobUnitTest {
                 null,
                 true,
                 cmd.getMedicationNote(),
+                null,
                 null
         );
         stubMedicationProfile.setMedication(medicationMapper.toEntity(stubMed,stubMedicationProfile));

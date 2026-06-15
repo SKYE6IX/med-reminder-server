@@ -19,6 +19,7 @@ public class MedicationMapper {
                 medicationProfile.getId(),
                 medicationProfile.isActive(),
                 medicationProfile.getNote(),
+                medicationProfile.getMedicationReason(),
                 profileEntity
         );
 
@@ -41,22 +42,13 @@ public class MedicationMapper {
 
         if( medication == null ) return null;
 
-        MedicationEntity me = new MedicationEntity(
+        return new MedicationEntity(
                 medication.getId(),
                 medication.getName(),
-                medication.getUnitType().name(),
+                medication.getUnitType().toString(),
+                medication.getMeasurement().toString(),
                 mpe
         );
-
-        MeasurementUnitEntity measurementUnitEntity = new MeasurementUnitEntity(
-                medication.getMeasurementUnit().getId(),
-                medication.getMeasurementUnit().getName().name(),
-                medication.getMeasurementUnit().getSymbol(),
-                me
-        );
-
-        me.setMeasurementUnit(measurementUnitEntity);
-        return me;
     }
 
     public MedicationScheduleEntity toEntity(MedicationSchedule medicationSchedule,
@@ -120,7 +112,8 @@ public class MedicationMapper {
        MedicationProfile dmp = new MedicationProfile(
                 mpe.getId(),
                 mpe.isActive(),
-                mpe.getNote()
+                mpe.getNote(),
+               mpe.getMedicationReason()
            );
 
        dmp.addMedication(toDomain(mpe.getMedication()));
@@ -139,17 +132,11 @@ public class MedicationMapper {
 
         if(medicationEntity == null) return null;
 
-        Medication domainMedication =  new Medication(
+        return new Medication(
                 medicationEntity.getId(),
                 medicationEntity.getName(),
-                Unit.valueOf(medicationEntity.getUnitType()));
-
-        MeasurementUnit measurementUnit = new MeasurementUnit(medicationEntity.getMeasurementUnit().getId(),
-                Measurement.valueOf(medicationEntity.getMeasurementUnit().getName()));
-
-        domainMedication.addMeasurementUnit(measurementUnit);
-
-        return domainMedication;
+                Unit.valueOf(medicationEntity.getUnitType()),
+                Measurement.valueOf(medicationEntity.getMeasurement()));
     }
 
     public MedicationSchedule toDomain(MedicationScheduleEntity mse){

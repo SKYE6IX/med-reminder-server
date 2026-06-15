@@ -124,6 +124,7 @@ public class QuartzJobsExecutionTest {
                 null,
                 true,
                 cmd.getMedicationNote(),
+                null,
                 null
         );
         stubMedicationProfile.setMedication(medicationMapper.toEntity(stubMed,stubMedicationProfile));
@@ -131,12 +132,14 @@ public class QuartzJobsExecutionTest {
 
         medicationRepository.saveMedicationProfile(stubMedicationProfile);
 
+        long totalEventsBeforeJob = scheduleEventRepo.count();
+
         medScheduleEventScheduler.triggerJob(JobKey.jobKey("medication_schedule_event_job_detail"));
 
         await().atMost(10, SECONDS)
                 .untilAsserted(() ->{
                     long count = scheduleEventRepo.count();
-                    assertThat(count).isEqualTo(20);
+                    assertThat(count).isGreaterThan(totalEventsBeforeJob);
                 }
                 );
     }

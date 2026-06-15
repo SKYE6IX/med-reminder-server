@@ -2,7 +2,6 @@ package com.medreminder.medreminder_server.infrastructure.entity.medications;
 
 
 import jakarta.persistence.*;
-import jakarta.persistence.CascadeType;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
@@ -20,12 +19,7 @@ public class MedicationEntity {
     @Column(name = "unit_type")
     private String unitType;
 
-    @OneToOne(
-            mappedBy = "medication",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    private MeasurementUnitEntity measurementUnit;
+    private String measurement;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medication_profile_id")
@@ -46,10 +40,12 @@ public class MedicationEntity {
     public MedicationEntity(String id,
                             String name,
                             String unitType,
+                            String measurement,
                             MedicationProfileEntity medicationProfile) {
         this.id = id;
         this.name = name;
         this.unitType = unitType;
+        this.measurement = measurement;
         this.medicationProfile = medicationProfile;
     }
 
@@ -65,15 +61,11 @@ public class MedicationEntity {
         return unitType;
     }
 
-    public MeasurementUnitEntity getMeasurementUnit() {
-        return measurementUnit;
+    public String getMeasurement() {
+        return measurement;
     }
 
     public MedicationProfileEntity getMedicationProfile() {
         return medicationProfile;
-    }
-
-    public void setMeasurementUnit(MeasurementUnitEntity measurementUnit) {
-        this.measurementUnit = measurementUnit;
     }
 }

@@ -240,7 +240,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 "",
                 mpe.getId(),
                 managedScheduleEvent.getDosage().stripTrailingZeros().toPlainString(),
-                medication.getMeasurementUnit().getSymbol(),
+                medication.getMeasurement(),
                 managedScheduleEvent.getScheduleAt().toString());
 
         response.setProfile(new ProfileResponse(

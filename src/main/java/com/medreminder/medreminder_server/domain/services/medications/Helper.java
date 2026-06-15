@@ -17,17 +17,10 @@ import java.util.stream.Collectors;
 
 public class Helper {
     public static Medication createMedication(CreateMedicationCommand cmd) {
-
-        Medication medication = new Medication(null,
+        return new Medication(null,
                 cmd.getMedicationName(),
-                Unit.valueOf(cmd.getMedicationUnit()));
-
-        MeasurementUnit measurementUnit = new MeasurementUnit(null,
+                Unit.valueOf(cmd.getMedicationUnit()),
                 Measurement.valueOf(cmd.getMedicationMeasurement()));
-
-        medication.addMeasurementUnit(measurementUnit);
-
-        return medication;
     }
 
     public static MedicationSchedule createMedicationSchedule(CreateMedSchedule schedule) {
@@ -62,63 +55,9 @@ public class Helper {
         return Optional.of(medicationPack);
     }
 
-    public static MedicationProfileResponse getMedicationProfileResponse(MedicationProfileEntity smp) {
-        return getMedicationProfileResponse(smp, smp.getProfile());
-    }
-
-    public static MedicationProfileResponse getMedicationProfileResponse(MedicationProfileEntity smp,
-                                                                   ProfileEntity profileEntity) {
-        String status = smp.isActive() ? "active" : "in_active";
-
-//        Create a new Medication profile response object
-        MedicationProfileResponse response = new MedicationProfileResponse(
-                smp.getId(),
-                smp.getMedication().getName(),
-                smp.getMedication().getUnitType(),
-                status,
-                smp.getNote());
-
-//        Attach the selected profile to the response
-        response.setProfile(new ProfileResponse(
-                profileEntity.getId(),
-                profileEntity.getAvatarUrl(),
-                profileEntity.getName(),
-                profileEntity.getRelation(),
-                profileEntity.isSelf()));
-
-//        Acquire the schedule and create an object and attached it to the response
-        MedicationScheduleEntity schedule = smp.getMedicationSchedule();
-
-        response.setSchedule(new MedScheduleResponse(
-                schedule.getId(),
-                schedule.getDoseQuantity().stripTrailingZeros().toPlainString(),
-                smp.getMedication().getMeasurementUnit().getSymbol(),
-                schedule.getRecurrenceRule(),
-                schedule.getStartTime().toString(),
-                schedule.getStartDate().toString(),
-                schedule.getTakenQuantity().stripTrailingZeros().toPlainString())
-        );
-
-        if(!smp.getMedicationPacks().isEmpty()){
-            smp.getMedicationPacks()
-                    .stream()
-                    .filter(packEntity -> packEntity.getStatus().equals("ACTIVE"))
-                    .findFirst()
-                    .ifPresent(medicationPack -> {
-                        PackResponse packResponse = new PackResponse(
-                                medicationPack.getTotalQuantity().stripTrailingZeros().toPlainString(),
-                                medicationPack.getCurrentQuantity().stripTrailingZeros().toPlainString(),
-                                medicationPack.getReminderDays()
-                                );
-                        response.setPack(packResponse);
-                    });
-        }
-        return response;
-    }
-
     public static void syncMedicationProfiles(List<MedicationProfile> domainMedicationProfiles,
-                                        ProfileEntity managedProfile) {
-     final MedicationMapper medicationMapper = new MedicationMapper();
+                                              ProfileEntity managedProfile) {
+        final MedicationMapper medicationMapper = new MedicationMapper();
 
         Map<String, MedicationProfileEntity> existingMedicationProfiles = new HashMap<>();
 
@@ -158,7 +97,7 @@ public class Helper {
     }
 
     public static void syncMedicationPack(MedicationProfileEntity managedMedicationProfile,
-                                    MedicationPack medicationPack) {
+                                          MedicationPack medicationPack) {
         managedMedicationProfile.getMedicationPacks()
                 .stream()
                 .filter(mpe->  mpe.getId().equals(medicationPack.getId()))
@@ -167,8 +106,8 @@ public class Helper {
     }
 
     public static MedicationPack getPackByStatus(MedicationProfileEntity managedMedicationProfile,
-                                           String status,
-                                           MedicationMapper medicationMapper) {
+                                                 String status,
+                                                 MedicationMapper medicationMapper) {
         return  managedMedicationProfile
                 .getMedicationPacks()
                 .stream()
@@ -176,5 +115,59 @@ public class Helper {
                 .findFirst()
                 .map(medicationMapper::toDomain)
                 .orElse(null);
+    }
+
+    public static MedicationProfileResponse getMedicationProfileResponse(MedicationProfileEntity smp) {
+        return getMedicationProfileResponse(smp, smp.getProfile());
+    }
+
+    public static MedicationProfileResponse getMedicationProfileResponse(MedicationProfileEntity smp,
+                                                                   ProfileEntity profileEntity) {
+        String status = smp.isActive() ? "active" : "in_active";
+
+//        Create a new Medication profile response object
+        MedicationProfileResponse response = new MedicationProfileResponse(
+                smp.getId(),
+                smp.getMedication().getName(),
+                smp.getMedication().getUnitType(),
+                status,
+                smp.getNote(),
+                smp.getMedicationReason());
+
+//        Attach the selected profile to the response
+        response.setProfile(new ProfileResponse(
+                profileEntity.getId(),
+                profileEntity.getAvatarUrl(),
+                profileEntity.getName(),
+                profileEntity.getRelation(),
+                profileEntity.isSelf()));
+
+//        Acquire the schedule and create an object and attached it to the response
+        MedicationScheduleEntity schedule = smp.getMedicationSchedule();
+        response.setSchedule(new MedScheduleResponse(
+                schedule.getId(),
+                schedule.getDoseQuantity().toPlainString(),
+                smp.getMedication().getMeasurement(),
+                schedule.getRecurrenceRule(),
+                schedule.getStartTime().toString(),
+                schedule.getStartDate().toString(),
+                schedule.getTakenQuantity().toPlainString())
+        );
+
+        if(!smp.getMedicationPacks().isEmpty()){
+            smp.getMedicationPacks()
+                    .stream()
+                    .filter(packEntity -> packEntity.getStatus().equals("ACTIVE"))
+                    .findFirst()
+                    .ifPresent(medicationPack -> {
+                        PackResponse packResponse = new PackResponse(
+                                medicationPack.getTotalQuantity().stripTrailingZeros().toPlainString(),
+                                medicationPack.getCurrentQuantity().stripTrailingZeros().toPlainString(),
+                                medicationPack.getReminderDays()
+                                );
+                        response.setPack(packResponse);
+                    });
+        }
+        return response;
     }
 }

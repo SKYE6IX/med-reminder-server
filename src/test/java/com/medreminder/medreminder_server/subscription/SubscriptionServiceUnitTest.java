@@ -4,12 +4,14 @@ package com.medreminder.medreminder_server.subscription;
 import com.medreminder.medreminder_server.application.dtos.subscription.PaidSubscriptionRequest;
 import com.medreminder.medreminder_server.application.dtos.subscription.SubscriptionPlanResponse;
 import com.medreminder.medreminder_server.application.services.PaymentService;
+import com.medreminder.medreminder_server.domain.models.billing.BillingCycle;
 import com.medreminder.medreminder_server.domain.models.subscription.Plan;
 import com.medreminder.medreminder_server.domain.models.subscription.PlanType;
 import com.medreminder.medreminder_server.domain.models.subscription.Subscription;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionRepository;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionService;
+import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionServiceHelper;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionServiceImpl;
 import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionEntity;
@@ -53,9 +55,6 @@ public class SubscriptionServiceUnitTest {
         SubscriptionMapper subscriptionMapper = new SubscriptionMapper();
         subscriptionService = new SubscriptionServiceImpl(
                 subscriptionRepository,userRepository,paymentService,subscriptionMapper);
-
-        when(paymentService.processNewPayment(any(),any()))
-                .thenReturn(SubscriptionServiceStubFactory.createMockSuccessfulPayment());
     }
 
     @Test
@@ -87,6 +86,9 @@ public class SubscriptionServiceUnitTest {
         when(subscriptionRepository.saveSubscription(any(SubscriptionEntity.class)))
                 .thenReturn(stubSubscriptionEntity);
 
+        when(paymentService.processNewPayment(any(),any()))
+                .thenReturn(SubscriptionServiceStubFactory.createMockSuccessfulPayment());
+
         SubscriptionPlanResponse response = subscriptionService
                 .createPaidSubscriptionPlan(request, stubUserEntity.getId());
 
@@ -95,6 +97,17 @@ public class SubscriptionServiceUnitTest {
         assertThat(response.subscriptionStatus()).isEqualTo("ACTIVE");
         assertThat(response.maxMedications()).isNull();
         assertThat(response.planType()).isEqualTo(PlanType.PRO);
+    }
+
+    @Test
+    void shouldReturnTheRightBillingAmount(){
+
+        String annualBilling = SubscriptionServiceHelper.getBillingCycleAmount(BillingCycle.ANNUAL);
+
+        String monthlyBilling = SubscriptionServiceHelper.getBillingCycleAmount(BillingCycle.MONTHLY);
+
+        assertThat(annualBilling).isEqualTo("3049.80");
+        assertThat(monthlyBilling).isEqualTo("299.00");
     }
 }
 

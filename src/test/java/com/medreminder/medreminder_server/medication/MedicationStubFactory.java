@@ -50,18 +50,12 @@ public class MedicationStubFactory {
 
     public static Medication createMedication(CreateMedicationCommand cmd) {
 
-        Medication medication = new Medication(
+        return new Medication(
                 null,
                 cmd.getMedicationName(),
-                Unit.valueOf(cmd.getMedicationUnit())
+                Unit.valueOf(cmd.getMedicationUnit()),
+                Measurement.valueOf(cmd.getMedicationMeasurement())
         );
-
-        MeasurementUnit measurementUnit = new MeasurementUnit(
-                null, Measurement.valueOf(cmd.getMedicationMeasurement()));
-
-        medication.addMeasurementUnit(measurementUnit);
-
-        return medication;
     }
 
     public static MedicationSchedule createMedicationSchedule(CreateMedicationCommand cmd) {
@@ -94,6 +88,7 @@ public class MedicationStubFactory {
                 defaultId,
                 true,
                 cmd.getMedicationNote(),
+                null,
                 snubProfileEntity
         );
         mpe.setMedication(medicationMapper.toEntity(createMedication(cmd),mpe));

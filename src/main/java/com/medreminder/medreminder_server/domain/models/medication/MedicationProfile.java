@@ -14,6 +14,8 @@ public class MedicationProfile {
 
     private String note;
 
+    private final String medicationReason;
+
     private Profile  profile;
 
     private Medication medication;
@@ -24,10 +26,12 @@ public class MedicationProfile {
 
     public MedicationProfile(String id,
                              boolean isActive,
-                             String note) {
+                             String note,
+                             String medicationReason) {
         this.id = id;
         this.isActive = isActive;
         this.note = note;
+        this.medicationReason = medicationReason;
     }
 
     public String getId() {
@@ -40,6 +44,10 @@ public class MedicationProfile {
 
     public String getNote() {
         return note;
+    }
+
+    public String getMedicationReason() {
+        return medicationReason;
     }
 
     public Profile getProfile() {

@@ -83,6 +83,7 @@ public class MedicationProfileServiceUnitTest {
         assertThat(response).isNotNull();
         assertThat(response.getMedicationName()).isEqualTo(cmd.getMedicationName());
         assertThat(response.getMedicationUnit()).isEqualTo(cmd.getMedicationUnit());
+        assertThat(response.getSchedule().measurement()).isEqualTo(cmd.getMedicationMeasurement());
         assertThat(response.getSchedule().dosage()).isEqualTo("1.2");
         assertThat(response.getSchedule().recurrenceRule()).isEqualTo(rrule);
     }

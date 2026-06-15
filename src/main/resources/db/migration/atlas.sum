@@ -1,4 +1,4 @@
-h1:ukweo1NFkH6kBjiaN+kh2RqB9hSoj0gzrjsqjs67nNI=
+h1:3evrgrwOBhrnRijYXgfD/Abjv6CAsHK4+9U40eUSV10=
 V20260228073530__init.sql h1:piXArQxcJfIl7pYmCksBYrIt7/wLOZlA2GLKur4R25o=
 V20260302125020__update_id_field.sql h1:WNMv2fnX/SKEPIp1ozI+J8iZgdamH5XD3O7KwXP7vvE=
 V20260303101307__update_email_field.sql h1:YdfzWuxYWKQQQOrDqVr+gIM2EgxMwuyTfe/bg+GzTso=
@@ -34,3 +34,5 @@ V20260601163425__updated_billing.sql h1:Li/qSBo+NpiVy2a5qqS+wHDysLl4o9BJlQl5S5dR
 V20260602095606__update_subscription_period_field.sql h1:ejCllkKKgbPG/5eUpRcmALTN+QXe9TSTtgyN9uHblR8=
 V20260605164621__added_time_zone_to_subscription.sql h1:vbRZnd1xk4Wx4oT5o9OBWz2+Luy7+hyei1eCRfay/rs=
 V20260606074833__added_payment_retry_flags.sql h1:ZYwRVFStz4bUt4qvmB/CkVrDEM1EdeTszI91TakMcpI=
+V20260611105325__remove_medication_measurement.sql h1:OtESqQNhOH8B542x9pRKJ6Uz36wPze1f9QbNuAsjSXA=
+V20260615093241__added_medication_reason_field.sql h1:mUnGs/DNLkYSCwFzA2GabldxtSycH/cI7J+CUK2fXF0=

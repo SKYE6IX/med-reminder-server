@@ -60,15 +60,21 @@ public class SubscriptionServiceHelper {
         if (billingCycle.equals(BillingCycle.ANNUAL)){
             BigDecimal amount = new BigDecimal(annualCost);
             BigDecimal paddedAmount = amount.setScale(2, RoundingMode.HALF_UP);
-            BigDecimal discount = paddedAmount.multiply(new BigDecimal("0.15"));
+
+            BigDecimal discount = paddedAmount
+                    .multiply(new BigDecimal("0.15"))
+                    .setScale(2, RoundingMode.HALF_UP);
+
             BigDecimal finalAmount = paddedAmount.subtract(discount);
-            return finalAmount.toPlainString();
+
+            return finalAmount.toString();
 
         } else if(billingCycle.equals(BillingCycle.MONTHLY)) {
             BigDecimal amount = new BigDecimal(monthlyCost);
             BigDecimal paddedAmount = amount.setScale(2, RoundingMode.HALF_UP);
-            return paddedAmount.toPlainString();
+            return paddedAmount.toString();
         }
+
         return null;
     }
 }

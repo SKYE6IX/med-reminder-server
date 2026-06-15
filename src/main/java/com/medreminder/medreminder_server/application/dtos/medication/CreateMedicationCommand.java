@@ -14,6 +14,7 @@ public class CreateMedicationCommand {
     private String medicationUnit;
     private String medicationMeasurement;
     private String medicationNote;
+    private String medicationReason;
     private CreateMedSchedule schedule;
     private CreateMedicationPack medicationPack;
 
@@ -26,6 +27,7 @@ public class CreateMedicationCommand {
         this.medicationUnit = builder.medicationUnit;
         this.medicationMeasurement = builder.medicationMeasurement;
         this.medicationNote = builder.medicationNote;
+        this.medicationReason = builder.medicationReason;
         this.schedule = builder.schedule;
         this.medicationPack = builder.medicationPack;
     }
@@ -50,6 +52,10 @@ public class CreateMedicationCommand {
         return medicationNote;
     }
 
+    public String getMedicationReason() {
+        return medicationReason;
+    }
+
     public CreateMedSchedule getSchedule() {
         return schedule;
     }
@@ -65,6 +71,7 @@ public class CreateMedicationCommand {
         private String medicationUnit;
         private String medicationMeasurement;
         private String medicationNote;
+        private String medicationReason;
         private CreateMedSchedule schedule;
         private CreateMedicationPack medicationPack;
 
@@ -93,6 +100,12 @@ public class CreateMedicationCommand {
             this.medicationNote = medicationNote;
             return this;
         }
+
+        public Builder medicationReason(String medicationReason) {
+            this.medicationReason = medicationReason;
+            return this;
+        }
+
         public Builder schedule(CreateMedSchedule schedule) {
             this.schedule = schedule;
             return this;
