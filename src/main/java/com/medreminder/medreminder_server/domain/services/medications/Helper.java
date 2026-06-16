@@ -146,12 +146,12 @@ public class Helper {
         MedicationScheduleEntity schedule = smp.getMedicationSchedule();
         response.setSchedule(new MedScheduleResponse(
                 schedule.getId(),
-                schedule.getDoseQuantity().toPlainString(),
+                schedule.getDoseQuantity().stripTrailingZeros().toPlainString(),
                 smp.getMedication().getMeasurement(),
                 schedule.getRecurrenceRule(),
                 schedule.getStartTime().toString(),
                 schedule.getStartDate().toString(),
-                schedule.getTakenQuantity().toPlainString())
+                schedule.getTakenQuantity().stripTrailingZeros().toPlainString())
         );
 
         if(!smp.getMedicationPacks().isEmpty()){

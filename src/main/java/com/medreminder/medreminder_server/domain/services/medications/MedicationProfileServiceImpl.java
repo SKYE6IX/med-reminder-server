@@ -58,10 +58,9 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
 
 //        Start Creating New Medication Profile
         MedicationProfile medicationProfile = new MedicationProfile(null,
-                true, cmd.getMedicationNote(), null);
+                true, cmd.getMedicationNote(),cmd.getMedicationReason());
         Medication medication = Helper.createMedication(cmd);
         MedicationSchedule medicationSchedule = Helper.createMedicationSchedule(cmd.getSchedule());
-
 //        Create schedule events
         List<ScheduleEvent> scheduleEvents = scheduleEventService.createScheduleEvents(medicationSchedule);
 
