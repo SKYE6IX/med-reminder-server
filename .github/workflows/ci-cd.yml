@@ -53,7 +53,7 @@ jobs:
           
           docker compose -f med-reminder-compose.yml pull server
           
-          docker compose -f med-reminder-compose.yml --env-file .env.med-reminder up server  -d
+          docker compose -f med-reminder-compose.yml --env-file .env.med-reminder up server -d
           
           docker image prune -f
           EOF
