@@ -1,0 +1,24 @@
+services:
+  medremindr-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=main
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_URL=${DATABASE_URL}
+      - PGSSLROOTCERT=${PGSSLROOTCERT}
+      - MED_REMINDER_JWT_KEY=${MED_REMINDER_JWT_KEY}
+      - MED_REMINDER_APPLE_CLIENT_ID=${MED_REMINDER_APPLE_CLIENT_ID}
+      - YC_S3_KEY_ID=${YC_S3_KEY_ID}
+      - YC_S3_SECRET_KEY=${YC_S3_SECRET_KEY}
+      - YC_S3_BUCKET=${YC_S3_BUCKET}
+      - YC_S3_REGION=${YC_S3_REGION}
+      - YC_S3_PRIVATE_ENDPOINT=${YC_S3_PRIVATE_ENDPOINT}
+      - YOOKASSA_SHOP_ID=${YOOKASSA_SHOP_ID}
+      - YOOKASSA_SECRET_KEY=${YOOKASSA_SECRET_KEY}
+    volumes:
+      - /Users/azeezabiola/.cloud-certs/root.crt:/Users/azeezabiola/.cloud-certs/root.crt:ro

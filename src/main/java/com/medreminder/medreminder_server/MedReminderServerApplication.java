@@ -15,7 +15,3 @@ public class MedReminderServerApplication {
 //TODO:
 // 1. Mailing system set up
 // 2. Add CORS so request is only accepted from the app.
-
-
-
-

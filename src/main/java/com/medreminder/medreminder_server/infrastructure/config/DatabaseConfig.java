@@ -13,7 +13,7 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@Profile("dev")
+@Profile("main")
 public class DatabaseConfig {
 
     private final Environment env;
