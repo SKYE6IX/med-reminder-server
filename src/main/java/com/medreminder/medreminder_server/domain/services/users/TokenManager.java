@@ -15,6 +15,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
+import java.util.List;
 
 public class TokenManager {
 
@@ -47,9 +48,16 @@ public class TokenManager {
     }
 
     public void revokeRefreshToken(String userId) {
-        jpaRefreshTokenRepository
-                .findByUserIdAndRevokedFalse(userId)
-                .ifPresent(this::revokeRefreshToken);
+        List <RefreshTokenEntity> refreshTokens = jpaRefreshTokenRepository
+                .findAllByUserIdAndRevokedFalse(userId);
+
+        if(!refreshTokens.isEmpty()){
+
+            refreshTokens.forEach(refreshTokenEntity ->
+                    refreshTokenEntity.setRevoked(true));
+
+            jpaRefreshTokenRepository.saveAll(refreshTokens);
+        }
     }
 
     public AuthResponse refreshToken(String token) {
@@ -93,11 +101,6 @@ public class TokenManager {
         Instant expiryTime = Instant.now().plus(REFRESH_TOKEN_EXPIRE_DAYS, ChronoUnit.DAYS);
 
         return new RefreshTokenEntity(null, hashToken, expiryTime,false, userEntity);
-    }
-
-    private void revokeRefreshToken(RefreshTokenEntity refreshTokenEntity){
-        refreshTokenEntity.setRevoked(true);
-        jpaRefreshTokenRepository.save(refreshTokenEntity);
     }
 
     private static String generateRandomToken() {

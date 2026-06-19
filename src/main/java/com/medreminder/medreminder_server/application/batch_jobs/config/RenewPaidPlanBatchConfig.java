@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 
 @Configuration
@@ -57,7 +58,7 @@ public class RenewPaidPlanBatchConfig {
     @Bean
     public JpaCursorItemReader<SubscriptionPeriodEntity> renewPaidPlanReader(
             EntityManagerFactory entityManagerFactory) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Moscow"));
 
         return new JpaCursorItemReaderBuilder<SubscriptionPeriodEntity>()
                 .name("renew_paid_plan_reader")

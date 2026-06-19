@@ -23,6 +23,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 
 @Configuration
@@ -57,9 +58,13 @@ public class MedicationScheduleEventBatchConfig {
 
     @Bean
     public JpaCursorItemReader<MedicationScheduleEntity> medScheduleEventItemReader(EntityManagerFactory entityManagerFactory){
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        LocalDate tomorrow = LocalDate.now(ZoneId.of("Europe/Moscow"))
+                .plusDays(1);
+
         LocalDateTime start = tomorrow.atStartOfDay();
         LocalDateTime end   = tomorrow.plusDays(1).atStartOfDay();
+
+
         return new JpaCursorItemReaderBuilder<MedicationScheduleEntity>()
                 .name("medication_schedule_reader")
                 .entityManagerFactory(entityManagerFactory)

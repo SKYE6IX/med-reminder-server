@@ -21,6 +21,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 
 @Configuration
@@ -55,7 +56,7 @@ public class MarkMissedDosageBatchConfig {
     public JpaCursorItemReader<ScheduleEventEntity> markMissedDosageReader(
             EntityManagerFactory entityManagerFactory) {
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Europe/Moscow"));
 
         LocalDateTime startOfToday = today.atStartOfDay();
         LocalDateTime startOfYesterday = today.minusDays(1).atStartOfDay();

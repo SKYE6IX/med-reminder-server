@@ -25,6 +25,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 
 @Configuration
@@ -59,7 +60,8 @@ public class DowngradePlanBatchConfig {
 
     @Bean
     public JpaCursorItemReader<SubscriptionPeriodEntity> downgradePlanReader(EntityManagerFactory entityManagerFactory){
-        LocalDate now = LocalDate.now();
+        LocalDate now = LocalDate.now(ZoneId.of("Europe/Moscow"));
+
         LocalDateTime startOfYesterday = now.minusDays(1).atStartOfDay();
         LocalDateTime startOfToday = now.atStartOfDay();
 

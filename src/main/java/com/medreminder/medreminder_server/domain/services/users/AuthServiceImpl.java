@@ -24,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 
@@ -72,9 +73,10 @@ public class AuthServiceImpl implements AuthService {
 //       Generate refresh token for user
         String refreshToken = tokenManager.generateRefreshToken();
 
-        newUser.updateLastLoginAt(LocalDateTime.now());
+        newUser.updateLastLoginAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
 
-        tokenManager.storeRefreshToken(refreshToken,newUser);
+        tokenManager.storeRefreshToken(refreshToken, newUser);
+
         userRepository.saveUser(newUser);
 
         return new AuthResponse(newUser.getId(), newUser.getEmail(), accessToken, refreshToken);
@@ -106,8 +108,10 @@ public class AuthServiceImpl implements AuthService {
         UserEntity loginUser = userRepository.findUserById(userPrincipal.getId())
                 .orElseThrow(()-> new UsernameNotFoundException("User not found: " + email));
 
-        loginUser.updateLastLoginAt(LocalDateTime.now());
+        loginUser.updateLastLoginAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+
         tokenManager.storeRefreshToken(refreshToken,loginUser);
+
         userRepository.saveUser(loginUser);
 
         return new AuthResponse(userPrincipal.getId(), userPrincipal.getEmail(), accessToken, refreshToken);
@@ -142,23 +146,29 @@ public class AuthServiceImpl implements AuthService {
                     newUser.getId());
             String refreshToken = tokenManager.generateRefreshToken();
 
-            newUser.updateLastLoginAt(LocalDateTime.now());
+            newUser.updateLastLoginAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+
             tokenManager.storeRefreshToken(refreshToken,newUser);
+
             userRepository.saveUser(newUser);
+
             return new AuthResponse(newUser.getId(), newUser.getEmail(), accessToken, refreshToken);
         }
-
 
 //        If user is found with the providerId, then this user exist.
         tokenManager.revokeRefreshToken(user.getId());
 
         String accessToken = tokenManager.generateAccessToken(user.getEmail(),
                 user.getId());
+
         String refreshToken = tokenManager.generateRefreshToken();
 
         user.updateLastLoginAt(LocalDateTime.now());
+
         tokenManager.storeRefreshToken(refreshToken,user);
+
         userRepository.saveUser(user);
+
         return new AuthResponse(user.getId(), user.getEmail(), accessToken, refreshToken);
     }
 

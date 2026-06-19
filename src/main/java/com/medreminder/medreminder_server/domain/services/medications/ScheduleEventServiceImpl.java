@@ -96,7 +96,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 //        Get the last event from the list at the LastExpandedUntil.
         schedule.updateLastExpandedUntil(updatedEvents.getLast());
 
-        return  updatedEvents
+        return updatedEvents
                 .stream()
                 .filter(dateTime -> dateTime.isAfter(now))
                 .map((date)-> new ScheduleEvent(null,
@@ -125,6 +125,10 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 .toDomain(managedMedicationProfile.getMedicationSchedule());
 
         if(domainScheduleEvent.getStatus().equals("TAKEN")){
+
+            final String timeZone = managedScheduleEvent
+                    .getMedicationSchedule()
+                    .getTimeZone();
 
 //          Track the amount that get taken and update medication schedule.
             BigDecimal amountTaken = domainMedicationSchedule.getTakenQuantity()
@@ -160,7 +164,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
                             pendingMedicationPack.updateStatus(MedicationPackStatus.ACTIVE);
                             pendingMedicationPack.updateCurrentQuantity(newRemainingQuantity);
-                            pendingMedicationPack.updateStartedAt(LocalDateTime.now());
+                            pendingMedicationPack.updateStartedAt(LocalDateTime.now(ZoneId.of(timeZone)));
                             Helper.syncMedicationPack(managedMedicationProfile, pendingMedicationPack);
                         }
                     } else {
@@ -170,11 +174,8 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 }
             }
 
-            final LocalDateTime takenAt = LocalDateTime.now()
-                    .atZone(ZoneId.of(managedScheduleEvent
-                            .getMedicationSchedule()
-                            .getTimeZone()))
-                    .toLocalDateTime();
+            final LocalDateTime takenAt = LocalDateTime.now(ZoneId.of(timeZone));
+
             domainScheduleEvent.updateTakenAt(takenAt);
         }
 
@@ -259,7 +260,6 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                                                                LocalDateTime eventDateFrom,
                                                                String timeZone,
                                                                int expansionWindowDays) {
-
         ZoneId zoneId = ZoneId.of(timeZone);
 
         LocalDateTime windowStart = eventDateFrom

@@ -22,6 +22,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -89,8 +90,8 @@ public class AuthServiceUnitTest {
         when(userRepository.findUserById(any(String.class)))
                 .thenReturn(Optional.of(userEntity));
 
-        when(jpaRefreshTokenRepository.findByUserIdAndRevokedFalse(any(String.class)))
-                .thenReturn(Optional.empty());
+        when(jpaRefreshTokenRepository.findAllByUserIdAndRevokedFalse(any(String.class)))
+                .thenReturn(List.of());
 
         ResetPasswordResponse response = authService
                 .resetPassword(testUser.getId(),"testhashpassword", "testnewpassword");

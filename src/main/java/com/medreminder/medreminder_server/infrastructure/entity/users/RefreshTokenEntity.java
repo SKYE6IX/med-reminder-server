@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Entity(name = "REFRESH_TOKEN")
+@Entity(name = "REFRESH_TOKENS")
 public class RefreshTokenEntity {
 
     @Id

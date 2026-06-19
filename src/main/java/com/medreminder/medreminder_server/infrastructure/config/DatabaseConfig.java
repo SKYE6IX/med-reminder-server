@@ -47,4 +47,5 @@ public class DatabaseConfig {
                 .locations("classpath:db/migration")
                 .load();
     }
+
 }

@@ -134,7 +134,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         subscriptionEntity.updateStatus(SubscriptionStatus.CANCELED.toString());
         subscriptionEntity.updateStartedAt(null);
-        subscriptionEntity.updateCanceledAt(LocalDateTime.now());
+        subscriptionEntity.updateCanceledAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
 
         userEntity.updatePaymentMethodId(null);
 

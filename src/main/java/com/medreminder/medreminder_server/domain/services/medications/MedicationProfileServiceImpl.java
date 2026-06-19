@@ -11,6 +11,7 @@ import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 public class MedicationProfileServiceImpl implements MedicationProfileService {
@@ -228,7 +229,7 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                 new BigDecimal(addMedicationPackRequest.totalQuantity()),
                 new BigDecimal(addMedicationPackRequest.totalQuantity()),
                 addMedicationPackRequest.reminderDays(),
-                LocalDateTime.now(),
+                LocalDateTime.now(ZoneId.of(managedMedicationProfile.getMedicationSchedule().getTimeZone())),
                 null,
                 MedicationPackStatus.ACTIVE,
                 false
@@ -272,7 +273,7 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                 new BigDecimal(refillMedicationPackRequest.totalQuantity()),
                 new BigDecimal(refillMedicationPackRequest.totalQuantity()),
                 refillMedicationPackRequest.reminderDays(),
-                isExistingActive ? null : LocalDateTime.now(),
+                isExistingActive ? null : LocalDateTime.now(ZoneId.of(managedMedicationProfile.getMedicationSchedule().getTimeZone())),
                 null,
                 isExistingActive ? MedicationPackStatus.PENDING : MedicationPackStatus.ACTIVE,
                 false
