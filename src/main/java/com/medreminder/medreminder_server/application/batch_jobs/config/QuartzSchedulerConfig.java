@@ -7,30 +7,21 @@ import com.medreminder.medreminder_server.application.batch_jobs.quartz_schedule
 import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.RenewPaidPlanScheduler;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.quartz.autoconfigure.SchedulerFactoryBeanCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
-import javax.sql.DataSource;
 import java.util.TimeZone;
 
 @Configuration
 public class QuartzSchedulerConfig {
 
+    private final String timeZone = "Europe/Moscow";
+
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean(
-            DataSource dataSource,
-            ApplicationContext context) {
-        SchedulerFactoryBean factory = new SchedulerFactoryBean();
-        factory.setDataSource(dataSource);
-        factory.setApplicationContextSchedulerContextKey("applicationContext");
-        factory.setJobFactory(new SpringBeanJobFactory());
-        factory.setOverwriteExistingJobs(true);
-        factory.setWaitForJobsToCompleteOnShutdown(true);
-        return factory;
+    public SchedulerFactoryBeanCustomizer customizer() {
+        return factory -> factory.setJobFactory(new SpringBeanJobFactory());
     }
 
     @Bean
@@ -48,7 +39,7 @@ public class QuartzSchedulerConfig {
                 .withIdentity("medication_schedule_event_trigger")
                 .withSchedule(CronScheduleBuilder
                         .cronSchedule("0 0 1 * * ?")
-                        .inTimeZone(TimeZone.getTimeZone("UTC")))
+                        .inTimeZone(TimeZone.getTimeZone(timeZone)))
                 .build();
     }
 
@@ -67,7 +58,7 @@ public class QuartzSchedulerConfig {
                 .withIdentity("downgrade_plan_trigger")
                 .withSchedule(CronScheduleBuilder
                         .cronSchedule("0 0 2 * * ?")
-                        .inTimeZone(TimeZone.getTimeZone("UTC")))
+                        .inTimeZone(TimeZone.getTimeZone(timeZone)))
                 .build();
     }
 
@@ -86,7 +77,7 @@ public class QuartzSchedulerConfig {
                 .withIdentity("renew_paid_plan_trigger")
                 .withSchedule(CronScheduleBuilder
                         .cronSchedule("0 0 7 * * ?")
-                        .inTimeZone(TimeZone.getTimeZone("UTC")))
+                        .inTimeZone(TimeZone.getTimeZone(timeZone)))
                 .build();
     }
 
@@ -105,7 +96,7 @@ public class QuartzSchedulerConfig {
                 .withIdentity("mark_missed_dosage_trigger")
                 .withSchedule(CronScheduleBuilder
                         .cronSchedule("0 0 3 * * ?")
-                        .inTimeZone(TimeZone.getTimeZone("UTC")))
+                        .inTimeZone(TimeZone.getTimeZone(timeZone)))
                 .build();
     }
 }

@@ -252,6 +252,5 @@ public class QuartzJobsExecutionTest {
                                 assertThat(event.getStatus()).isEqualTo("MISSED");
                             });
                 });
-
     };
 }

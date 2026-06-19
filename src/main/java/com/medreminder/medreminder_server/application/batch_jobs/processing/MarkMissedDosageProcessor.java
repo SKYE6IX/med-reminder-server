@@ -15,6 +15,9 @@ public class MarkMissedDosageProcessor implements ItemProcessor<ScheduleEventEnt
 
     @Override
     public ScheduleEventEntity process(ScheduleEventEntity scheduleEvent){
+
+        System.out.println("Starting processing of missed dosage: " + scheduleEvent);
+
         ScheduleEvent domainScheduleEvent = medicationMapper.toDomain(scheduleEvent);
         domainScheduleEvent.updateStatus("MISSED");
         scheduleEvent.updateScheduleEvent(domainScheduleEvent);

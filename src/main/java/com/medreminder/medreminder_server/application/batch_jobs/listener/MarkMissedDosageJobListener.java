@@ -18,9 +18,7 @@ public class MarkMissedDosageJobListener implements JobExecutionListener {
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             long count = jobExecution.getStepExecutions().stream()
                     .mapToLong(StepExecution::getWriteCount).sum();
-
             log.info("Mark Missed Dosage job completed. {} dosage missed.", count);
-
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("Mark Missed Dosage job FAILED: {}", jobExecution.getAllFailureExceptions());
             // Send alert to Slack / PagerDuty / email here

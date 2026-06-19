@@ -54,7 +54,9 @@ public class MarkMissedDosageBatchConfig {
     @Bean
     public JpaCursorItemReader<ScheduleEventEntity> markMissedDosageReader(
             EntityManagerFactory entityManagerFactory) {
+
         LocalDate today = LocalDate.now();
+
         LocalDateTime startOfToday = today.atStartOfDay();
         LocalDateTime startOfYesterday = today.minusDays(1).atStartOfDay();
 
