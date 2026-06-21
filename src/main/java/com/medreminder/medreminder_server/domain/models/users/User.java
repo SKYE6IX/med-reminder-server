@@ -5,6 +5,7 @@ import com.medreminder.medreminder_server.domain.models.subscription.Plan;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +23,6 @@ public class User  {
     private String providerId;
     private LocalDateTime lastLoginAt;
     private Plan plan;
-    private String passwordResetToken;
-    private LocalDateTime passwordResetIssuedAt;
-    private LocalDateTime passwordResetRedeemedAt;
     private final List<Profile> profiles = new ArrayList<>();
 
     public User(String id,
@@ -45,7 +43,9 @@ public class User  {
                 String name,
                 LocalDate dateOfBirth,
                 String gender,
-                UserProvider provider, String providerId, LocalDateTime lastLoginAt) {
+                UserProvider provider,
+                String providerId,
+                LocalDateTime lastLoginAt) {
         this.id = id;
         this.email = email;
         this.hashPassword = hashPassword;
@@ -93,18 +93,6 @@ public class User  {
         return lastLoginAt;
     }
 
-    public String getPasswordResetToken() {
-        return passwordResetToken;
-    }
-
-    public LocalDateTime getPasswordResetIssuedAt() {
-        return passwordResetIssuedAt;
-    }
-
-    public LocalDateTime getPasswordResetRedeemedAt() {
-        return passwordResetRedeemedAt;
-    }
-
     public void updateUser(UpdateUserCommand command) {
         final Locale locale = Locale.of("ru-RU");
         final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -144,15 +132,5 @@ public class User  {
             throw new IllegalArgumentException("Hash Password cannot be empty!");
         }
         this.hashPassword = newPassword;
-    }
-
-    public void issuePasswordResetToken(String token) {
-        this.passwordResetToken = token;
-        this.passwordResetIssuedAt = LocalDateTime.now();
-    }
-
-    public void redeemPasswordResetToken() {
-        this.passwordResetRedeemedAt = LocalDateTime.now();
-        this.passwordResetToken = null;
     }
 }

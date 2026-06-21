@@ -26,14 +26,18 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String email, String userId){
+    public String generateToken(String email,
+                                String userId,
+                                String tokenType,
+                                Date expireAt){
+
         long now = System.currentTimeMillis();
         return Jwts.builder()
                 .subject(email)
                 .claim("user_id", userId)
-                .claim("token_type","access")
+                .claim("token_type",tokenType)
                 .issuedAt(new Date(now))
-                .expiration(new Date(now + 1000 * 60 * 30))
+                .expiration(expireAt)
                 .signWith(getSigningKey(),Jwts.SIG.HS256)
                 .compact();
     }
@@ -78,7 +82,6 @@ public class JwtUtil {
             return (emailFromToken.equals(email) &&
                     (Objects.equals(tokenType, expectedType))
                     && isTokenExpired(token));
-
         } catch (Exception e) {
             return false;
         }

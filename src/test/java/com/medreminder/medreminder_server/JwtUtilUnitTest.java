@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.Environment;
 
+import java.util.Date;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -34,8 +36,10 @@ public class JwtUtilUnitTest {
 
     @Test
     void generateToken_ShouldReturnNonNullToken(){
+        long now = System.currentTimeMillis();
 
-        String token = jwtUtil.generateToken("testUser@mail.com", "123456789");
+        String token = jwtUtil.generateToken("testUser@mail.com", "123456789",
+                "access", new Date(now + 1000 * 60 * 30));
 
         assertThat(token).isNotNull().isNotEmpty();
     }
@@ -43,7 +47,10 @@ public class JwtUtilUnitTest {
     @Test
     void generateToken_ShouldContainCorrectSubject() {
         String email = "testUser@mail.com";
-        String token = jwtUtil.generateToken(email, "123456789");
+        long now = System.currentTimeMillis();
+
+        String token = jwtUtil.generateToken(email, "123456789",
+                "access", new Date(now + 1000 * 60 * 30));
 
         String subject = jwtUtil.extractEmail(token);
 
@@ -54,7 +61,10 @@ public class JwtUtilUnitTest {
     void generateToken_ShouldHaveAccessTokenType() {
         String email = "testUser@mail.com";
 
-        String token = jwtUtil.generateToken(email, "123456789");
+        long now = System.currentTimeMillis();
+
+        String token = jwtUtil.generateToken(email, "123456789",
+                "access", new Date(now + 1000 * 60 * 30) );
 
         String claimType = jwtUtil.extractClaim(token, "token_type");
 

@@ -15,7 +15,9 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 public class TokenManager {
 
@@ -35,7 +37,10 @@ public class TokenManager {
     }
 
     public String generateAccessToken(String userEmail, String userId) {
-        return jwtUtil.generateToken(userEmail, userId);
+        long now = System.currentTimeMillis();
+
+        return jwtUtil.generateToken(userEmail, userId,
+                "access", new Date(now + 1000 * 60 * 30) );
     }
 
     public String generateRefreshToken() {
@@ -61,8 +66,7 @@ public class TokenManager {
     }
 
     public AuthResponse refreshToken(String token) {
-
-        String hashToken = hashRefreshToken(token);
+        String hashToken = hashToken(token);
 
         RefreshTokenEntity existingRefreshToken =
                 jpaRefreshTokenRepository.findByHashToken(hashToken);
@@ -79,7 +83,10 @@ public class TokenManager {
 
         UserEntity userEntity = existingRefreshToken.getUser();
 
-        String accessToken = jwtUtil.generateToken(userEntity.getEmail(), userEntity.getId());
+        long now = System.currentTimeMillis();
+        String accessToken = jwtUtil.generateToken(userEntity.getEmail(),
+                userEntity.getId(),
+                "access", new Date(now + 1000 * 60 * 30) );
 
         String refreshToken = generateRandomToken();
 
@@ -94,12 +101,24 @@ public class TokenManager {
         return appleTokenVerifier.verifyToken(token);
     }
 
-    private RefreshTokenEntity createRefreshTokenEntity(String rawToken, UserEntity userEntity) {
-        String hashToken = hashRefreshToken(rawToken);;
+    public int generatePasswordResetRawToken() {
+        Random random = new Random();
+        return 100000 + random.nextInt(900000);
+    }
 
+    public String getPasswordResetHashToken(String token) {
+        return hashToken(token);
+    }
+
+    public boolean validatePasswordResetToken(String rawToken, String hashToken) {
+      return hashToken(rawToken).equals(hashToken);
+    }
+
+//    HELPER METHODS.
+    private RefreshTokenEntity createRefreshTokenEntity(String rawToken, UserEntity userEntity) {
+        String hashToken = hashToken(rawToken);;
         final int REFRESH_TOKEN_EXPIRE_DAYS = 3650;
         Instant expiryTime = Instant.now().plus(REFRESH_TOKEN_EXPIRE_DAYS, ChronoUnit.DAYS);
-
         return new RefreshTokenEntity(null, hashToken, expiryTime,false, userEntity);
     }
 
@@ -109,10 +128,10 @@ public class TokenManager {
         return base64Encoder.encodeToString(randomBytes);
     }
 
-    private static String hashRefreshToken(String refreshToken) {
+    private static String hashToken(String token) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(refreshToken.getBytes(StandardCharsets.UTF_8));
+            byte[] hash = md.digest(token.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(hash);
         }  catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e.getMessage());

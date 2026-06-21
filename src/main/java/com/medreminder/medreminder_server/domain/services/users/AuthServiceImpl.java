@@ -2,15 +2,13 @@ package com.medreminder.medreminder_server.domain.services.users;
 
 
 import com.medreminder.medreminder_server.application.dtos.user.*;
-import com.medreminder.medreminder_server.application.security.JwtUtil;
 import com.medreminder.medreminder_server.application.exceptions.UserAlreadyExistsException;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
+import com.medreminder.medreminder_server.application.services.EmailService;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.models.users.UserProvider;
-import com.medreminder.medreminder_server.infrastructure.entity.users.RefreshTokenEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
-import com.medreminder.medreminder_server.infrastructure.repository.users.JpaRefreshTokenRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,15 +16,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AuthServiceImpl implements AuthService {
 
@@ -36,19 +29,22 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final TokenManager tokenManager;
+    private final EmailService emailService;
 
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            UserService userService,
                            PasswordEncoder passwordEncoder,
                            UserMapper userMapper,
                            UserRepository userRepository,
-                           TokenManager tokenManager) {
+                           TokenManager tokenManager,
+                           EmailService emailService) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.userRepository = userRepository;
         this.tokenManager = tokenManager;
+        this.emailService = emailService;
     }
 
     @Override
@@ -138,6 +134,7 @@ public class AuthServiceImpl implements AuthService {
                     socialAuthRequest.fullName(),
                     null
             );
+
             UserEntity newUser = userService.createUser(registerUserRequest,
                     UserProvider.valueOf(socialAuthRequest.provider()));
             newUser.setProviderId(socialAuthRequest.providerId());
@@ -178,18 +175,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResetPasswordResponse resetPassword(String userId, String oldPassword, String newPassword) {
+    public ResetPasswordResponse changePassword(String userId, String oldPassword, String newPassword) {
 
         UserEntity existingUser = userRepository.findUserById(userId)
-                .orElse(null);
-
-        if (existingUser == null) {
-            throw new UsernameNotFoundException("User not found!");
-        }
+                .orElseThrow(()-> new UsernameNotFoundException("User not found: " + userId));
 
         User domainUser = userMapper.toDomain(existingUser);
 
-        boolean passwordMatch = passwordEncoder.matches(oldPassword,domainUser.getHashPassword());
+        boolean passwordMatch = passwordEncoder.matches(oldPassword ,domainUser.getHashPassword());
 
         if (!passwordMatch) {
             throw new BadCredentialsException("Invalid old password!");
@@ -206,7 +199,91 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.saveUser(existingUser);
 
+        return new ResetPasswordResponse("success", "Successfully change your password!");
+    }
+
+    @Override
+    public ResetPasswordResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
+
+        UserEntity existingUser = userRepository.findUserByEmail(resetPasswordRequest.email())
+                .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
+
+        boolean isValidToken = tokenManager
+                .validatePasswordResetToken(String.valueOf(resetPasswordRequest.token()),
+                existingUser.getPasswordResetToken());
+
+        if (!isValidToken) {
+            throw new BadCredentialsException("Invalid token!");
+        }
+
+        User domainUser = userMapper.toDomain(existingUser);
+
+        String newPasswordHash = passwordEncoder.encode(resetPasswordRequest.newPassword());
+
+        domainUser.updatePassword(newPasswordHash);
+
+        existingUser.syncUserData(domainUser);
+
+        // Revoked the existing token
+        tokenManager.revokeRefreshToken(domainUser.getId());
+
+        userRepository.saveUser(existingUser);
+
         return new ResetPasswordResponse("success", "Successfully reset your password!");
+    }
+
+    @Override
+    public Map<String, String> requestPasswordResetToken(String email) {
+
+        UserEntity existingUser = userRepository.findUserByEmail(email)
+                .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
+
+        final int token = tokenManager.generatePasswordResetRawToken();
+        final String hashToken = tokenManager.getPasswordResetHashToken(String.valueOf(token));
+
+        existingUser.issuePasswordResetToken(hashToken);
+
+        final String EMAIL_SUBJECT = "Ваш код подтверждения";
+        final String EMAIL_TEMPLATE= "otp-email-template.ftl";
+
+        Map<String, String> model = new HashMap<>();
+        model.put("token",String.valueOf(token));
+
+        emailService.sendTemplateEmail(existingUser.getEmail(),
+                EMAIL_SUBJECT, EMAIL_TEMPLATE, model);
+
+        userRepository.saveUser(existingUser);
+
+        Map<String, String> result = new HashMap<>();
+
+        result.put("status", "success");
+
+        return result;
+    }
+
+    @Override
+    public Map<String, String> verifyPasswordResetToken(String email, int token) {
+
+        final long EXPIRE_MINUTES = 30;
+
+        UserEntity existingUser = userRepository.findUserByEmail(email)
+                .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
+
+        boolean isValidToken = tokenManager.validatePasswordResetToken(String.valueOf(token),
+                existingUser.getPasswordResetToken());
+
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Moscow"));
+        boolean isExpired = existingUser.getPasswordResetIssuedAt()
+                .plusMinutes(EXPIRE_MINUTES).isBefore(now);
+
+        if( isExpired || !isValidToken) {
+            throw new BadCredentialsException("Invalid token!");
+        }
+
+        Map<String, String> result = new HashMap<>();
+        result.put("status", "success");
+
+        return result;
     }
 
     @Override

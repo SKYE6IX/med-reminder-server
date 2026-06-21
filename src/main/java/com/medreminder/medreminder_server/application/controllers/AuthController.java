@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -61,15 +63,44 @@ public class AuthController {
         return  ResponseEntity.ok(response);
     }
 
-    @PostMapping(value = "/reset-password")
-    ResponseEntity<ResetPasswordResponse> resetPassword(@AuthenticationPrincipal UserDetails userDetails,
-                                    @RequestBody ResetPasswordRequest resetPasswordRequest) {
+    @PostMapping(value = "/change-password")
+    ResponseEntity<ResetPasswordResponse> changePassword(@AuthenticationPrincipal UserDetails userDetails,
+                                    @RequestBody ChangePasswordRequest changePasswordRequest) {
 
         UserPrincipal userPrincipal = (UserPrincipal) userDetails;
 
-        ResetPasswordResponse response = authService.resetPassword(userPrincipal.getId(),
-                resetPasswordRequest.oldPassword(),
-                resetPasswordRequest.newPassword());
+        ResetPasswordResponse response = authService.changePassword(userPrincipal.getId(),
+                changePasswordRequest.oldPassword(),
+                changePasswordRequest.newPassword());
+
+        return  ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/forget-password")
+    ResponseEntity<ResetPasswordResponse> resetPassword(
+            @RequestBody ResetPasswordRequest resetPasswordRequest ) {
+
+        ResetPasswordResponse  response = authService
+                .resetPassword(resetPasswordRequest);
+
+        return  ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/forget-password/token")
+    ResponseEntity<Map<String, String>> requestPasswordResetToken(
+            @RequestBody Map<String, String> resetPasswordRequest) {
+
+        Map<String, String> response = authService
+                .requestPasswordResetToken(resetPasswordRequest.get("email"));
+
+        return  ResponseEntity.ok(response);
+    }
+
+    @GetMapping(value = "/forget-password/token")
+    ResponseEntity<Map<String, String>> verifyPasswordResetToken(@RequestParam String email,
+                                                                 @RequestParam int token) {
+        Map<String, String> response = authService
+                .verifyPasswordResetToken(email, token);
 
         return  ResponseEntity.ok(response);
     }

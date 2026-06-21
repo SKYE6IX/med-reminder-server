@@ -13,6 +13,7 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -207,6 +208,16 @@ public class UserEntity {
 
     public void updatePaymentMethodId(String paymentMethodId) {
         this.paymentMethodId = paymentMethodId;
+    }
+
+    public void issuePasswordResetToken(String token) {
+        this.passwordResetToken = token;
+        this.passwordResetIssuedAt = LocalDateTime.now(ZoneId.of("Europe/Moscow"));
+    }
+
+    public void redeemPasswordResetToken() {
+        this.passwordResetRedeemedAt = LocalDateTime.now(ZoneId.of("Europe/Moscow"));
+        this.passwordResetToken = null;
     }
 
     public void syncUserData(User domain){

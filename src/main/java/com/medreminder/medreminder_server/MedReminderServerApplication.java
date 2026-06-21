@@ -12,8 +12,7 @@ public class MedReminderServerApplication {
 	}
 }
 
-
 //TODO:
-// 1. Mailing system set up
+// 1. Mailing system set up ✅
 // 2. Add CORS so request is only accepted from the app.
 // 3. Taken time for medication is getting offset of 3 hours. ✅

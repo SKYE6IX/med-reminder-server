@@ -2,6 +2,7 @@ package com.medreminder.medreminder_server.user;
 
 import com.medreminder.medreminder_server.application.dtos.user.ResetPasswordResponse;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
+import com.medreminder.medreminder_server.application.services.EmailService;
 import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
@@ -61,14 +62,14 @@ public class AuthServiceUnitTest {
 
         userMapper = new UserMapper();
         passwordEncoder = new BCryptPasswordEncoder();
-
         authService = new AuthServiceImpl(
                 authenticationManager,
                 userService,
                 passwordEncoder,
                 userMapper,
                 userRepository,
-                tokenManager);
+                tokenManager,
+                null);
     }
 
     @Test
@@ -94,7 +95,7 @@ public class AuthServiceUnitTest {
                 .thenReturn(List.of());
 
         ResetPasswordResponse response = authService
-                .resetPassword(testUser.getId(),"testhashpassword", "testnewpassword");
+                .changePassword(testUser.getId(),"testhashpassword", "testnewpassword");
 
         verify(userRepository).saveUser(any(UserEntity.class));
 

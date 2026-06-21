@@ -3,6 +3,7 @@ package com.medreminder.medreminder_server.application.config;
 
 import com.medreminder.medreminder_server.application.security.AppleTokenVerifier;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
+import com.medreminder.medreminder_server.application.services.EmailService;
 import com.medreminder.medreminder_server.application.services.PaymentService;
 import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.services.UseCase;
@@ -15,10 +16,12 @@ import com.medreminder.medreminder_server.infrastructure.entity.medications.Medi
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import com.medreminder.medreminder_server.infrastructure.repository.users.JpaRefreshTokenRepository;
+import jakarta.annotation.PostConstruct;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -69,6 +72,7 @@ public class AppConfig {
                             UserMapper userMapper,
                             UserRepository userRepository,
                             TokenManager tokenManager,
+                            EmailService emailService,
                             TransactionInterceptor txInterceptor) {
 
         AuthService authService = new AuthServiceImpl(
@@ -77,8 +81,10 @@ public class AppConfig {
                 passwordEncoder,
                 userMapper,
                 userRepository,
-                tokenManager
+                tokenManager,
+                emailService
         );
+
         return createProxyFactory(authService, AuthService.class,txInterceptor);
     }
 
