@@ -2,9 +2,10 @@ package com.medreminder.medreminder_server.batch_jobs.jobs;
 
 
 import com.medreminder.medreminder_server.TestConfig;
-import com.medreminder.medreminder_server.application.batch_jobs.config.MarkMissedDosageBatchConfig;
-import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
-import com.medreminder.medreminder_server.infrastructure.repository.medications.JpaScheduleEventRepo;
+import com.medreminder.medreminder_server.application.batch_jobs.config.PurgeStaleTokenBatchConfig;
+import com.medreminder.medreminder_server.infrastructure.entity.users.RefreshTokenEntity;
+import com.medreminder.medreminder_server.infrastructure.repository.users.JpaRefreshTokenRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.BatchStatus;
@@ -18,22 +19,25 @@ import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.parameters.P;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBatchTest
 @SpringJUnitConfig(classes = {
         TestConfig.class,
-        MarkMissedDosageBatchConfig.class
+        PurgeStaleTokenBatchConfig.class
 })
 @ActiveProfiles("test")
-public class MarkMissedDosageJobUnitTest {
+public class PurgeStaleTokenJobUnitTest {
 
     @Autowired
     private JobOperatorTestUtils jobOperatorTestUtils;
@@ -42,11 +46,11 @@ public class MarkMissedDosageJobUnitTest {
     private JobRepositoryTestUtils jobRepositoryTestUtils;
 
     @Autowired
-    @Qualifier("markMissedDosageJob")
-    private Job markMissedDosageJob;
+    @Qualifier("purgeStaleTokenJob")
+    private Job purgeStaleTokenJob;
 
     @Autowired
-    private JpaScheduleEventRepo scheduleEventRepo;
+    private JpaRefreshTokenRepository jpaRefreshTokenRepository;
 
     @BeforeEach
     void setup() {
@@ -54,23 +58,22 @@ public class MarkMissedDosageJobUnitTest {
     }
 
     @Test
-    void jobShouldProcessOnlyEligibleAndCompleteSuccessfully() throws Exception{
+    void jobShouldProcessOnlyEligibleAndCompleteSuccessfully() throws Exception {
 
-        LocalDate now = LocalDate.now();
-        LocalDateTime yesterday = now
-                .minusDays(1).atTime(6,30,0);
+        List<RefreshTokenEntity> refreshTokenEntities = IntStream.range(0, 10)
+                .mapToObj(i -> new RefreshTokenEntity(
+                        null,
+                        i + "hash_token",
+                        LocalDateTime.now(ZoneId.of("Europe/Moscow")).minusWeeks(i+1),
+                        true,
+                        null
+                ))
+                .toList();
 
-        ScheduleEventEntity scheduleEventEntity = new ScheduleEventEntity(
-                null,
-                new BigDecimal("2.1"),
-                "PENDING",
-                yesterday,
-                null
-        );
+        jpaRefreshTokenRepository.saveAll(refreshTokenEntities);
 
-        scheduleEventRepo.save(scheduleEventEntity);
+        jobOperatorTestUtils.setJob(purgeStaleTokenJob);
 
-        jobOperatorTestUtils.setJob(markMissedDosageJob);
         JobExecution execution = jobOperatorTestUtils.startJob(
                 new JobParametersBuilder()
                         .addLocalDate("runDate", LocalDate.now())
@@ -80,7 +83,7 @@ public class MarkMissedDosageJobUnitTest {
         StepExecution stepExecution = execution.getStepExecutions().iterator().next();
         assertThat(execution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
         assertThat(execution.getExitStatus()).isEqualTo(ExitStatus.COMPLETED);
-        assertThat(stepExecution.getReadCount()).isEqualTo(1);
-        assertThat(stepExecution.getWriteCount()).isEqualTo(1);
+        assertThat(stepExecution.getReadCount()).isGreaterThan(5);
+        assertThat(stepExecution.getWriteCount()).isGreaterThan(5);
     }
 }

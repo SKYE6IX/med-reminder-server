@@ -15,6 +15,7 @@ import net.fortuna.ical4j.model.Recur;
 import java.math.BigDecimal;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,9 +32,14 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
     @Override
     public List<ScheduleEvent> createScheduleEvents(MedicationSchedule schedule) {
+
         LocalDateTime now = LocalDateTime.now(ZoneId.of(schedule.getTimeZone()));
 
-        final int MAX_EXPANSION_DAY = 7;
+        final long MAX_EXPANSION_DAY = schedule.getEndDate() != null ?
+                ChronoUnit.DAYS.between(schedule.getStartDate(), schedule.getEndDate())
+                : 7;
+
+
 //        When creating, we need to check if we are expanding or starting new.
         final LocalDateTime dateTimeFrom = schedule.getLastExpandedUntil()
                 != null ? schedule.getLastExpandedUntil().toLocalDate().atStartOfDay()
@@ -259,7 +265,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
     private List<LocalDateTime> generateSchedulesEventDateTime(String rrule,
                                                                LocalDateTime eventDateFrom,
                                                                String timeZone,
-                                                               int expansionWindowDays) {
+                                                               long expansionWindowDays) {
         ZoneId zoneId = ZoneId.of(timeZone);
 
         LocalDateTime windowStart = eventDateFrom

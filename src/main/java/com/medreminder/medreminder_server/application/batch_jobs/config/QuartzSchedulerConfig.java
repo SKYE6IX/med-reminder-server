@@ -1,10 +1,7 @@
 package com.medreminder.medreminder_server.application.batch_jobs.config;
 
 
-import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.DowngradePlanScheduler;
-import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.MarkMissedDosageScheduler;
-import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.MedicationScheduleEventScheduler;
-import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.RenewPaidPlanScheduler;
+import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.*;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.quartz.autoconfigure.SchedulerFactoryBeanCustomizer;
@@ -97,6 +94,26 @@ public class QuartzSchedulerConfig {
                 .withSchedule(CronScheduleBuilder
                         .cronSchedule("0 0 3 * * ?")
                         .inTimeZone(TimeZone.getTimeZone(timeZone)))
+                .build();
+    }
+
+    @Bean
+    public JobDetail purgeStaleTokenJobDetail() {
+        return JobBuilder.newJob(PurgeStaleTokenScheduler.class)
+                .withIdentity("purge_stale_token_job_detail")
+                .storeDurably()
+                .build();
+    }
+
+    @Bean
+    public Trigger purgeStaleTokenTrigger(@Qualifier("purgeStaleTokenJobDetail") JobDetail detail) {
+        return TriggerBuilder.newTrigger()
+                .forJob(detail)
+                .withIdentity("purge_stale_token_trigger")
+                .withSchedule(
+                        CronScheduleBuilder
+                                .cronSchedule("0 0 6 * * ?")
+                                .inTimeZone(TimeZone.getTimeZone(timeZone)))
                 .build();
     }
 }

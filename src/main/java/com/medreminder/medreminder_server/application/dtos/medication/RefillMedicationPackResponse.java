@@ -6,5 +6,7 @@ public record RefillMedicationPackResponse(String id,
                                            String totalQuantity,
                                            String medicationName,
                                            String medicationImageUrl,
-                                           String medicationProfileId) {
+                                           String medicationProfileId,
+                                           String dosageAmount,
+                                           String dosageMeasurement) {
 }

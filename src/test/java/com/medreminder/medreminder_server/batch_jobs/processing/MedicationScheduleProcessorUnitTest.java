@@ -45,7 +45,7 @@ public class MedicationScheduleProcessorUnitTest {
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
 
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0","15.06.2026");
+                "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0","15.06.2026", null);
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity snubMedicationProfile = MedicationStubFactory

@@ -2,10 +2,7 @@ package com.medreminder.medreminder_server.batch_jobs;
 
 
 import com.medreminder.medreminder_server.TestConfig;
-import com.medreminder.medreminder_server.application.batch_jobs.config.DowngradePlanBatchConfig;
-import com.medreminder.medreminder_server.application.batch_jobs.config.MarkMissedDosageBatchConfig;
-import com.medreminder.medreminder_server.application.batch_jobs.config.MedicationScheduleEventBatchConfig;
-import com.medreminder.medreminder_server.application.batch_jobs.config.RenewPaidPlanBatchConfig;
+import com.medreminder.medreminder_server.application.batch_jobs.config.*;
 import com.medreminder.medreminder_server.application.dtos.medication.CreateMedicationCommand;
 import com.medreminder.medreminder_server.application.services.PaymentService;
 import com.medreminder.medreminder_server.domain.models.medication.Medication;
@@ -24,10 +21,12 @@ import com.medreminder.medreminder_server.infrastructure.entity.medications.Medi
 import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionPeriodEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.users.RefreshTokenEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import com.medreminder.medreminder_server.infrastructure.repository.medications.JpaScheduleEventRepo;
 import com.medreminder.medreminder_server.infrastructure.repository.subscription.JpaSubscriptionPeriodRepo;
+import com.medreminder.medreminder_server.infrastructure.repository.users.JpaRefreshTokenRepository;
 import com.medreminder.medreminder_server.medication.MedicationStubFactory;
 import com.medreminder.medreminder_server.subscription.SubscriptionServiceStubFactory;
 import com.medreminder.medreminder_server.user.UserStubData;
@@ -44,7 +43,10 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,6 +60,7 @@ import static org.mockito.Mockito.when;
         DowngradePlanBatchConfig.class,
         RenewPaidPlanBatchConfig.class,
         MarkMissedDosageBatchConfig.class,
+        PurgeStaleTokenBatchConfig.class,
 })
 @ActiveProfiles("test")
 public class QuartzJobsExecutionTest {
@@ -84,6 +87,10 @@ public class QuartzJobsExecutionTest {
     private Scheduler markMissedDosageScheduler;
 
     @Autowired
+    @Qualifier("purgeStaleTokenSchedulerFactoryBean")
+    private Scheduler purgeStaleTokenScheduler;
+
+    @Autowired
     private MedicationRepository medicationRepository;
 
     @Autowired
@@ -99,24 +106,26 @@ public class QuartzJobsExecutionTest {
     SubscriptionRepository subscriptionRepository;
 
     @Autowired
+    private JpaRefreshTokenRepository jpaRefreshTokenRepository;
+
+    @Autowired
     private PaymentService paymentService;
 
     @Autowired
     private JpaSubscriptionPeriodRepo jpaSubscriptionPeriodRepo;
 
-    @BeforeEach
-    void cleanUp() {
-        scheduleEventRepo.deleteAll();
-    }
-
     @Test
     void medicationJobShouldExecuteWhenTriggeredManually() throws Exception {
+
+        scheduleEventRepo.deleteAll();
+
+
         Profile snubProfile = UserStubData.createProfileWithId("John",
                 Relation.BROTHER.toString(), false);
 
         CreateMedicationCommand cmd = MedicationStubFactory
                 .createMedicationCommand(snubProfile.getId(),
-                        "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0", "15.06.2026");
+                        "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0", "15.06.2026", null);
 
         Medication stubMed = MedicationStubFactory.createMedication(cmd);
         MedicationSchedule stubMedicationSchedule = MedicationStubFactory.createMedicationSchedule(cmd);
@@ -253,4 +262,29 @@ public class QuartzJobsExecutionTest {
                             });
                 });
     };
+
+
+    @Test
+    void purgeStaleTokenJobShouldExecuteWhenTriggeredManually() throws Exception {
+
+        List<RefreshTokenEntity> refreshTokenEntities = IntStream.range(0, 10)
+                .mapToObj(i -> new RefreshTokenEntity(
+                        null,
+                        i + "hash_token",
+                        LocalDateTime.now(ZoneId.of("Europe/Moscow")).minusWeeks(i+3),
+                        true,
+                        null
+                ))
+                .toList();
+
+        jpaRefreshTokenRepository.saveAll(refreshTokenEntities);
+
+        purgeStaleTokenScheduler.triggerJob(JobKey.jobKey("purge_stale_token_job_detail"));
+
+        await().atMost(10, SECONDS)
+                .untilAsserted(() -> {
+                    final long count = jpaRefreshTokenRepository.count();
+                    assertThat(count).isEqualTo(0);
+                });
+    }
 }

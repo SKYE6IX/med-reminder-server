@@ -1,15 +1,9 @@
 package com.medreminder.medreminder_server;
 
 
-import com.medreminder.medreminder_server.application.batch_jobs.listener.DowngradePlanJobListener;
-import com.medreminder.medreminder_server.application.batch_jobs.listener.MarkMissedDosageJobListener;
-import com.medreminder.medreminder_server.application.batch_jobs.listener.MedicationScheduleEventJobListener;
-import com.medreminder.medreminder_server.application.batch_jobs.listener.RenewPaidPlanJobListener;
+import com.medreminder.medreminder_server.application.batch_jobs.listener.*;
 import com.medreminder.medreminder_server.application.services.PaymentService;
-import com.medreminder.medreminder_server.batch_jobs.config.DowngradePlanSchedulerTestConfig;
-import com.medreminder.medreminder_server.batch_jobs.config.MarkMissedDosageSchedulerTestConfig;
-import com.medreminder.medreminder_server.batch_jobs.config.MedScheduleEventSchedulerTestConfig;
-import com.medreminder.medreminder_server.batch_jobs.config.RenewPaidPlanSchedulerTestConfig;
+import com.medreminder.medreminder_server.batch_jobs.config.*;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventService;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventServiceImpl;
@@ -39,6 +33,7 @@ import java.util.Properties;
         DowngradePlanSchedulerTestConfig.class,
         RenewPaidPlanSchedulerTestConfig.class,
         MarkMissedDosageSchedulerTestConfig.class,
+        PurgeStaleTokenSchedulerTestConfig.class,
 })
 @ActiveProfiles("test")
 public class TestConfig {
@@ -84,7 +79,7 @@ public class TestConfig {
     }
 
     @Bean
-    public MedicationScheduleEventJobListener listener(){
+    public MedicationScheduleEventJobListener medicationScheduleEventListener(){
         return new MedicationScheduleEventJobListener();
     }
 
@@ -101,6 +96,11 @@ public class TestConfig {
     @Bean
     public MarkMissedDosageJobListener markMissedDosageListener(){
         return new MarkMissedDosageJobListener();
+    }
+
+    @Bean
+    public PurgeStaleTokenJobListener purgeStaleTokenListener(){
+        return new PurgeStaleTokenJobListener();
     }
 
 //    HELPER BEANS

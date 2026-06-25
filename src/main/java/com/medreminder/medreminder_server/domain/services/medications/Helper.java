@@ -25,13 +25,19 @@ public class Helper {
 
     public static MedicationSchedule createMedicationSchedule(CreateMedSchedule schedule) {
         final Locale locale = Locale.of("ru-RU");
+
         final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
                 .localizedBy(locale);
+
+        final LocalDate startDate = LocalDate.parse(schedule.startDate(), dateFormatter);
+
+        final LocalDate endDate = schedule.endDate() != null ? LocalDate.parse(schedule.endDate(), dateFormatter) : null;
 
         return new MedicationSchedule(null,
                 new BigDecimal(schedule.dosage()),
                 schedule.recurrenceRule(),
-                LocalDate.parse(schedule.startDate(), dateFormatter),
+                startDate,
+                endDate,
                 schedule.timeZone(),
                 new BigDecimal("0"),
                 null);
@@ -144,6 +150,9 @@ public class Helper {
 
 //        Acquire the schedule and create an object and attached it to the response
         MedicationScheduleEntity schedule = smp.getMedicationSchedule();
+
+        final String endDate = schedule.getEndDate() != null ? schedule.getEndDate().toString() : null;
+
         response.setSchedule(new MedScheduleResponse(
                 schedule.getId(),
                 schedule.getDoseQuantity().stripTrailingZeros().toPlainString(),
@@ -151,6 +160,7 @@ public class Helper {
                 schedule.getRecurrenceRule(),
                 schedule.getStartTime().toString(),
                 schedule.getStartDate().toString(),
+                endDate,
                 schedule.getTakenQuantity().stripTrailingZeros().toPlainString())
         );
 

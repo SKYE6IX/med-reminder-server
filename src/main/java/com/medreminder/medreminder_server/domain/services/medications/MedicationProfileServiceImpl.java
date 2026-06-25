@@ -59,9 +59,12 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
 
 //        Start Creating New Medication Profile
         MedicationProfile medicationProfile = new MedicationProfile(null,
-                true, cmd.getMedicationNote(),cmd.getMedicationReason());
+                true, cmd.getMedicationNote(), cmd.getMedicationReason());
+
         Medication medication = Helper.createMedication(cmd);
+
         MedicationSchedule medicationSchedule = Helper.createMedicationSchedule(cmd.getSchedule());
+
 //        Create schedule events
         List<ScheduleEvent> scheduleEvents = scheduleEventService.createScheduleEvents(medicationSchedule);
 
@@ -100,8 +103,13 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                 .toDomain(managedMedicationProfile);
 
         cmd.getStatus().ifPresent(domainMedicationProfile::updateActive);
-        cmd.getNote().ifPresent(domainMedicationProfile::updateNote);
-
+        cmd.getNote().ifPresent(note -> {
+            if(note.isEmpty()){
+                domainMedicationProfile.updateNote(null);
+            } else {
+                domainMedicationProfile.updateNote(note);
+            }
+        });
 //        If user change their events schedules
         cmd.getRecurrenceRule().ifPresent(newRules -> {
             MedicationSchedule medicationSchedule = domainMedicationProfile.getMedicationSchedule();
@@ -295,14 +303,16 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                 .saveMedicationProfile(managedMedicationProfile)
                 .getMedicationPacks().getLast();
 
-        return  new RefillMedicationPackResponse(
+        return new RefillMedicationPackResponse(
                 refilledPack.getId(),
                 "REFILLED",
                 refilledPack.getStartedAt() != null ? refilledPack.getStartedAt().toString() : "",
                 refilledPack.getTotalQuantity().stripTrailingZeros().toPlainString(),
                 managedMedicationProfile.getMedication().getName(),
                 "",
-                managedMedicationProfile.getId()
+                managedMedicationProfile.getId(),
+                null,
+                null
         );
     }
 
@@ -340,7 +350,9 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                             packEntity.getTotalQuantity().stripTrailingZeros().toPlainString(),
                             medicationProfileEntity.getMedication().getName(),
                             "",
-                            medicationProfileEntity.getId()
+                            medicationProfileEntity.getId(),
+                            medicationProfileEntity.getMedicationSchedule().getDoseQuantity().toPlainString(),
+                            medicationProfileEntity.getMedication().getMeasurement()
                     );
                 })
                 .toList();

@@ -69,7 +69,7 @@ public class MedicationScheduleEventsJobUnitTest {
 
         CreateMedicationCommand cmd = MedicationStubFactory
                 .createMedicationCommand(snubProfile.getId(),
-                        "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0", "15.06.2026");
+                        "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0", "15.06.2026", null);
         Medication stubMed = MedicationStubFactory.createMedication(cmd);
         MedicationSchedule stubMedicationSchedule = MedicationStubFactory.createMedicationSchedule(cmd);
         MedicationProfileEntity stubMedicationProfile = new MedicationProfileEntity(

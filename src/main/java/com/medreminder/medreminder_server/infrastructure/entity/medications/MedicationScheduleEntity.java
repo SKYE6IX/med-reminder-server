@@ -34,6 +34,9 @@ public class MedicationScheduleEntity {
     @Column(name = "start_date")
     private LocalDate startDate;
 
+    @Column(name = "end_date")
+    private LocalDate endDate;
+
     @Column(name = "last_expanded_until")
     private LocalDateTime lastExpandedUntil;
 
@@ -69,6 +72,7 @@ public class MedicationScheduleEntity {
                                     String recurrenceRule,
                                     LocalDateTime startTime,
                                     LocalDate startDate,
+                                    LocalDate endDate,
                                     String timeZone,
                                     LocalDateTime lastExpandedUntil,
                                     MedicationProfileEntity medicationProfile
@@ -79,6 +83,7 @@ public class MedicationScheduleEntity {
         this.recurrenceRule = recurrenceRule;
         this.startTime = startTime;
         this.startDate = startDate;
+        this.endDate = endDate;
         this.timeZone = timeZone;
         this.lastExpandedUntil = lastExpandedUntil;
         this.medicationProfile = medicationProfile;
@@ -106,6 +111,10 @@ public class MedicationScheduleEntity {
 
     public LocalDate getStartDate() {
         return startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
     }
 
     public LocalDateTime getLastExpandedUntil() {

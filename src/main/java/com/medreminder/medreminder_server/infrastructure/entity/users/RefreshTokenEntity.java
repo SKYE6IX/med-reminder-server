@@ -20,7 +20,7 @@ public class RefreshTokenEntity {
     private String hashToken;
 
     @Column(name = "expired_at")
-    private Instant expiredAt;
+    private LocalDateTime expiredAt;
 
     private boolean revoked;
 
@@ -42,7 +42,7 @@ public class RefreshTokenEntity {
 
     public RefreshTokenEntity(String id,
                               String hashToken,
-                              Instant expiredAt,
+                              LocalDateTime expiredAt,
                               boolean revoked, UserEntity user) {
         this.id = id;
         this.hashToken = hashToken;
@@ -55,7 +55,7 @@ public class RefreshTokenEntity {
         return id;
     }
 
-    public Instant getExpiredAt() {
+    public LocalDateTime getExpiredAt() {
         return expiredAt;
     }
 
@@ -81,5 +81,9 @@ public class RefreshTokenEntity {
 
     public void setRevoked(boolean revoked) {
         this.revoked = revoked;
+    }
+
+    public void updateExpiredAt(LocalDateTime updatedAt) {
+        this.expiredAt = updatedAt;
     }
 }

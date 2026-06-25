@@ -13,6 +13,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Date;
@@ -52,15 +54,16 @@ public class TokenManager {
         jpaRefreshTokenRepository.save(refreshTokenEntity);
     }
 
+
     public void revokeRefreshToken(String userId) {
         List <RefreshTokenEntity> refreshTokens = jpaRefreshTokenRepository
                 .findAllByUserIdAndRevokedFalse(userId);
 
         if(!refreshTokens.isEmpty()){
-
-            refreshTokens.forEach(refreshTokenEntity ->
-                    refreshTokenEntity.setRevoked(true));
-
+            refreshTokens.forEach(refreshTokenEntity -> {
+                refreshTokenEntity.setRevoked(true);
+                refreshTokenEntity.updateExpiredAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+            });
             jpaRefreshTokenRepository.saveAll(refreshTokens);
         }
     }
@@ -118,7 +121,9 @@ public class TokenManager {
     private RefreshTokenEntity createRefreshTokenEntity(String rawToken, UserEntity userEntity) {
         String hashToken = hashToken(rawToken);;
         final int REFRESH_TOKEN_EXPIRE_DAYS = 3650;
-        Instant expiryTime = Instant.now().plus(REFRESH_TOKEN_EXPIRE_DAYS, ChronoUnit.DAYS);
+
+        LocalDateTime expiryTime = LocalDateTime.now(ZoneId.of("Europe/Moscow"))
+                .plusDays(REFRESH_TOKEN_EXPIRE_DAYS);
         return new RefreshTokenEntity(null, hashToken, expiryTime,false, userEntity);
     }
 

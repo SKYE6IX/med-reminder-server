@@ -67,8 +67,9 @@ public class MedicationProfileServiceUnitTest {
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
 
         final String rrule = "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0";
+
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                rrule,"10.06.2026");
+                rrule, "10.06.2026", null);
 
         when(profileRepository.findProfileById(any(String.class)))
                 .thenReturn(Optional.of(snubProfileEntity));
@@ -89,6 +90,29 @@ public class MedicationProfileServiceUnitTest {
     }
 
     @Test
+    void shouldCreateFixedDuration_MedicationSchedule_thenSaveIt() {
+
+        ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
+
+        final String rrule = "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0";
+
+        CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
+                rrule, "10.06.2026", "15.06.2026");
+
+        when(profileRepository.findProfileById(any(String.class)))
+                .thenReturn(Optional.of(snubProfileEntity));
+
+        when(profileRepository.saveProfile(any(ProfileEntity.class)))
+                .thenReturn(snubProfileEntity);
+
+        MedicationProfileResponse response = medicationProfileService.createMedicationProfile(cmd);
+
+        verify(profileRepository).saveProfile(any(ProfileEntity.class));
+        assertThat(response).isNotNull();
+        assertThat(response.getSchedule().endDate()).isNotNull();
+    }
+
+    @Test
     void shouldCreateMedication_Profile_WithPack(){
 
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
@@ -97,7 +121,7 @@ public class MedicationProfileServiceUnitTest {
 
         final String rrule = "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0";
 
-        CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
+        CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommandWithPack(snubProfileEntity.getId(),
                 rrule,"15.06.2026", pack);
 
         when(profileRepository.findProfileById(any(String.class)))
@@ -120,7 +144,7 @@ public class MedicationProfileServiceUnitTest {
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
         final String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                rrule,"10.06.2026");
+                rrule,"10.06.2026", null);
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -150,7 +174,7 @@ public class MedicationProfileServiceUnitTest {
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
         final String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                rrule,"15.06.2026");
+                rrule,"15.06.2026", null);
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -181,7 +205,7 @@ public class MedicationProfileServiceUnitTest {
     void shouldUpdateDosage_thenSaveIt(){
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0","15.06.2026");
+                "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0","15.06.2026", null);
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -208,7 +232,7 @@ public class MedicationProfileServiceUnitTest {
 
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0","15.06.2026");
+                "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0","15.06.2026", null);
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -237,7 +261,7 @@ public class MedicationProfileServiceUnitTest {
 
         final String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                rrule,"10.06.2026");
+                rrule,"10.06.2026",null);
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =

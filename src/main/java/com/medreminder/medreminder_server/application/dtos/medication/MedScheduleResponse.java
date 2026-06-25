@@ -6,5 +6,6 @@ public record MedScheduleResponse(String id,
                                   String recurrenceRule,
                                   String starTime,
                                   String startDate,
+                                  String endDate,
                                   String amountTaken) {
 }

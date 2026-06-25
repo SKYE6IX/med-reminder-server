@@ -31,6 +31,10 @@ public class QuartzSchedulersTest {
     @Qualifier("markMissedDosageSchedulerFactoryBean")
     private Scheduler markMissedDosageScheduler;
 
+    @Autowired
+    @Qualifier("purgeStaleTokenSchedulerFactoryBean")
+    private Scheduler purgeStaleTokenScheduler;
+
 
 
     @Test
@@ -39,12 +43,14 @@ public class QuartzSchedulersTest {
         JobKey downgradePlanSchedulerKey = JobKey.jobKey("downgrade_plan_job_detail");
         JobKey renewPaidPlanSchedulerKey = JobKey.jobKey("renew_paid_plan_job_detail");
         JobKey markMissedDosageSchedulerKey = JobKey.jobKey("mark_missed_dosage_job_detail");
+        JobKey purgeStaleTokenSchedulerKey = JobKey.jobKey("purge_stale_token_job_detail");
 
 
         assertThat(medScheduleEventScheduler.checkExists(medScheduleEventSchedulerKey)).isTrue();
         assertThat(downgradePlanScheduler.checkExists(downgradePlanSchedulerKey)).isTrue();
         assertThat(renewPaidPlanScheduler.checkExists(renewPaidPlanSchedulerKey)).isTrue();
         assertThat(markMissedDosageScheduler.checkExists(markMissedDosageSchedulerKey)).isTrue();
+        assertThat(purgeStaleTokenScheduler.checkExists(purgeStaleTokenSchedulerKey)).isTrue();
     }
 
     @Test
@@ -62,10 +68,14 @@ public class QuartzSchedulersTest {
         TriggerKey triggerKey4 = TriggerKey.triggerKey("mark_missed_dosage_trigger");
         Trigger trigger4 = markMissedDosageScheduler.getTrigger(triggerKey4);
 
+        TriggerKey triggerKey5 = TriggerKey.triggerKey("purge_stale_token_trigger");
+        Trigger trigger5 = purgeStaleTokenScheduler.getTrigger(triggerKey5);
+
         assertThat(trigger.getJobKey()).isEqualTo(JobKey.jobKey("medication_schedule_event_job_detail"));
         assertThat(trigger2.getJobKey()).isEqualTo(JobKey.jobKey("downgrade_plan_job_detail"));
         assertThat(trigger3.getJobKey()).isEqualTo(JobKey.jobKey("renew_paid_plan_job_detail"));
         assertThat(trigger4.getJobKey()).isEqualTo(JobKey.jobKey("mark_missed_dosage_job_detail"));
+        assertThat(trigger5.getJobKey()).isEqualTo(JobKey.jobKey("purge_stale_token_job_detail"));
     }
 
     @Test
@@ -103,5 +113,14 @@ public class QuartzSchedulersTest {
         assertThat(trigger).isNotNull();
         assertThat(trigger.getCronExpression()).isEqualTo("0 0 3 * * ?");
 
+    }
+
+    @Test
+    void purgeStaleTokenTriggerShouldFireAt6AM() throws Exception {
+        TriggerKey triggerKey = TriggerKey.triggerKey("purge_stale_token_trigger");
+        CronTrigger trigger = (CronTrigger) purgeStaleTokenScheduler.getTrigger(triggerKey);
+
+        assertThat(trigger).isNotNull();
+        assertThat(trigger.getCronExpression()).isEqualTo("0 0 6 * * ?");
     }
 }

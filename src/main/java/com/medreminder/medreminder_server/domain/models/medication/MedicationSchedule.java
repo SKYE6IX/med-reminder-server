@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MedicationSchedule {
-
     private final String id;
     private BigDecimal doseQuantity;
     private BigDecimal takenQuantity;
     private String recurrenceRule;
     private LocalDateTime startTime;
     private final LocalDate startDate;
+    private final LocalDate endDate;
     private LocalDateTime lastExpandedUntil;
     private final String timeZone;
     private MedicationProfile medicationProfile;
@@ -25,6 +25,7 @@ public class MedicationSchedule {
                               BigDecimal doseQuantity,
                               String recurrenceRule,
                               LocalDate startDate,
+                              LocalDate endDate,
                               String timeZone,
                               BigDecimal takenQuantity,
                               LocalDateTime lastExpandedUntil) {
@@ -32,6 +33,7 @@ public class MedicationSchedule {
         this.doseQuantity = doseQuantity;
         this.recurrenceRule = recurrenceRule;
         this.startDate = startDate;
+        this.endDate = endDate;
         this.timeZone = timeZone;
         this.takenQuantity = takenQuantity;
         this.lastExpandedUntil = lastExpandedUntil;
@@ -56,6 +58,10 @@ public class MedicationSchedule {
 
     public LocalDate getStartDate() {
         return startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
     }
 
     public LocalDateTime getLastExpandedUntil() {
@@ -98,6 +104,7 @@ public class MedicationSchedule {
         this.scheduleEvents.add(scheduleEvent);
         scheduleEvent.setMedicationSchedule(this);
     }
+
     public void addMedicationProfile(MedicationProfile medicationProfile) {
         this.medicationProfile = medicationProfile;
     }

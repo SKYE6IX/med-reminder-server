@@ -14,36 +14,36 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.IntStream;
 
 public class MedicationStubFactory {
 
     public static CreateMedicationCommand createMedicationCommand(String profileId,
                                                                   String rrule,
-                                                                  String startDate) {
+                                                                  String startDate,
+                                                                  String endDate) {
         return new CreateMedicationCommand.Builder()
                 .profileId(profileId)
                 .medicationName("Paracetamol")
                 .medicationUnit("TABLET")
                 .medicationMeasurement("CAPSULE")
                 .medicationNote("Take on time")
-                .schedule(createMedSchedule(rrule,startDate))
+                .schedule(createMedSchedule(rrule,startDate,endDate))
                 .medicationPack(null)
                 .build();
     }
 
-    public static CreateMedicationCommand createMedicationCommand(String profileId,
-                                                                  String rrule,
-                                                                  String stratDate,
-                                                                  CreateMedicationPack createMedicationPack) {
+    public static CreateMedicationCommand createMedicationCommandWithPack(String profileId,
+                                                                          String rrule,
+                                                                          String stratDate,
+                                                                          CreateMedicationPack createMedicationPack) {
         return new CreateMedicationCommand.Builder()
                 .profileId(profileId)
                 .medicationName("Paracetamol")
                 .medicationUnit("TABLET")
                 .medicationMeasurement("CAPSULE")
                 .medicationNote("Take on time")
-                .schedule(createMedSchedule(rrule,stratDate))
+                .schedule(createMedSchedule(rrule,stratDate, null))
                 .medicationPack(createMedicationPack)
                 .build();
     }
@@ -63,18 +63,27 @@ public class MedicationStubFactory {
 
         LocalDateTime mockLastUntilWindow = LocalDateTime.now().plusDays(1);
 
+        final LocalDate startDate = LocalDate.parse(cmd.getSchedule().startDate(), formatter);
+
+        final LocalDate endDate = cmd.getSchedule().endDate() != null ?
+                LocalDate.parse(cmd.getSchedule().endDate(), formatter) : null;
+
         MedicationSchedule medicationSchedule = new MedicationSchedule(
                 null,
                 new BigDecimal(cmd.getSchedule().dosage()),
                 cmd.getSchedule().recurrenceRule(),
-                LocalDate.parse(cmd.getSchedule().startDate(), formatter),
+                startDate,
+                endDate,
                 cmd.getSchedule().timeZone(),
                 new BigDecimal("0"),
                 mockLastUntilWindow
         );
+
         medicationSchedule.updateStartTime(LocalDateTime.now());
+
         createScheduleEvents().forEach(medicationSchedule::addScheduleEvent);
         return medicationSchedule;
+
     }
 
     public static MedicationProfileEntity createMedicationProfileEntity(
@@ -97,11 +106,14 @@ public class MedicationStubFactory {
         return mpe;
     }
 
-    private static CreateMedSchedule createMedSchedule(String rrule, String startDate) {
+    private static CreateMedSchedule createMedSchedule(String rrule,
+                                                       String startDate,
+                                                       String endDate) {
         return new CreateMedSchedule(
                 "1.2",
                 rrule,
                 startDate,
+                endDate,
                 "Europe/Moscow"
         );
     }
