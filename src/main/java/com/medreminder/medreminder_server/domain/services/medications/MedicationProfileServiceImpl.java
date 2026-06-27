@@ -311,8 +311,8 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                 managedMedicationProfile.getMedication().getName(),
                 "",
                 managedMedicationProfile.getId(),
-                null,
-                null
+                managedMedicationProfile.getMedicationSchedule().getDoseQuantity().toPlainString(),
+                managedMedicationProfile.getMedication().getMeasurement()
         );
     }
 

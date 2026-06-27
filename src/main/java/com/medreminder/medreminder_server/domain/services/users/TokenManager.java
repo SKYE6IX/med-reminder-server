@@ -1,7 +1,7 @@
 package com.medreminder.medreminder_server.domain.services.users;
 
 import com.medreminder.medreminder_server.application.dtos.user.AuthResponse;
-import com.medreminder.medreminder_server.application.security.AppleTokenVerifier;
+import com.medreminder.medreminder_server.application.security.AppleAuth;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
 import com.medreminder.medreminder_server.infrastructure.entity.users.RefreshTokenEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
@@ -12,10 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -25,17 +23,17 @@ public class TokenManager {
 
     private final JwtUtil jwtUtil;
     private final JpaRefreshTokenRepository jpaRefreshTokenRepository;
-    private final AppleTokenVerifier appleTokenVerifier;
+    private final AppleAuth appleAuth;
 
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder().withoutPadding();
 
     public TokenManager(JwtUtil jwtUtil,
                         JpaRefreshTokenRepository jpaRefreshTokenRepository,
-                        AppleTokenVerifier appleTokenVerifier) {
+                        AppleAuth appleAuth) {
         this.jwtUtil = jwtUtil;
         this.jpaRefreshTokenRepository = jpaRefreshTokenRepository;
-        this.appleTokenVerifier = appleTokenVerifier;
+        this.appleAuth = appleAuth;
     }
 
     public String generateAccessToken(String userEmail, String userId) {
@@ -100,10 +98,6 @@ public class TokenManager {
         return new AuthResponse(userEntity.getId(), userEntity.getEmail(), accessToken, refreshToken);
     }
 
-    public boolean validateAppleToken(String token) {
-        return appleTokenVerifier.verifyToken(token);
-    }
-
     public int generatePasswordResetRawToken() {
         Random random = new Random();
         return 100000 + random.nextInt(900000);
@@ -115,6 +109,26 @@ public class TokenManager {
 
     public boolean validatePasswordResetToken(String rawToken, String hashToken) {
       return hashToken(rawToken).equals(hashToken);
+    }
+
+    public boolean validateAppleToken(String token) {
+        return appleAuth.verifyToken(token);
+    }
+
+    public String getAppleRevokeToken(String authorizationCode) {
+        try {
+            return appleAuth.exchangeCodeForRefreshToken(authorizationCode).refreshToken();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void revokeAppleToken(String token) {
+        try {
+            appleAuth.revokeAppleUserToken(token);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 //    HELPER METHODS.

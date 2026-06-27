@@ -116,56 +116,76 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse authorizeUserWithSocial(SocialAuthRequest socialAuthRequest) {
 
-        boolean isAppleTokenValid = tokenManager
+        final boolean isAppleTokenValid = tokenManager
                 .validateAppleToken(socialAuthRequest.jwtToken());
 
         if(!isAppleTokenValid) {
             throw new BadCredentialsException("Invalid token from social authentication!");
         }
-
-        UserEntity user = userRepository.findUserByProviderId(socialAuthRequest.providerId())
+//        Check if user already sign up with social using their
+//        providerId.
+        UserEntity user = userRepository
+                .findUserByProviderId(socialAuthRequest.providerId())
                 .orElse(null);
 
-//        If user null, mean this user is new
+//        If user null, it means this the first time user,
+//        is using a social media authorization.
         if(user == null) {
+            final String revokeToken = tokenManager
+                    .getAppleRevokeToken(socialAuthRequest.authorizationCode());
 
-            RegisterUserRequest registerUserRequest = new RegisterUserRequest(
-                    socialAuthRequest.email(),
-                    socialAuthRequest.fullName(),
-                    null
-            );
+//            For some random reason, user that already exist decided to use
+//            the social authentication. We check if the incoming email exist
+//            and update their data.
+            UserEntity userWithEmailExist = userRepository
+                    .findUserByEmail(socialAuthRequest.email())
+                    .orElse(null);
 
-            UserEntity newUser = userService.createUser(registerUserRequest,
-                    UserProvider.valueOf(socialAuthRequest.provider()));
-            newUser.setProviderId(socialAuthRequest.providerId());
+            if(userWithEmailExist != null) {
+                userWithEmailExist.setProvider(socialAuthRequest.provider());
+                userWithEmailExist.setProviderId(socialAuthRequest.providerId());
+                userWithEmailExist.setAppleRevokeToken(revokeToken);
 
-            String accessToken = tokenManager.generateAccessToken(newUser.getEmail(),
-                    newUser.getId());
-            String refreshToken = tokenManager.generateRefreshToken();
+                String accessToken = tokenManager.generateAccessToken(userWithEmailExist.getEmail(),
+                        userWithEmailExist.getId());
+                String refreshToken = tokenManager.generateRefreshToken();
 
-            newUser.updateLastLoginAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+                userWithEmailExist.updateLastLoginAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+                tokenManager.storeRefreshToken(refreshToken,userWithEmailExist);
+                userRepository.saveUser(userWithEmailExist);
+                return new AuthResponse(userWithEmailExist.getId(), userWithEmailExist.getEmail(), accessToken, refreshToken);
+            } else {
+                RegisterUserRequest registerUserRequest = new RegisterUserRequest(
+                        socialAuthRequest.email(),
+                        socialAuthRequest.fullName(),
+                        null
+                );
 
-            tokenManager.storeRefreshToken(refreshToken,newUser);
+                UserEntity newUser = userService.createUser(registerUserRequest,
+                        UserProvider.valueOf(socialAuthRequest.provider()));
+                newUser.setProviderId(socialAuthRequest.providerId());
+                newUser.setAppleRevokeToken(revokeToken);
 
-            userRepository.saveUser(newUser);
+                String accessToken = tokenManager.generateAccessToken(newUser.getEmail(),
+                        newUser.getId());
+                String refreshToken = tokenManager.generateRefreshToken();
 
-            return new AuthResponse(newUser.getId(), newUser.getEmail(), accessToken, refreshToken);
+                newUser.updateLastLoginAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+                tokenManager.storeRefreshToken(refreshToken,newUser);
+                userRepository.saveUser(newUser);
+                return new AuthResponse(newUser.getId(), newUser.getEmail(), accessToken, refreshToken);
+            }
         }
 
 //        If user is found with the providerId, then this user exist.
         tokenManager.revokeRefreshToken(user.getId());
-
         String accessToken = tokenManager.generateAccessToken(user.getEmail(),
                 user.getId());
-
         String refreshToken = tokenManager.generateRefreshToken();
 
         user.updateLastLoginAt(LocalDateTime.now());
-
         tokenManager.storeRefreshToken(refreshToken,user);
-
         userRepository.saveUser(user);
-
         return new AuthResponse(user.getId(), user.getEmail(), accessToken, refreshToken);
     }
 
@@ -223,6 +243,7 @@ public class AuthServiceImpl implements AuthService {
         domainUser.updatePassword(newPasswordHash);
 
         existingUser.syncUserData(domainUser);
+        existingUser.redeemPasswordResetToken();
 
         // Revoked the existing token
         tokenManager.revokeRefreshToken(domainUser.getId());

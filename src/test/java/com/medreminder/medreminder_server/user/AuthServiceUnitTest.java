@@ -57,7 +57,7 @@ public class AuthServiceUnitTest {
         SubscriptionMapper subscriptionMapper = new SubscriptionMapper();
         JwtUtil jwtUtil = new JwtUtil(env);
         S3Service s3Service = new S3Service(null);
-        UserService userService = new UserServiceImpl(userRepository, userMapper, subscriptionMapper,s3Service);
+        UserService userService = new UserServiceImpl(userRepository, userMapper, subscriptionMapper,s3Service, null);
         TokenManager tokenManager = new TokenManager(jwtUtil, jpaRefreshTokenRepository,null);
 
         userMapper = new UserMapper();

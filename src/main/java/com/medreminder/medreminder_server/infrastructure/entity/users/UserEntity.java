@@ -46,6 +46,9 @@ public class UserEntity {
     @Column(name = "provider_id")
     private String providerId;
 
+    @Column(name = "apple_revoke_token")
+    private String appleRevokeToken;
+
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
@@ -158,6 +161,10 @@ public class UserEntity {
         return providerId;
     }
 
+    public String getAppleRevokeToken() {
+        return appleRevokeToken;
+    }
+
     public LocalDateTime getLastLoginAt() {
         return lastLoginAt;
     }
@@ -198,8 +205,16 @@ public class UserEntity {
         this.subscription = subscription;
     }
 
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
     public void setProviderId(String providerId) {
         this.providerId = providerId;
+    }
+
+    public void setAppleRevokeToken(String appleRevokeToken) {
+        this.appleRevokeToken = appleRevokeToken;
     }
 
     public void updateLastLoginAt(LocalDateTime lastLoginAt) {

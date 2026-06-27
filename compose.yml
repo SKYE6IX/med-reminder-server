@@ -12,7 +12,10 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - PGSSLROOTCERT=${PGSSLROOTCERT}
       - MED_REMINDER_JWT_KEY=${MED_REMINDER_JWT_KEY}
-      - MED_REMINDER_APPLE_CLIENT_ID=${MED_REMINDER_APPLE_CLIENT_ID}
+      - APPLE_TEAM_ID=${APPLE_TEAM_ID}
+      - APPLE_KEY_ID=${APPLE_KEY_ID}
+      - APPLE_BUNDLE_ID=${APPLE_BUNDLE_ID}
+      - APPLE_PRIVATE_KEY_PATH=${APPLE_PRIVATE_KEY_PATH}
       - YC_S3_KEY_ID=${YC_S3_KEY_ID}
       - YC_S3_SECRET_KEY=${YC_S3_SECRET_KEY}
       - YC_S3_BUCKET=${YC_S3_BUCKET}
@@ -25,3 +28,4 @@ services:
       - MAIL_PASSWORD=${MAIL_PASSWORD}
     volumes:
       - /Users/azeezabiola/.cloud-certs/root.crt:/Users/azeezabiola/.cloud-certs/root.crt:ro
+      - /Users/azeezabiola/AuthKey_236N7KRQ35.p8:/Users/azeezabiola/AuthKey_236N7KRQ35.p8:ro

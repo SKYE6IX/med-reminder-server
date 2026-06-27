@@ -1,7 +1,7 @@
 package com.medreminder.medreminder_server.application.config;
 
 
-import com.medreminder.medreminder_server.application.security.AppleTokenVerifier;
+import com.medreminder.medreminder_server.application.security.AppleAuth;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
 import com.medreminder.medreminder_server.application.services.EmailService;
 import com.medreminder.medreminder_server.application.services.PaymentService;
@@ -16,30 +16,25 @@ import com.medreminder.medreminder_server.infrastructure.entity.medications.Medi
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import com.medreminder.medreminder_server.infrastructure.repository.users.JpaRefreshTokenRepository;
-import jakarta.annotation.PostConstruct;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.interceptor.*;
+import org.springframework.web.client.RestClient;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
@@ -59,9 +54,12 @@ public class AppConfig {
                             UserMapper userMapper,
                             SubscriptionMapper subscriptionMapper,
                             S3Service s3Service,
+                            AppleAuth appleAuth,
                             TransactionInterceptor txInterceptor ) {
 
-        UserService userService = new UserServiceImpl(userRepository, userMapper,subscriptionMapper,s3Service);
+        UserService userService = new UserServiceImpl(userRepository,
+                userMapper,subscriptionMapper,s3Service,appleAuth);
+
         return createProxyFactory(userService,UserService.class, txInterceptor);
     }
 
@@ -130,7 +128,7 @@ public class AppConfig {
     @Bean
     TokenManager tokenManager(JwtUtil jwtUtil,
                               JpaRefreshTokenRepository jpaRefreshTokenRepository,
-                              AppleTokenVerifier appleTokenVerifier) {
+                              AppleAuth appleTokenVerifier) {
         return new TokenManager(jwtUtil, jpaRefreshTokenRepository, appleTokenVerifier);
     }
 
@@ -145,6 +143,13 @@ public class AppConfig {
                                         env.getProperty("yc.s3.key.id"),env.getProperty("yc.s3.secret.key"))
                         )
                 )
+                .build();
+    }
+
+    @Bean
+    public RestClient appleRestClient() {
+        return RestClient.builder()
+                .baseUrl("https://appleid.apple.com")
                 .build();
     }
 

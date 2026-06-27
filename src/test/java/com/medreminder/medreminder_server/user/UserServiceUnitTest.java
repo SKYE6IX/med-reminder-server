@@ -38,7 +38,7 @@ public class UserServiceUnitTest {
         userMapper = new UserMapper();
         SubscriptionMapper subscriptionMapper = new SubscriptionMapper();
         S3Service s3Service = new S3Service(null);
-        userService = new UserServiceImpl(userRepository, userMapper, subscriptionMapper, s3Service);
+        userService = new UserServiceImpl(userRepository, userMapper, subscriptionMapper, s3Service, null);
     }
 
     @Test

@@ -2,6 +2,8 @@ package com.medreminder.medreminder_server.domain.services.users;
 
 import com.medreminder.medreminder_server.application.dtos.user.*;
 import com.medreminder.medreminder_server.application.exceptions.ResourceNotFoundException;
+import com.medreminder.medreminder_server.application.exceptions.UserAlreadyExistsException;
+import com.medreminder.medreminder_server.application.security.AppleAuth;
 import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.models.subscription.Plan;
 import com.medreminder.medreminder_server.domain.models.subscription.PlanType;
@@ -28,20 +30,34 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final SubscriptionMapper subscriptionMapper;
     private final S3Service s3Service;
+    private final AppleAuth appleAuth;
 
     public UserServiceImpl(UserRepository userRepository,
                            UserMapper userMapper,
                            SubscriptionMapper subscriptionMapper,
-                           S3Service s3Service) {
+                           S3Service s3Service,
+                           AppleAuth appleAuth) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.subscriptionMapper = subscriptionMapper;
         this.s3Service = s3Service;
+        this.appleAuth = appleAuth;
     }
 
     @Override
     public UserEntity createUser(RegisterUserRequest registerUserRequest,
                            UserProvider userProvider) {
+
+//        To make sure we don't try to create user that
+//        already exist with a particular email, we should
+//        check early and then return the right error.
+        UserEntity userWithEmailExist = userRepository
+                .findUserByEmail(registerUserRequest.getEmail())
+                .orElse(null);
+
+        if(userWithEmailExist != null) {
+            throw new UserAlreadyExistsException(registerUserRequest.getEmail());
+        }
 
         User user = new User(null,
                 registerUserRequest.getEmail(),
@@ -171,11 +187,19 @@ public class UserServiceImpl implements UserService {
         userRepository.saveUser(managedUser);
     }
 
-
     @Override
     public void deleteUser(String userId) {
-
         UserEntity managedUser = getUserEntity(userId);
+
+//        Revoke app from user Apple's account.
+        if(managedUser.getProvider().equals(UserProvider.APPLE.toString())){
+            try {
+                appleAuth.revokeAppleUserToken(managedUser.getAppleRevokeToken());
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
         managedUser.getProfiles()
                 .forEach(profileEntity -> {
                     if(profileEntity.getAvatarUrl() != null) {
