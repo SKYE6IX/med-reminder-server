@@ -62,8 +62,7 @@ public class MedicationScheduleEventBatchConfig {
                 .plusDays(1);
 
         LocalDateTime start = tomorrow.atStartOfDay();
-        LocalDateTime end   = tomorrow.plusDays(1).atStartOfDay();
-
+        LocalDateTime end = tomorrow.plusDays(1).atStartOfDay();
 
         return new JpaCursorItemReaderBuilder<MedicationScheduleEntity>()
                 .name("medication_schedule_reader")

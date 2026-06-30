@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import org.hibernate.annotations.*;
 
+import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class MedicationProfileEntity {
     @Column(name = "is_active")
     private boolean isActive;
 
+    @JdbcTypeCode(Types.LONGVARCHAR)
     private String note;
 
     @Column(name = "medication_reason")

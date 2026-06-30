@@ -1,4 +1,4 @@
-h1:zZYFc9Y3t1n/x0QutnAmngCV7K9xg3Vxgjmp0AhiwRg=
+h1:c6YlOmV8urnPELieMYfdyGgF76Vj2Ljlw4OYx0cDxVI=
 V20260228073530__init.sql h1:piXArQxcJfIl7pYmCksBYrIt7/wLOZlA2GLKur4R25o=
 V20260302125020__update_id_field.sql h1:WNMv2fnX/SKEPIp1ozI+J8iZgdamH5XD3O7KwXP7vvE=
 V20260303101307__update_email_field.sql h1:YdfzWuxYWKQQQOrDqVr+gIM2EgxMwuyTfe/bg+GzTso=
@@ -40,3 +40,4 @@ V20260619102309__update_refresh_token_table_name.sql h1:RUQ5QaC7ZcQK8GKLq1ThH2kP
 V20260624081004__added_endtime_feild.sql h1:h1EzBCQWxvWJC2WPzoxLxpZcsUvr12b9XSp77/HKUls=
 V20260625081420__update_exipire_field_on_token.sql h1:fSY8RjniRB6ME/9Zu5b0w3S/s03/24QJZkastaKmf+E=
 V20260627103214__added_apple_revoke_token_field.sql h1:+BkDTmKRe5lA6WrU9ShdGyxqpBJX5/SQt1wbnrZElJU=
+V20260628093615__increase_note_varchar_length.sql h1:Uov0WQ88ERq+JkQo757NRlT4XgOnsWBF37yQRQZsz4Y=
