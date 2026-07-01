@@ -175,7 +175,6 @@ public class MedicationMapper {
     }
 
     public MedicationPack toDomain(MedicationPackEntity medicationPack) {
-
         if(medicationPack == null) return null;
 
         return new MedicationPack(

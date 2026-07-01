@@ -40,9 +40,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             token = authHeader.substring(7);
             try {
                 email = jwtUtil.extractEmail(token);
-
             } catch (ExpiredJwtException ex){
-
                 System.out.println("Error message: " + ex.getMessage());
             }
         }
@@ -61,6 +59,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
-        filterChain.doFilter(request,response);
+
+
+        filterChain.doFilter(request, response);
     }
 }

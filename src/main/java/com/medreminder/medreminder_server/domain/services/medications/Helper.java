@@ -4,6 +4,7 @@ import com.medreminder.medreminder_server.application.dtos.medication.*;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
 import com.medreminder.medreminder_server.domain.models.medication.*;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
+import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationPackEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
@@ -83,7 +84,6 @@ public class Helper {
 //        anymore medication profile. This is the case for when user delete their medication
 //        profile.
         if(domainMedicationProfiles.isEmpty()) {
-
 //            If the list is empty, we need to make sure that the managed also is.
             managedProfile.getMedicationProfile().clear();
         } else {
@@ -102,27 +102,6 @@ public class Helper {
         }
     }
 
-    public static void syncMedicationPack(MedicationProfileEntity managedMedicationProfile,
-                                          MedicationPack medicationPack) {
-        managedMedicationProfile.getMedicationPacks()
-                .stream()
-                .filter(mpe->  mpe.getId().equals(medicationPack.getId()))
-                .findFirst()
-                .ifPresent(mpe-> mpe.updateMedicationPack(medicationPack));
-    }
-
-    public static MedicationPack getPackByStatus(MedicationProfileEntity managedMedicationProfile,
-                                                 String status,
-                                                 MedicationMapper medicationMapper) {
-        return  managedMedicationProfile
-                .getMedicationPacks()
-                .stream()
-                .filter(mpe -> mpe.getStatus().equals(status))
-                .findFirst()
-                .map(medicationMapper::toDomain)
-                .orElse(null);
-    }
-
     public static MedicationProfileResponse getMedicationProfileResponse(MedicationProfileEntity smp) {
         return getMedicationProfileResponse(smp, smp.getProfile());
     }
@@ -130,7 +109,6 @@ public class Helper {
     public static MedicationProfileResponse getMedicationProfileResponse(MedicationProfileEntity smp,
                                                                    ProfileEntity profileEntity) {
         String status = smp.isActive() ? "active" : "in_active";
-
 //        Create a new Medication profile response object
         MedicationProfileResponse response = new MedicationProfileResponse(
                 smp.getId(),
@@ -170,14 +148,54 @@ public class Helper {
                     .filter(packEntity -> packEntity.getStatus().equals("ACTIVE"))
                     .findFirst()
                     .ifPresent(medicationPack -> {
-                        PackResponse packResponse = new PackResponse(
-                                medicationPack.getTotalQuantity().stripTrailingZeros().toPlainString(),
-                                medicationPack.getCurrentQuantity().stripTrailingZeros().toPlainString(),
-                                medicationPack.getReminderDays()
-                                );
-                        response.setPack(packResponse);
+                        response.setPack(medicationPack.getTotalQuantity().stripTrailingZeros().toPlainString(),
+                                medicationPack.getCurrentQuantity().stripTrailingZeros().toPlainString() );
                     });
         }
         return response;
+    }
+
+    public static void syncMedicationPack(MedicationProfileEntity managedMedicationProfile,
+                                          MedicationPack medicationPack) {
+        managedMedicationProfile.getMedicationPacks()
+                .stream()
+                .filter(mpe->  mpe.getId().equals(medicationPack.getId()))
+                .findFirst()
+                .ifPresent(mpe-> mpe.updateMedicationPack(medicationPack));
+    }
+
+    public static MedicationPack getMedicationPackByStatus(MedicationProfileEntity managedMedicationProfile,
+                                                           String status,
+                                                           MedicationMapper medicationMapper) {
+        return managedMedicationProfile
+                .getMedicationPacks()
+                .stream()
+                .filter(mpe -> mpe.getStatus().equals(status))
+                .findFirst()
+                .map(medicationMapper::toDomain)
+                .orElse(null);
+    }
+
+    public static MedicationPackResponse getMedicationPackResponse(MedicationPackEntity medicationPack) {
+
+        var medicationProfile = medicationPack.getMedicationProfile();
+
+        String startedAt = medicationPack.getStartedAt() != null ? medicationPack.getStartedAt().toString() : null;
+        String endedAt = medicationPack.getEndedAt() != null ? medicationPack.getEndedAt().toString() : null;
+
+        return new MedicationPackResponse(
+                medicationPack.getId(),
+                medicationPack.getStatus(),
+                startedAt,
+                endedAt,
+                medicationPack.getTotalQuantity().stripTrailingZeros().toPlainString(),
+                medicationPack.getCurrentQuantity().stripTrailingZeros().toPlainString(),
+                medicationPack.isRefilled(),
+                medicationProfile.getId(),
+                medicationProfile.getMedication().getName(),
+                "",
+                medicationProfile.getMedicationSchedule().getDoseQuantity().stripTrailingZeros().toPlainString(),
+                medicationProfile.getMedication().getMeasurement()
+        );
     }
 }

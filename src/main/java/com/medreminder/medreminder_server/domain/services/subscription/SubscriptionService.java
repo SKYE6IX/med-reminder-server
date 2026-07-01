@@ -6,7 +6,7 @@ import com.medreminder.medreminder_server.domain.services.UseCase;
 
 import java.util.Map;
 
-public interface SubscriptionService extends UseCase {
+public interface SubscriptionService {
 
     SubscriptionPlanResponse createPaidSubscriptionPlan(PaidSubscriptionRequest request, String userId);
 

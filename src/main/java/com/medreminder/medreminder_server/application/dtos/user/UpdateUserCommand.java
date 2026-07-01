@@ -1,6 +1,5 @@
 package com.medreminder.medreminder_server.application.dtos.user;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 public class UpdateUserCommand {

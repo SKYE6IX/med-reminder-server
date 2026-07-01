@@ -8,7 +8,7 @@ import com.medreminder.medreminder_server.domain.services.UseCase;
 import java.util.List;
 import java.util.Map;
 
-public interface ScheduleEventService extends UseCase {
+public interface ScheduleEventService {
 
     List<ScheduleEvent> createScheduleEvents(MedicationSchedule schedule);
 

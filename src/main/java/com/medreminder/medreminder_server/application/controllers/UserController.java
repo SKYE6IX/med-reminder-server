@@ -6,7 +6,6 @@ import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
 import com.medreminder.medreminder_server.application.dtos.user.UpdateUserCommand;
 import com.medreminder.medreminder_server.application.dtos.user.UserResponse;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
-import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.services.users.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +31,7 @@ public class UserController {
 
         var principal = getPrincipal(userDetails);
 
-        var response = userService.getUserById(principal.getId());
+        var response = userService.getUser(principal.getId());
 
         return  ResponseEntity.ok(response);
     }
@@ -82,12 +80,15 @@ public class UserController {
     @DeleteMapping(value = "/profiles/{profileId}")
     public ResponseEntity<?> deleteProfile(@AuthenticationPrincipal UserDetails userDetails,
                                         @PathVariable String profileId) {
+
         var principal = getPrincipal(userDetails);
 
       userService.deleteProfile(principal.getId(), profileId);
 
         return ResponseEntity.noContent().build();
     }
+
+
 
     @PostMapping(value = "/profiles/images")
     public ResponseEntity<Map<String, String>> uploadProfileImage(

@@ -44,14 +44,13 @@ public class UserServiceUnitTest {
     @Test
     void shouldCreateUser_thenSaveIt(){
         User snubUser = UserStubData
-                .createUserWithId("test@mail.com","test user", "12345678");
-
+                .createUserWithId("test11@mail.com","test user", "12345678");
 
         when(userRepository.saveUser(any(UserEntity.class)))
                 .thenReturn(userMapper.toEntity(snubUser));
 
         UserEntity user = userService.createUser(
-                new RegisterUserRequest("test@mail.com","test user", "12345678")
+                new RegisterUserRequest("test11@mail.com","test user", "12345678")
                 ,UserProvider.LOCAL);
 
         assertThat(user.getId()).isNotNull().isEqualTo(snubUser.getId());
@@ -64,7 +63,7 @@ public class UserServiceUnitTest {
     @Test
     void shouldUpdateUser_thenSaveIt(){
         User snubUser = UserStubData
-                .createUserWithId("test@mail.com","test user", "12345678");
+                .createUserWithId("test2@mail.com","test user", "12345678");
 
         UpdateUserCommand updateUserCommand = new UpdateUserCommand("updatetest@mail.com",
                 null, "27.07.1992", "Male");
@@ -88,7 +87,7 @@ public class UserServiceUnitTest {
     @Test
     void shouldCreateProfile_thenSaveIt(){
         User snubUser = UserStubData
-                .createUserWithId("test@mail.com","test user", "12345678");
+                .createUserWithId("test3@mail.com","test user", "12345678");
         Profile snubProfile = UserStubData
                 .createProfileWithId("John", Relation.BROTHER.toString(),false);
 
@@ -112,7 +111,7 @@ public class UserServiceUnitTest {
     @Test
     void shouldDeleteProfile_thenSaveIt(){
         User snubUser = UserStubData
-                .createUserWithId("test@mail.com","test user", "12345678");
+                .createUserWithId("test5@mail.com","test user", "12345678");
 
         Profile snubProfile = UserStubData
                 .createProfileWithId("John", Relation.BROTHER.toString(),false);

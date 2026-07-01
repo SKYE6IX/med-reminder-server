@@ -22,9 +22,7 @@ public class MedicationPack {
                           LocalDateTime startedAt,
                           LocalDateTime endedAt,
                           MedicationPackStatus status,
-                          boolean isRefilled
-
-    ) {
+                          boolean isRefilled) {
         this.id = id;
         this.totalQuantity = totalQuantity;
         this.currentQuantity = currentQuantity;

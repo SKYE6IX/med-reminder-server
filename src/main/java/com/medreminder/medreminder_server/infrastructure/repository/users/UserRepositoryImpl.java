@@ -1,11 +1,11 @@
 package com.medreminder.medreminder_server.infrastructure.repository.users;
 
 import com.medreminder.medreminder_server.domain.services.users.UserRepository;
+import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
@@ -40,5 +40,4 @@ public class UserRepositoryImpl implements UserRepository {
     public void deleteUser(String userId) {
         jpaUserRepository.deleteById(userId);
     }
-
 }

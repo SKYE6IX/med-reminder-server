@@ -4,13 +4,15 @@ import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
 
 public class MedicationProfileResponse {
 
+    public record Pack(String totalAmountInPack, String currentAmountInPack) { }
+
     private String id;
     private String medicationName;
     private String medicationUnit;
     private String status;
     private String note;
     private String medicationReason;
-    private PackResponse pack;
+    private Pack pack;
     private ProfileResponse profile;
     private MedScheduleResponse schedule;
 
@@ -63,7 +65,7 @@ public class MedicationProfileResponse {
         return schedule;
     }
 
-    public PackResponse getPack() {
+    public Pack getPack() {
         return pack;
     }
 
@@ -75,8 +77,7 @@ public class MedicationProfileResponse {
         this.schedule = schedule;
     }
 
-    public void setPack(PackResponse pack) {
-        this.pack = pack;
+    public void setPack(String totalAmountInPack, String currentAmountInPack) {
+        this.pack = new Pack(totalAmountInPack, currentAmountInPack);
     }
-
 }

@@ -6,7 +6,7 @@ import com.medreminder.medreminder_server.domain.services.UseCase;
 
 import java.util.Map;
 
-public interface AuthService extends UseCase {
+public interface AuthService {
 
     AuthResponse registerUserWithEmail(RegisterUserRequest request);
 

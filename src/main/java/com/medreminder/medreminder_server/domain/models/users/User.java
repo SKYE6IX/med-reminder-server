@@ -108,11 +108,6 @@ public class User  {
         profile.addUser(this);
     }
 
-    public void removeProfiles(Profile profile) {
-        this.profiles.remove(profile);
-        profile.addUser(null);
-    }
-
     private void updateName(String newName) {
         if(newName == null || newName.isEmpty()){
             throw new IllegalArgumentException("Name cannot be empty");

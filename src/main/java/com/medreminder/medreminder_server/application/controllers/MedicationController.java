@@ -115,33 +115,33 @@ public class MedicationController {
     }
 
     @PostMapping(value = "/packs")
-    public ResponseEntity<Map<String, String>> createMedicationPack(
-            @RequestBody AddMedicationPackRequest addMedicationPackRequest){
+    public ResponseEntity<MedicationPackResponse> createMedicationPack(
+            @RequestBody NewMedicationPackRequest addMedicationPackRequest){
 
-        Map<String, String> response = medicationProfileService
+        MedicationPackResponse response = medicationProfileService
                 .createMedicationPack(addMedicationPackRequest);
 
         return ResponseEntity.ok(response);
     }
 
     @PostMapping(value = "/packs/refill")
-    public ResponseEntity<RefillMedicationPackResponse> refillMedicationPack(
+    public ResponseEntity<MedicationPackResponse> refillMedicationPack(
             @RequestBody RefillMedicationPackRequest refillMedicationPackRequest) {
 
-        RefillMedicationPackResponse response = medicationProfileService
+        MedicationPackResponse response = medicationProfileService
                 .refillMedicationPack(refillMedicationPackRequest);
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(value = "/packs/refill")
-    public ResponseEntity<List<RefillMedicationPackResponse>> getRefillMedicationPacks(
+    @GetMapping(value = "/packs")
+    public ResponseEntity<List<MedicationPackResponse>> getMedicationPacks(
             @AuthenticationPrincipal UserDetails userDetails) {
 
         UserPrincipal principal = (UserPrincipal) userDetails;
 
-        List<RefillMedicationPackResponse> response = medicationProfileService
-                .getRefillMedicationPacks(principal.getId());
+        List<MedicationPackResponse> response = medicationProfileService
+                .getMedicationPacks(principal.getId());
 
         return ResponseEntity.ok(response);
     }

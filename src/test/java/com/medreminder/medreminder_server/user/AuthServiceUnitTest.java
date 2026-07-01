@@ -2,12 +2,12 @@ package com.medreminder.medreminder_server.user;
 
 import com.medreminder.medreminder_server.application.dtos.user.ResetPasswordResponse;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
-import com.medreminder.medreminder_server.application.services.EmailService;
 import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
 import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.models.users.UserProvider;
+import com.medreminder.medreminder_server.domain.services.users.TokenManager;
 import com.medreminder.medreminder_server.domain.services.users.*;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;

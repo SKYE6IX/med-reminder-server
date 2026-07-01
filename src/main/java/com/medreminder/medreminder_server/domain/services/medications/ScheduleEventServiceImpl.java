@@ -37,8 +37,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
         final long MAX_EXPANSION_DAY = schedule.getEndDate() != null ?
                 ChronoUnit.DAYS.between(schedule.getStartDate(), schedule.getEndDate())
-                : 7;
-
+                : 14;
 
 //        When creating, we need to check if we are expanding or starting new.
         final LocalDateTime dateTimeFrom = schedule.getLastExpandedUntil()
@@ -131,7 +130,6 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 .toDomain(managedMedicationProfile.getMedicationSchedule());
 
         if(domainScheduleEvent.getStatus().equals("TAKEN")){
-
             final String timeZone = managedScheduleEvent
                     .getMedicationSchedule()
                     .getTimeZone();
@@ -148,7 +146,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 //            flip to in_active if the currentQuantity is lower than the
 //            incoming dosage.
             if(!managedMedicationProfile.getMedicationPacks().isEmpty()){
-                MedicationPack activeMedicationPack = Helper.getPackByStatus(managedMedicationProfile,
+                MedicationPack activeMedicationPack = Helper.getMedicationPackByStatus(managedMedicationProfile,
                         MedicationPackStatus.ACTIVE.toString(), medicationMapper);
 
                 if(activeMedicationPack != null){
@@ -156,18 +154,17 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                             .subtract(domainScheduleEvent.getDosage());
 
                     if(remainingQuantity.compareTo(BigDecimal.ZERO) <= 0){
-//                      End the pack and start a new one if user refill;
+//                      End the pack and start a new one if user have a refill;
                         activeMedicationPack.updateStatus(MedicationPackStatus.COMPLETED);
-                        activeMedicationPack.updateEndedAt(LocalDateTime.now());
+                        activeMedicationPack.updateEndedAt(LocalDateTime.now(ZoneId.of(timeZone)));
                         Helper.syncMedicationPack(managedMedicationProfile, activeMedicationPack);
 
-//                        Get a pending pack from the list
-                        MedicationPack pendingMedicationPack = Helper.getPackByStatus(managedMedicationProfile,
+//                        Get a pending pack from the list if available
+                        MedicationPack pendingMedicationPack = Helper.getMedicationPackByStatus(managedMedicationProfile,
                                 MedicationPackStatus.PENDING.toString(), medicationMapper);
                         if( pendingMedicationPack != null){
                             BigDecimal newRemainingQuantity = activeMedicationPack
                                     .getCurrentQuantity().add(remainingQuantity);
-
                             pendingMedicationPack.updateStatus(MedicationPackStatus.ACTIVE);
                             pendingMedicationPack.updateCurrentQuantity(newRemainingQuantity);
                             pendingMedicationPack.updateStartedAt(LocalDateTime.now(ZoneId.of(timeZone)));
@@ -179,7 +176,6 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                     }
                 }
             }
-
             final LocalDateTime takenAt = LocalDateTime.now(ZoneId.of(timeZone));
 
             domainScheduleEvent.updateTakenAt(takenAt);

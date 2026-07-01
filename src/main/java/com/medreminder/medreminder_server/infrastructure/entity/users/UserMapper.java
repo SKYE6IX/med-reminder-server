@@ -29,13 +29,14 @@ public class UserMapper {
                 .toList();
 
         userEntity.getProfiles().addAll(profileEntities);
-
        return userEntity;
     }
 
     public ProfileEntity toEntity(Profile profile,
                                   UserEntity userEntity ) {
+
         if (profile == null) return null;
+
         return new ProfileEntity(
                 profile.getId(),
                 profile.getName(),
@@ -71,9 +72,7 @@ public class UserMapper {
     }
 
     public Profile toDomain(ProfileEntity profileEntity) {
-
         if (profileEntity == null) return null;
-
         return new Profile(
                 profileEntity.getId(),
                 profileEntity.getName(),

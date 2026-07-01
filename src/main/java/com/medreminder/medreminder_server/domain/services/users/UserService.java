@@ -9,11 +9,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 
-public interface UserService extends UseCase {
+public interface UserService {
 
     UserEntity createUser(RegisterUserRequest registerUserRequest, UserProvider userProvider);
 
-    UserResponse getUserById(String userId);
+    UserResponse getUser(String userId);
 
     UserResponse updateUser(String userId, UpdateUserCommand updateUserCommand);
 
