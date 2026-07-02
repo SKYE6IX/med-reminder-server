@@ -241,7 +241,8 @@ public class QuartzJobsExecutionTest {
     void markMissedDosageJobShouldExecuteWhenTriggeredManually() throws Exception {
         LocalDate now = LocalDate.now();
         LocalDateTime yesterday = now
-                .minusDays(1).atTime(6,30,0);
+                .minusDays(1).atTime(8,0,0);
+
         ScheduleEventEntity scheduleEventEntity = new ScheduleEventEntity(
                 null,
                 new BigDecimal("2.1"),
@@ -254,7 +255,7 @@ public class QuartzJobsExecutionTest {
 
         markMissedDosageScheduler.triggerJob(JobKey.jobKey("mark_missed_dosage_job_detail"));
 
-        await().atMost(15, SECONDS)
+        await().atMost(10, SECONDS)
                 .untilAsserted(() -> {
                     scheduleEventRepo.findById(savedData.getId())
                             .ifPresent(event-> {
