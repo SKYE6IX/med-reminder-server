@@ -114,6 +114,18 @@ public class MedicationController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping(value = "/packs")
+    public ResponseEntity<List<MedicationPackResponse>> getMedicationPacks(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        UserPrincipal principal = (UserPrincipal) userDetails;
+
+        List<MedicationPackResponse> response = medicationProfileService
+                .getMedicationPacks(principal.getId());
+
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping(value = "/packs")
     public ResponseEntity<MedicationPackResponse> createMedicationPack(
             @RequestBody NewMedicationPackRequest addMedicationPackRequest){
@@ -130,18 +142,6 @@ public class MedicationController {
 
         MedicationPackResponse response = medicationProfileService
                 .refillMedicationPack(refillMedicationPackRequest);
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping(value = "/packs")
-    public ResponseEntity<List<MedicationPackResponse>> getMedicationPacks(
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        UserPrincipal principal = (UserPrincipal) userDetails;
-
-        List<MedicationPackResponse> response = medicationProfileService
-                .getMedicationPacks(principal.getId());
 
         return ResponseEntity.ok(response);
     }

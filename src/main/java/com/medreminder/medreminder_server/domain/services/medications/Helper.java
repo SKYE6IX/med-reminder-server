@@ -49,7 +49,6 @@ public class Helper {
         if( pack == null) {
             return Optional.empty();
         }
-
         MedicationPack medicationPack = new MedicationPack(null,
                 new BigDecimal(pack.totalQuantity()),
                 new BigDecimal(pack.totalQuantity()),
@@ -58,7 +57,6 @@ public class Helper {
                 null,
                 MedicationPackStatus.ACTIVE,
                 false);
-
         return Optional.of(medicationPack);
     }
 
@@ -191,6 +189,7 @@ public class Helper {
                 medicationPack.getTotalQuantity().stripTrailingZeros().toPlainString(),
                 medicationPack.getCurrentQuantity().stripTrailingZeros().toPlainString(),
                 medicationPack.isRefilled(),
+                medicationPack.getReminderDays(),
                 medicationProfile.getId(),
                 medicationProfile.getMedication().getName(),
                 "",
