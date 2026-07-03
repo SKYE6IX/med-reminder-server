@@ -30,6 +30,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -67,11 +69,18 @@ public class MedicationScheduleEventsJobUnitTest {
         Profile snubProfile = UserStubData.createProfileWithId("John",
                 Relation.BROTHER.toString(), false);
 
+        LocalDate today = LocalDate.now(ZoneId.of("Europe/Moscow"));
+        LocalDate startDate = today.minusDays(14);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
         CreateMedicationCommand cmd = MedicationStubFactory
                 .createMedicationCommand(snubProfile.getId(),
-                        "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0", "15.06.2026", null);
+                        "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0", formatter.format(startDate),
+                        null);
+
         Medication stubMed = MedicationStubFactory.createMedication(cmd);
         MedicationSchedule stubMedicationSchedule = MedicationStubFactory.createMedicationSchedule(cmd);
+        stubMedicationSchedule.updateLastExpandedUntil(today.minusDays(7).atTime(14,10));
         MedicationProfileEntity stubMedicationProfile = new MedicationProfileEntity(
                 null,
                 true,
@@ -79,6 +88,7 @@ public class MedicationScheduleEventsJobUnitTest {
                 null,
                 null
         );
+
         stubMedicationProfile.setMedication(medicationMapper.toEntity(stubMed,stubMedicationProfile));
         stubMedicationProfile.setMedicationSchedule(medicationMapper.toEntity(stubMedicationSchedule, stubMedicationProfile));
         medicationRepository.saveMedicationProfile(stubMedicationProfile);

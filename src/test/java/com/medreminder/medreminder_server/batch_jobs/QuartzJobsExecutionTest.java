@@ -44,6 +44,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
@@ -119,16 +120,20 @@ public class QuartzJobsExecutionTest {
 
         scheduleEventRepo.deleteAll();
 
-
         Profile snubProfile = UserStubData.createProfileWithId("John",
                 Relation.BROTHER.toString(), false);
 
+        LocalDate today = LocalDate.now(ZoneId.of("Europe/Moscow"));
+        LocalDate startDate = today.minusDays(14);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
         CreateMedicationCommand cmd = MedicationStubFactory
                 .createMedicationCommand(snubProfile.getId(),
-                        "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0", "15.06.2026", null);
+                        "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0", formatter.format(startDate), null);
 
         Medication stubMed = MedicationStubFactory.createMedication(cmd);
         MedicationSchedule stubMedicationSchedule = MedicationStubFactory.createMedicationSchedule(cmd);
+        stubMedicationSchedule.updateLastExpandedUntil(today.minusDays(7).atTime(14,10));
         MedicationProfileEntity stubMedicationProfile = new MedicationProfileEntity(
                 null,
                 true,
