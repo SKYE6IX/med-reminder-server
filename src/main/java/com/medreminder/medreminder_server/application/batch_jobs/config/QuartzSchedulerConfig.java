@@ -39,7 +39,6 @@ public class QuartzSchedulerConfig {
                         .inTimeZone(TimeZone.getTimeZone(timeZone)))
                 .build();
     }
-
     @Bean
     public JobDetail downgradePlanJobDetail() {
         return JobBuilder.newJob(DowngradePlanScheduler.class)
@@ -85,7 +84,6 @@ public class QuartzSchedulerConfig {
                 .storeDurably()
                 .build();
     }
-
     @Bean
     public Trigger markMissedDosageTrigger(@Qualifier("markMissedDosageJobDetail") JobDetail detail) {
         return TriggerBuilder.newTrigger()

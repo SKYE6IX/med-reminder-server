@@ -111,7 +111,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
     }
 
     @Override
-    public ScheduleEventResponse updateScheduleEvent(String scheduleEventId, Map<String, String> eventBody) {
+    public ScheduleEventResponse logScheduleEvent(String scheduleEventId, Map<String, String> eventBody) {
 
         ScheduleEventEntity managedScheduleEvent = medicationRepository
                 .getScheduleEventById(scheduleEventId);
@@ -150,11 +150,15 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                         MedicationPackStatus.ACTIVE.toString(), medicationMapper);
 
                 if(activeMedicationPack != null){
-                    BigDecimal remainingQuantity = activeMedicationPack.getCurrentQuantity()
-                            .subtract(domainScheduleEvent.getDosage());
+                    BigDecimal availableQuantity = activeMedicationPack.getCurrentQuantity();
+                    BigDecimal dosage = domainScheduleEvent.getDosage();
+                    BigDecimal remainingQuantity = availableQuantity.subtract(dosage);
 
                     if(remainingQuantity.compareTo(BigDecimal.ZERO) <= 0){
 //                      End the pack and start a new one if user have a refill;
+                        BigDecimal overflow = dosage.subtract(availableQuantity);
+
+                        activeMedicationPack.updateCurrentQuantity(BigDecimal.ZERO);
                         activeMedicationPack.updateStatus(MedicationPackStatus.COMPLETED);
                         activeMedicationPack.updateEndedAt(LocalDateTime.now(ZoneId.of(timeZone)));
                         Helper.syncMedicationPack(managedMedicationProfile, activeMedicationPack);
@@ -162,11 +166,12 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 //                        Get a pending pack from the list if available
                         MedicationPack pendingMedicationPack = Helper.getMedicationPackByStatus(managedMedicationProfile,
                                 MedicationPackStatus.PENDING.toString(), medicationMapper);
+
                         if( pendingMedicationPack != null){
-                            BigDecimal newRemainingQuantity = activeMedicationPack
-                                    .getCurrentQuantity().add(remainingQuantity);
+                            BigDecimal pendingPackRemainingQty = pendingMedicationPack
+                                    .getCurrentQuantity().subtract(overflow);
                             pendingMedicationPack.updateStatus(MedicationPackStatus.ACTIVE);
-                            pendingMedicationPack.updateCurrentQuantity(newRemainingQuantity);
+                            pendingMedicationPack.updateCurrentQuantity(pendingPackRemainingQty);
                             pendingMedicationPack.updateStartedAt(LocalDateTime.now(ZoneId.of(timeZone)));
                             Helper.syncMedicationPack(managedMedicationProfile, pendingMedicationPack);
                         }
@@ -177,16 +182,12 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 }
             }
             final LocalDateTime takenAt = LocalDateTime.now(ZoneId.of(timeZone));
-
             domainScheduleEvent.updateTakenAt(takenAt);
         }
 
         managedScheduleEvent.updateScheduleEvent(domainScheduleEvent);
-
         medicationRepository.saveScheduleEvent(managedScheduleEvent);
-
         medicationRepository.saveMedicationProfile(managedMedicationProfile);
-
         return getScheduleEventResponse(managedScheduleEvent);
     }
 

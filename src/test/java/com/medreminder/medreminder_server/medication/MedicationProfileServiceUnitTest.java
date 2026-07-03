@@ -278,7 +278,7 @@ public class MedicationProfileServiceUnitTest {
         updateEventInput.put("action", "TAKEN");
 
         ScheduleEventResponse response = scheduleEventService
-                .updateScheduleEvent(stubScheduleEvent.getId(), updateEventInput);
+                .logScheduleEvent(stubScheduleEvent.getId(), updateEventInput);
 
         verify(medicationRepository).saveScheduleEvent(any(ScheduleEventEntity.class));
         verify(medicationRepository).saveMedicationProfile(any(MedicationProfileEntity.class));

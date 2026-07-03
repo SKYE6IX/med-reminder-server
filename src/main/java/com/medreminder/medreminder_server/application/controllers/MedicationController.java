@@ -82,7 +82,7 @@ public class MedicationController {
     @PutMapping(value = "/schedules/event/{eventId}")
     public ResponseEntity<ScheduleEventResponse> updateScheduleEvent(@PathVariable String eventId,
                                                                      @RequestBody Map<String, String> eventBody) {
-        var response = scheduleEventService.updateScheduleEvent(eventId, eventBody);
+        var response = scheduleEventService.logScheduleEvent(eventId, eventBody);
 
         return ResponseEntity.ok(response);
     }
