@@ -60,7 +60,6 @@ import static org.mockito.Mockito.when;
         MedicationScheduleEventBatchConfig.class,
         DowngradePlanBatchConfig.class,
         RenewPaidPlanBatchConfig.class,
-        MarkMissedDosageBatchConfig.class,
         PurgeStaleTokenBatchConfig.class,
 })
 @ActiveProfiles("test")
@@ -82,10 +81,6 @@ public class QuartzJobsExecutionTest {
     @Autowired
     @Qualifier("renewPaidPlanSchedulerFactoryBean")
     private Scheduler renewPaidPlanScheduler;
-
-    @Autowired
-    @Qualifier("markMissedDosageSchedulerFactoryBean")
-    private Scheduler markMissedDosageScheduler;
 
     @Autowired
     @Qualifier("purgeStaleTokenSchedulerFactoryBean")
@@ -241,34 +236,6 @@ public class QuartzJobsExecutionTest {
                     assertThat(count).isGreaterThan(1);
                 });
     };
-
-    @Test
-    void markMissedDosageJobShouldExecuteWhenTriggeredManually() throws Exception {
-        LocalDate now = LocalDate.now();
-        LocalDateTime yesterday = now
-                .minusDays(1).atTime(8,0,0);
-
-        ScheduleEventEntity scheduleEventEntity = new ScheduleEventEntity(
-                null,
-                new BigDecimal("2.1"),
-                "PENDING",
-                yesterday,
-                null
-        );
-
-        var savedData = scheduleEventRepo.save(scheduleEventEntity);
-
-        markMissedDosageScheduler.triggerJob(JobKey.jobKey("mark_missed_dosage_job_detail"));
-
-        await().atMost(10, SECONDS)
-                .untilAsserted(() -> {
-                    scheduleEventRepo.findById(savedData.getId())
-                            .ifPresent(event-> {
-                                assertThat(event.getStatus()).isEqualTo("MISSED");
-                            });
-                });
-    };
-
 
     @Test
     void purgeStaleTokenJobShouldExecuteWhenTriggeredManually() throws Exception {

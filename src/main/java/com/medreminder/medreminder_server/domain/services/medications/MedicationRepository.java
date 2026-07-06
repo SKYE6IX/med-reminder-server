@@ -15,14 +15,20 @@ public interface MedicationRepository {
 
     void saveScheduleEvent(ScheduleEventEntity scheduleEvent);
 
+    void saveAllScheduledEvent(List<ScheduleEventEntity > scheduleEvents);
+
     ScheduleEventEntity getScheduleEventById(String id);
 
-    List<ScheduleEventEntity> getScheduleEventsByUserIdAndDates(String userId,
-                                                                LocalDateTime startOfDay,
-                                                                LocalDateTime endOfDay);
+    List<ScheduleEventEntity> getScheduleEvents(String userId,
+                                                LocalDateTime startOfDay,
+                                                LocalDateTime endOfDay);
+
     List<ScheduleEventEntity> getUpcomingScheduleEvents(String userId,
-                                                LocalDateTime eventDateFrom,
-                                                int limit);
+                                                        LocalDateTime eventDateFrom,
+                                                        int limit);
+
+    List<ScheduleEventEntity> getOverdueScheduleEvents(String userId,
+                                                       LocalDateTime eventDateFrom);
 
     List<MedicationPackEntity> getAllMedicationPacksByUserId(String userId);
 }

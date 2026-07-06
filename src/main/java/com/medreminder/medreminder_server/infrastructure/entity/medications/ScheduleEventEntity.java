@@ -85,4 +85,7 @@ public class ScheduleEventEntity {
     public void updateDosage(BigDecimal dosage) {
         this.dosage = dosage;
     }
+    public void updateStatus(String status) {
+        this.status = status;
+    }
 }

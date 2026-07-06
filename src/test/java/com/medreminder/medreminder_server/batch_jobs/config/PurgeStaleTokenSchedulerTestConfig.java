@@ -1,7 +1,6 @@
 package com.medreminder.medreminder_server.batch_jobs.config;
 
 
-import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.MarkMissedDosageScheduler;
 import com.medreminder.medreminder_server.application.batch_jobs.quartz_scheduler.PurgeStaleTokenScheduler;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Qualifier;

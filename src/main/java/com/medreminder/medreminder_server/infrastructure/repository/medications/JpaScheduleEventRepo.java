@@ -43,6 +43,18 @@ public interface JpaScheduleEventRepo extends BaseJpaRepository<ScheduleEventEnt
                                                          @Param("eventDayFrom") LocalDateTime eventDayFrom,
                                                          Pageable pageable
                                                          );
+    @Query("""
+    SELECT se FROM SCHEDULE_EVENTS se
+    JOIN se.medicationSchedule s
+    JOIN s.medicationProfile mp
+    JOIN mp.profile p
+    JOIN p.user u
+    WHERE u.id = :userId
+    AND se.status = 'PENDING'
+    AND se.scheduleAt < :eventDayUntil
+    """)
+    List<ScheduleEventEntity> findOverdueScheduleEvents(@Param("userId") String userId,
+                                                        @Param("eventDayUntil") LocalDateTime eventDayUntil);
 
     @Query("""
     SELECT se FROM SCHEDULE_EVENTS se

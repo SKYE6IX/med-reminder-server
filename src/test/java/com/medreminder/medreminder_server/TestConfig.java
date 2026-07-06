@@ -32,7 +32,6 @@ import java.util.Properties;
         MedScheduleEventSchedulerTestConfig.class,
         DowngradePlanSchedulerTestConfig.class,
         RenewPaidPlanSchedulerTestConfig.class,
-        MarkMissedDosageSchedulerTestConfig.class,
         PurgeStaleTokenSchedulerTestConfig.class,
 })
 @ActiveProfiles("test")
@@ -91,11 +90,6 @@ public class TestConfig {
     @Bean
     public RenewPaidPlanJobListener renewPaidPlanListener(){
         return new RenewPaidPlanJobListener();
-    }
-
-    @Bean
-    public MarkMissedDosageJobListener markMissedDosageListener(){
-        return new MarkMissedDosageJobListener();
     }
 
     @Bean

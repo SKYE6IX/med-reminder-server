@@ -15,6 +15,8 @@ public interface ScheduleEventService {
 
     ScheduleEventResponse logScheduleEvent(String scheduleEventId, Map<String, String> eventBody);
 
+    void logOverdueScheduleEvent(String userId, Map<String, String> eventBody);
+
     List<ScheduleEventResponse> getScheduleEvents(String userId, String eventDate);
 
     List<ScheduleEventResponse> getUpcomingScheduleEvents(String userId,

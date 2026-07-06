@@ -30,9 +30,9 @@ public class EmailService {
     private String emailFrom;
 
     public void sendTemplateEmail(String to,
-                                                  String subject,
-                                                  String templateName,
-                                                  Map<String, String> templateModel) {
+                                  String subject,
+                                  String templateName,
+                                  Map<String, String> templateModel) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message,true);

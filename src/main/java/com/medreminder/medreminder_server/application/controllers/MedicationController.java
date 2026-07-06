@@ -114,6 +114,16 @@ public class MedicationController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping(value = "/schedules/overdue")
+    public ResponseEntity<?> updateOverdueScheduleEvents(@AuthenticationPrincipal UserDetails userDetails,
+                                                         @RequestBody Map<String, String> eventBody ){
+        UserPrincipal principal = (UserPrincipal) userDetails;
+
+        scheduleEventService.logOverdueScheduleEvent(principal.getId(),eventBody);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping(value = "/packs")
     public ResponseEntity<List<MedicationPackResponse>> getMedicationPacks(
             @AuthenticationPrincipal UserDetails userDetails) {

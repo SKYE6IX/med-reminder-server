@@ -78,24 +78,6 @@ public class QuartzSchedulerConfig {
     }
 
     @Bean
-    public JobDetail markMissedDosageJobDetail() {
-        return JobBuilder.newJob(MarkMissedDosageScheduler.class)
-                .withIdentity("mark_missed_dosage_job_detail")
-                .storeDurably()
-                .build();
-    }
-    @Bean
-    public Trigger markMissedDosageTrigger(@Qualifier("markMissedDosageJobDetail") JobDetail detail) {
-        return TriggerBuilder.newTrigger()
-                .forJob(detail)
-                .withIdentity("mark_missed_dosage_trigger")
-                .withSchedule(CronScheduleBuilder
-                        .cronSchedule("0 0 3 * * ?")
-                        .inTimeZone(TimeZone.getTimeZone(timeZone)))
-                .build();
-    }
-
-    @Bean
     public JobDetail purgeStaleTokenJobDetail() {
         return JobBuilder.newJob(PurgeStaleTokenScheduler.class)
                 .withIdentity("purge_stale_token_job_detail")

@@ -24,6 +24,10 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
     private final MedicationRepository medicationRepository;
     private final MedicationMapper medicationMapper;
 
+    private final Locale locale = Locale.of("ru-RU");
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+            .localizedBy(locale);
+
     public ScheduleEventServiceImpl(MedicationRepository medicationRepository,
                                     MedicationMapper medicationMapper) {
         this.medicationRepository = medicationRepository;
@@ -192,16 +196,35 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
     }
 
     @Override
-    public List<ScheduleEventResponse> getScheduleEvents(String userId, String eventDate) {
-        final Locale locale = Locale.of("ru-RU");
-        final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-                .localizedBy(locale);
+    public void logOverdueScheduleEvent(String userId, Map<String, String> eventBody) {
 
+        String eventDateUntil = eventBody.get(("eventDateUntil"));
+        if(eventDateUntil == null) {
+            throw new IllegalArgumentException("Event date until cannot be empty!");
+        }
+
+        LocalDateTime until = LocalDate.parse(eventDateUntil, dateFormatter)
+                .atStartOfDay();
+
+        List<ScheduleEventEntity> eventEntities = medicationRepository
+                .getOverdueScheduleEvents(userId, until);
+
+        if(!eventEntities.isEmpty()) {
+            eventEntities.forEach(event -> {
+                event.updateStatus("MISSED");
+            });
+
+            medicationRepository.saveAllScheduledEvent(eventEntities);
+        }
+    }
+
+    @Override
+    public List<ScheduleEventResponse> getScheduleEvents(String userId, String eventDate) {
         LocalDateTime startOfDay = LocalDate.parse(eventDate, dateFormatter).atStartOfDay();
         LocalDateTime endOfDay = LocalDate.parse(eventDate, dateFormatter).atTime(LocalTime.MAX);
 
         List<ScheduleEventEntity> scheduleEvents = medicationRepository
-                .getScheduleEventsByUserIdAndDates(userId, startOfDay, endOfDay);
+                .getScheduleEvents(userId, startOfDay, endOfDay);
 
         return scheduleEvents
                 .stream()
