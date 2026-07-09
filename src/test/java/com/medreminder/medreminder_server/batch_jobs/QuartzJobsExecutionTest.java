@@ -146,11 +146,11 @@ public class QuartzJobsExecutionTest {
         medScheduleEventScheduler.triggerJob(JobKey.jobKey("medication_schedule_event_job_detail"));
 
         await().atMost(10, SECONDS)
-                .untilAsserted(() ->{
+                .untilAsserted(() -> {
                     long count = scheduleEventRepo.count();
                     assertThat(count).isGreaterThan(totalEventsBeforeJob);
                 }
-                );
+        );
     }
 
     @Test
@@ -173,7 +173,7 @@ public class QuartzJobsExecutionTest {
 
         var stubPeriod = SubscriptionServiceStubFactory
                 .createSubscriptionPeriod(null,
-                        LocalDateTime.now().minusYears(1), LocalDateTime.now().minusDays(1));
+                        LocalDateTime.now().minusYears(1),LocalDateTime.now().minusDays(1));
 
         var stubPeriodEntity = subscriptionMapper
                 .toEntity(stubPeriod, stubSubscriptionEntity);

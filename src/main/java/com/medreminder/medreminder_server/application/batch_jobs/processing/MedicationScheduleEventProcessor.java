@@ -41,6 +41,7 @@ public class MedicationScheduleEventProcessor implements ItemProcessor<Medicatio
                 .toList();
 
         scheduleEntity.updateMedicationSchedule(domainMedicationSchedule);
+
         scheduleEntity.getScheduleEvents().addAll(newWindowEvents);
 
         log.info("Added new schedule events window ({})", newWindowEvents);

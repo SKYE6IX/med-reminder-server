@@ -62,7 +62,7 @@ public class PurgeStaleTokenBatchConfig {
                         AND rt.expiredAt < :cutoffDate
                         """)
                 .parameterValues(Map.of(
-                        "cutoffDate", LocalDateTime.now(ZoneId.of("Europe/Moscow")).minusWeeks(2)
+                        "cutoffDate",LocalDateTime.now(ZoneId.of("Europe/Moscow")).minusWeeks(2)
                 ))
                 .build();
     }

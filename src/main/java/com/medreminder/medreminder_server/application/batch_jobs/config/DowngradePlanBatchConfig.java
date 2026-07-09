@@ -61,8 +61,6 @@ public class DowngradePlanBatchConfig {
     @Bean
     public JpaCursorItemReader<SubscriptionPeriodEntity> downgradePlanReader(EntityManagerFactory entityManagerFactory){
         LocalDate now = LocalDate.now(ZoneId.of("Europe/Moscow"));
-
-        LocalDateTime startOfYesterday = now.minusDays(1).atStartOfDay();
         LocalDateTime startOfToday = now.atStartOfDay();
 
         return new JpaCursorItemReaderBuilder<SubscriptionPeriodEntity>()
@@ -73,12 +71,10 @@ public class DowngradePlanBatchConfig {
                     FROM SUBSCRIPTION_PERIODS sp
                     JOIN sp.subscription s
                     WHERE s.status = 'CANCELED'
-                        AND sp.endTime >= :startOfYesterday
                         AND sp.endTime < :startOfToday
                         AND sp.status = 'ACTIVE'
                     """)
                 .parameterValues(Map.of(
-                        "startOfYesterday", startOfYesterday,
                         "startOfToday", startOfToday
                 ))
                 .build();
