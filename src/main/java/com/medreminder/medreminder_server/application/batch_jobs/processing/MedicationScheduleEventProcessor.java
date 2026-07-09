@@ -29,9 +29,8 @@ public class MedicationScheduleEventProcessor implements ItemProcessor<Medicatio
 
     @Override
     public MedicationScheduleEntity process(MedicationScheduleEntity scheduleEntity) {
-        MedicationSchedule domainMedicationSchedule = medicationMapper.toDomain(scheduleEntity);
 
-        System.out.println("Processing Medication Schedule: " + domainMedicationSchedule);
+        MedicationSchedule domainMedicationSchedule = medicationMapper.toDomain(scheduleEntity);
 
         List<ScheduleEventEntity> newWindowEvents = scheduleEventService
                 .createScheduleEvents(domainMedicationSchedule)

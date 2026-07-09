@@ -128,7 +128,7 @@ public class QuartzJobsExecutionTest {
 
         Medication stubMed = MedicationStubFactory.createMedication(cmd);
         MedicationSchedule stubMedicationSchedule = MedicationStubFactory.createMedicationSchedule(cmd);
-        stubMedicationSchedule.updateLastExpandedUntil(today.minusDays(7).atTime(14,10));
+        stubMedicationSchedule.updateLastExpandedUntil(today.minusDays(1).atTime(14,10));
         MedicationProfileEntity stubMedicationProfile = new MedicationProfileEntity(
                 null,
                 true,
@@ -142,12 +142,14 @@ public class QuartzJobsExecutionTest {
         medicationRepository.saveMedicationProfile(stubMedicationProfile);
 
         long totalEventsBeforeJob = scheduleEventRepo.count();
+        System.out.println("Total events before job: " + totalEventsBeforeJob);
 
         medScheduleEventScheduler.triggerJob(JobKey.jobKey("medication_schedule_event_job_detail"));
 
         await().atMost(10, SECONDS)
                 .untilAsserted(() -> {
                     long count = scheduleEventRepo.count();
+                    System.out.println("Total events after job: " + count);
                     assertThat(count).isGreaterThan(totalEventsBeforeJob);
                 }
         );

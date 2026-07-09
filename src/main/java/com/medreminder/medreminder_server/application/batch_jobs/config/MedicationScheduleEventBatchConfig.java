@@ -57,11 +57,8 @@ public class MedicationScheduleEventBatchConfig {
 
     @Bean
     public JpaCursorItemReader<MedicationScheduleEntity> medScheduleEventItemReader(EntityManagerFactory entityManagerFactory){
-        LocalDate today = LocalDate.now(ZoneId.of("Europe/Moscow"));
-        LocalDate targetDate = today.minusDays(7);
-
-        LocalDateTime start = targetDate.atStartOfDay();
-        LocalDateTime end = targetDate.plusDays(1).atStartOfDay();
+        LocalDate now = LocalDate.now(ZoneId.of("Europe/Moscow"));
+        LocalDateTime targetDate = now.plusDays(7).atStartOfDay();
 
         return new JpaCursorItemReaderBuilder<MedicationScheduleEntity>()
                 .name("medication_schedule_reader")
@@ -71,13 +68,11 @@ public class MedicationScheduleEventBatchConfig {
                     FROM MEDICATION_SCHEDULES ms
                     JOIN ms.medicationProfile mp
                     WHERE mp.isActive = true
-                        AND ms.lastExpandedUntil >= :start
-                        AND ms.lastExpandedUntil < :end
+                        AND ms.lastExpandedUntil <= :targetDate
                         AND ms.endDate IS NULL
                     """)
                 .parameterValues(Map.of(
-                        "start", start,
-                        "end", end
+                        "targetDate", targetDate
                 ))
                 .build();
     }

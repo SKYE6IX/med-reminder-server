@@ -79,7 +79,6 @@ public class DowngradePlanBatchConfig {
                 ))
                 .build();
     }
-
     @Bean
     public DowngradePlanProcessor downgradePlanProcessor(SubscriptionMapper subscriptionMapper){
         return new DowngradePlanProcessor(subscriptionMapper);
