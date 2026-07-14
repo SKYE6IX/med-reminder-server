@@ -51,9 +51,9 @@ jobs:
             --username "${{ vars.DOCKER_USERNAME }}" \
             --password-stdin
           
-          docker compose -f med-reminder-compose.yml pull server
+          docker compose -f medremindr-compose.yml pull server
           
-          docker compose -f med-reminder-compose.yml --env-file .env.med-reminder up server -d
+          docker compose -f medremindr-compose.yml --env-file .env.med-reminder up server -d
           
           docker image prune -f
           EOF
