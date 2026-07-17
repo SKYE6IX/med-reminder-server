@@ -19,9 +19,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
-//TODO:
-// Handle failed payment to be retried again the next two days
-// and cancel subscription after that.
 public class RenewPaidPlanProcessor implements ItemProcessor<SubscriptionPeriodEntity, RenewPaidPlanResult> {
 
     private final PaymentService paymentService;
@@ -39,17 +36,18 @@ public class RenewPaidPlanProcessor implements ItemProcessor<SubscriptionPeriodE
 
         Payment processRenewPayment;
 
-        final LocalDateTime now = LocalDateTime.now();
+        final LocalDateTime now = LocalDateTime.now(ZoneId.of(subscriptionEntity.getTimeZone()));
 
         final String billingAmount = SubscriptionServiceHelper
                 .getBillingCycleAmount(BillingCycle.valueOf(subscriptionEntity.getBillingCycle()));
+
         if (billingAmount == null) {
             return null;
         }
 
 //        Return early if subscription last payment failed.
 //          And the next retry day isn't now.
-//        By return null, indicate worker not to do anything.
+//        By return null, it to indicate worker not to do anything.
         if(subscriptionEntity.getBillingRetry()
                 && !subscriptionEntity.getNextRetryBillingAt().isBefore(now)) {
 //            Don't do anything for the particular subscription.
@@ -69,8 +67,8 @@ public class RenewPaidPlanProcessor implements ItemProcessor<SubscriptionPeriodE
 //        We either allowed a retry for second time, or canceled the
 //        subscription if the second time already used.
         if(processRenewPayment == null
-                || processRenewPayment.getStatus().equals(Payment.Status.CANCELED)){
-//            Meaning failed payment is a retry one.
+                || processRenewPayment.getStatus().equals(Payment.Status.CANCELED)) {
+//            Meaning: failed payment is a retry one.
             if(subscriptionEntity.getBillingRetry()){
                 subscriptionEntity.updateStatus(SubscriptionStatus.CANCELED.toString());
                 subscriptionEntity.updateStartedAt(null);
@@ -84,7 +82,7 @@ public class RenewPaidPlanProcessor implements ItemProcessor<SubscriptionPeriodE
                         .ifPresent(period ->
                                 period.updateStatus(SubscriptionPeriodStatus.COMPLETED.toString()));
             } else {
-//                Meaning failed payment isn't a retry one
+//                Meaning: failed payment isn't a retry one
                 subscriptionEntity.updateIsBillingRetry(true);
 //                Retry again in next two days.
                 subscriptionEntity.updateNextRetryBillingAt(now.plusDays(2)
@@ -109,10 +107,11 @@ public class RenewPaidPlanProcessor implements ItemProcessor<SubscriptionPeriodE
             SubscriptionPeriodEntity newPeriodEntity = SubscriptionServiceHelper.createSubscriptionPeriod(
                     subscriptionEntity, subscriptionEntity.getBillingCycle(), subscriptionEntity.getTimeZone()
             );
+
             subscriptionEntity.getPeriods().add(newPeriodEntity);
 
 //            Create a billing. We set subscription period to null here, for later we
-//            get it from saved data and then attached it before saving.
+//            get it from saved data and then attached it to billing before saving.
             BillingEntity newBilling = new BillingEntity(
                     null,
                     new BigDecimal(billingAmount),
@@ -122,8 +121,10 @@ public class RenewPaidPlanProcessor implements ItemProcessor<SubscriptionPeriodE
                     userEntity,
                     null
             );
+
             return new RenewPaidPlanResult(subscriptionEntity, newBilling);
         }
+
 //        We return null and do nothing if none of the above
         return null;
     }

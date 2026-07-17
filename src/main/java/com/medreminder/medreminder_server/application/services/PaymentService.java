@@ -9,10 +9,13 @@ import ru.loolzaaa.youkassa.pojo.Amount;
 import ru.loolzaaa.youkassa.pojo.Currency;
 import ru.loolzaaa.youkassa.processors.PaymentProcessor;
 
+import java.util.UUID;
+
 @Service
 public class PaymentService {
 
     private final PaymentProcessor paymentProcessor;
+
 
     public PaymentService(@Value("${yookassa.shop.id}") String shopId,
                             @Value("${yookassa.secret.key}") String secretKey) {
@@ -24,23 +27,30 @@ public class PaymentService {
     }
 
     public Payment processNewPayment(String paymentToken, String amount) {
+
+        String idempotencyKey = UUID.randomUUID().toString();
+
         return paymentProcessor.create(Payment.builder()
                 .amount(Amount.builder().value(amount).currency(Currency.RUB).build())
                 .paymentToken(paymentToken)
                 .capture(true)
                 .savePaymentMethod(true)
                 .test(true)
-                .build(), null
+                .build(),
+                idempotencyKey
         );
     }
 
     public Payment processRenewPayment(String paymentMethodId, String amount) {
+
+        String idempotencyKey = UUID.randomUUID().toString();
+
         return paymentProcessor.create(Payment.builder()
                 .amount(Amount.builder().value(amount).currency(Currency.RUB).build())
                 .paymentMethodId(paymentMethodId)
                 .capture(true)
                 .build(),
-                null
+                idempotencyKey
         );
     }
 }

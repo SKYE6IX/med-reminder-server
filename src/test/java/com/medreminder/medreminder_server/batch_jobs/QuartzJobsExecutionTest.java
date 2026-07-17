@@ -232,7 +232,7 @@ public class QuartzJobsExecutionTest {
 
         renewPaidPlanScheduler.triggerJob(JobKey.jobKey("renew_paid_plan_job_detail"));
 
-        await().atMost(15, SECONDS)
+        await().atMost(10, SECONDS)
                 .untilAsserted(() -> {
                     long count = jpaSubscriptionPeriodRepo.count();
                     assertThat(count).isGreaterThan(1);
