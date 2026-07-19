@@ -5,6 +5,7 @@ import com.medreminder.medreminder_server.application.exceptions.ResourceNotFoun
 import com.medreminder.medreminder_server.application.exceptions.UserAlreadyExistsException;
 import com.medreminder.medreminder_server.application.security.AppleAuth;
 import com.medreminder.medreminder_server.application.services.S3Service;
+import com.medreminder.medreminder_server.application.services.TelemetryService;
 import com.medreminder.medreminder_server.domain.models.subscription.Plan;
 import com.medreminder.medreminder_server.domain.models.subscription.PlanType;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
@@ -160,8 +161,9 @@ public class UserServiceImpl implements UserService {
                     String url = s3Service.uploadFile(file);
                     map.put("url", url);
                     profileEntity.setAvatarUrl(url);
-                    },
-                        ()-> {throw new ResourceNotFoundException("Profile is not found!");}
+                    },()-> {
+                    throw new ResourceNotFoundException("Profile is not found!");
+                }
                 );
         userRepository.saveUser(managedUser);
         return map;
@@ -177,6 +179,7 @@ public class UserServiceImpl implements UserService {
             try {
                 appleAuth.revokeAppleUserToken(managedUser.getAppleRevokeToken());
             } catch (Exception e) {
+                TelemetryService.captureException(e);
                 System.out.println(e.getMessage());
             }
         }

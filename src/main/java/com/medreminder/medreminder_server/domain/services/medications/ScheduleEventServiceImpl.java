@@ -192,6 +192,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         managedScheduleEvent.updateScheduleEvent(domainScheduleEvent);
         medicationRepository.saveScheduleEvent(managedScheduleEvent);
         medicationRepository.saveMedicationProfile(managedMedicationProfile);
+
         return getScheduleEventResponse(managedScheduleEvent);
     }
 

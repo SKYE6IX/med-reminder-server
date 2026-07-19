@@ -1,5 +1,8 @@
 package com.medreminder.medreminder_server.application.batch_jobs.listener;
 
+import com.medreminder.medreminder_server.application.services.TelemetryService;
+import io.sentry.SentryAttribute;
+import io.sentry.SentryLogLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -20,9 +23,20 @@ public class RenewPaidPlanJobListener implements JobExecutionListener {
 
             log.info("Renew Paid Plan job completed. {} total subscription renewed", count);
 
+            TelemetryService.log(
+                    SentryLogLevel.INFO,
+                    "Renew Paid Plan job completed.",
+                    SentryAttribute.integerAttribute("TotalSubscriptionRenewed", (int) count)
+            );
+
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("Renew Paid Plan job FAILED: {}", jobExecution.getAllFailureExceptions());
-            // Send alert to Slack / PagerDuty / email here
+
+            TelemetryService.log(
+                    SentryLogLevel.ERROR,
+                    "Renew Paid Plan job FAILED.",
+                    SentryAttribute.named("FailureExceptions", jobExecution.getAllFailureExceptions())
+            );
         }
     }
 }

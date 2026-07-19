@@ -4,6 +4,4 @@ import com.medreminder.medreminder_server.infrastructure.entity.billing.BillingE
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 
-public record RenewPaidPlanResult(SubscriptionEntity subscriptionEntity,
-                                  BillingEntity newBillingEntity) {
-}
+public record RenewPaidPlanResult(SubscriptionEntity subscriptionEntity, BillingEntity newBillingEntity) {}

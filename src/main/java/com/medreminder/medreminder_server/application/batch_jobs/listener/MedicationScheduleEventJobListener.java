@@ -1,5 +1,6 @@
 package com.medreminder.medreminder_server.application.batch_jobs.listener;
 
+import com.medreminder.medreminder_server.application.services.TelemetryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -7,6 +8,9 @@ import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.listener.JobExecutionListener;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.stereotype.Component;
+
+import io.sentry.SentryLogLevel;
+import io.sentry.SentryAttribute;
 
 
 @Component
@@ -19,12 +23,22 @@ public class MedicationScheduleEventJobListener implements JobExecutionListener 
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             long count = jobExecution.getStepExecutions().stream()
                     .mapToLong(StepExecution::getWriteCount).sum();
-
             log.info("Medication Schedule Event job completed. {} created coming days events.", count);
+
+            TelemetryService.log(
+                    SentryLogLevel.INFO,
+                    "Medication Schedule Event job completed.",
+                    SentryAttribute.integerAttribute("TotalEventsCreated", (int) count)
+            );
 
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("Medication Schedule Event job FAILED: {}", jobExecution.getAllFailureExceptions());
-            // Send alert to Slack / PagerDuty / email here
+
+            TelemetryService.log(
+                    SentryLogLevel.ERROR,
+                    "Medication Schedule Event job FAILED.",
+                    SentryAttribute.named("FailureExceptions", jobExecution.getAllFailureExceptions())
+            );
         }
     }
 }

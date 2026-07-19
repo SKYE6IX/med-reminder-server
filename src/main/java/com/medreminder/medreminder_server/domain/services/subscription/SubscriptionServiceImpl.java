@@ -120,6 +120,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 //            since we don't recognize the payment method
             throw new PaymentFailedException("Payment failed!");
         }
+
         return null;
     }
 
@@ -143,6 +144,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         Map<String, String> result = new HashMap<>();
         result.put("status", "success");
+
         return result;
     }
 

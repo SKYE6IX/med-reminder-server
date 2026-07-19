@@ -1,5 +1,8 @@
 package com.medreminder.medreminder_server.application.batch_jobs.listener;
 
+import com.medreminder.medreminder_server.application.services.TelemetryService;
+import io.sentry.SentryAttribute;
+import io.sentry.SentryLogLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -19,9 +22,21 @@ public class PurgeStaleTokenJobListener implements JobExecutionListener {
             long count = jobExecution.getStepExecutions().stream()
                     .mapToLong(StepExecution::getWriteCount).sum();
             log.info("Clean up stale refresh token completed. {} token removed.", count);
+
+            TelemetryService.log(
+                    SentryLogLevel.INFO,
+                    "Clean up stale refresh token completed.",
+                    SentryAttribute.integerAttribute("TotalTokenPurge", (int) count)
+            );
+
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
-            log.error("Clean up stale refresh token  job FAILED: {}", jobExecution.getAllFailureExceptions());
-            // Send alert to Slack / PagerDuty / email here
+            log.error("Clean up stale refresh token job FAILED: {}", jobExecution.getAllFailureExceptions());
+
+            TelemetryService.log(
+                    SentryLogLevel.ERROR,
+                    "Clean up stale refresh token job FAILED.",
+                    SentryAttribute.named("FailureExceptions", jobExecution.getAllFailureExceptions())
+            );
         }
     }
 }

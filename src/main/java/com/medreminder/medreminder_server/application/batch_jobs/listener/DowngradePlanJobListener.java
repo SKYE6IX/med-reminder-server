@@ -1,5 +1,8 @@
 package com.medreminder.medreminder_server.application.batch_jobs.listener;
 
+import com.medreminder.medreminder_server.application.services.TelemetryService;
+import io.sentry.SentryAttribute;
+import io.sentry.SentryLogLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -19,9 +22,22 @@ public class DowngradePlanJobListener implements JobExecutionListener {
             long count = jobExecution.getStepExecutions().stream()
                     .mapToLong(StepExecution::getWriteCount).sum();
             log.info("Downgrade Plan job completed. {} total plan downgraded.", count);
+
+            TelemetryService.log(
+                    SentryLogLevel.INFO,
+                    "Downgrade Plan job completed.",
+                    SentryAttribute.integerAttribute("TotalPlanDowngraded", (int) count)
+            );
+
+
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("Downgrade Plan job FAILED: {}", jobExecution.getAllFailureExceptions());
-            // Send alert to Slack / PagerDuty / email here
+
+            TelemetryService.log(
+                    SentryLogLevel.ERROR,
+                    "Downgrade Plan job FAILED.",
+                    SentryAttribute.named("FailureExceptions", jobExecution.getAllFailureExceptions())
+            );
         }
     }
 }

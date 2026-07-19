@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+      - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
     ports:
       - "8080:8080"
     environment:

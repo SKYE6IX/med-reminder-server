@@ -13,6 +13,10 @@ RUN ./mvnw dependency:go-offline -q
 
 COPY src ./src
 
+ARG SENTRY_AUTH_TOKEN
+
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+
 RUN ./mvnw package -DskipTests -q
 
 RUN java -Djarmode=layertools -jar target/*.jar extract --destination extracted

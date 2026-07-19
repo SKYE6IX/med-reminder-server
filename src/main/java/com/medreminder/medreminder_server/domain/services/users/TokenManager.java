@@ -123,14 +123,6 @@ public class TokenManager {
         }
     }
 
-    public void revokeAppleToken(String token) {
-        try {
-            appleAuth.revokeAppleUserToken(token);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 //    HELPER METHODS.
     private RefreshTokenEntity createRefreshTokenEntity(String rawToken, UserEntity userEntity) {
         String hashToken = hashToken(rawToken);;

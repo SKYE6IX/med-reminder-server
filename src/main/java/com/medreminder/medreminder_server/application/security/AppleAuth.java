@@ -62,6 +62,7 @@ public class AppleAuth {
                     .build()
                     .verify(token);
             return verified.getAudience().contains(bundleId);
+
         }catch (Exception e){
             throw new BadCredentialsException("Apple token verification failed!");
         }

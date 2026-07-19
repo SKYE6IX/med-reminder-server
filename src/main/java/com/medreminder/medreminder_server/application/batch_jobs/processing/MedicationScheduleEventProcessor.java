@@ -6,17 +6,12 @@ import com.medreminder.medreminder_server.infrastructure.entity.medications.Medi
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 
 public class MedicationScheduleEventProcessor implements ItemProcessor<MedicationScheduleEntity,
         MedicationScheduleEntity> {
-
-    private static final Logger log = LoggerFactory
-            .getLogger(MedicationScheduleEventProcessor.class);
 
     private final ScheduleEventService scheduleEventService;
     private final MedicationMapper medicationMapper;
@@ -43,7 +38,6 @@ public class MedicationScheduleEventProcessor implements ItemProcessor<Medicatio
 
         scheduleEntity.getScheduleEvents().addAll(newWindowEvents);
 
-        log.info("Added new schedule events window ({})", newWindowEvents);
         return scheduleEntity;
     }
 }
