@@ -18,9 +18,7 @@ public class DowngradePlanJobListener implements JobExecutionListener {
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             long count = jobExecution.getStepExecutions().stream()
                     .mapToLong(StepExecution::getWriteCount).sum();
-
             log.info("Downgrade Plan job completed. {} total plan downgraded.", count);
-
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("Downgrade Plan job FAILED: {}", jobExecution.getAllFailureExceptions());
             // Send alert to Slack / PagerDuty / email here

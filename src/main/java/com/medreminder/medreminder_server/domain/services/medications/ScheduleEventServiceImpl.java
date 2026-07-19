@@ -276,6 +276,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 profile.getName(),
                 profile.getRelation(),
                 profile.isSelf()));
+
         if(managedScheduleEvent.getTakenAt() != null){
             response.setTakenAt(managedScheduleEvent.getTakenAt().toString());
         }
