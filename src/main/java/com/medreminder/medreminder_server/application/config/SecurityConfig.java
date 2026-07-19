@@ -36,6 +36,7 @@ public class SecurityConfig {
                 authorize.requestMatchers("/auth/change-password").authenticated()
                         .requestMatchers("/auth/logout").authenticated()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated())
 
                 .sessionManagement(session ->

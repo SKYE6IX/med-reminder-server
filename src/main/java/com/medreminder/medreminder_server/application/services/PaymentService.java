@@ -16,7 +16,6 @@ public class PaymentService {
 
     private final PaymentProcessor paymentProcessor;
 
-
     public PaymentService(@Value("${yookassa.shop.id}") String shopId,
                             @Value("${yookassa.secret.key}") String secretKey) {
         ApiClient apiClient = ApiClientBuilder
