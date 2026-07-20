@@ -124,6 +124,10 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
             throw new ResourceNotFoundException("Event is not found!");
         }
 
+        if(!managedScheduleEvent.getStatus().equals("PENDING")) {
+            return null;
+        }
+
         MedicationProfileEntity managedMedicationProfile = managedScheduleEvent
                 .getMedicationSchedule().getMedicationProfile();
 
@@ -185,6 +189,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                     }
                 }
             }
+
             final LocalDateTime takenAt = LocalDateTime.now(ZoneId.of(timeZone));
             domainScheduleEvent.updateTakenAt(takenAt);
         }

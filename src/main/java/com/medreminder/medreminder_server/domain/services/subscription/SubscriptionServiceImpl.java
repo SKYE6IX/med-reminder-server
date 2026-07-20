@@ -71,7 +71,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
             if(proccessPayment == null || proccessPayment.getStatus().equals(Payment.Status.CANCELED)){
                 throw new PaymentFailedException("Payment failed!");
-
             } else if (proccessPayment.getStatus().equals(Payment.Status.SUCCEEDED)) {
 
 //            Update the subscription plan
