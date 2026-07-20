@@ -31,6 +31,8 @@ jobs:
           push: true
           file: Dockerfile
           tags: ${{ vars.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
+          build-args: |
+            SENTRY_AUTH_TOKEN=${{ secret.SENTRY_AUTH_TOKEN }}
 
   deploy:
     runs-on: ubuntu-latest
