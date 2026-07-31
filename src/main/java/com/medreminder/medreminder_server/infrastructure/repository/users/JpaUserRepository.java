@@ -9,8 +9,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface JpaUserRepository extends BaseJpaRepository<UserEntity, String> {
-
     Optional <UserEntity> findByEmail(String email);
-
     Optional <UserEntity> findByProviderId(String providerId);
 }

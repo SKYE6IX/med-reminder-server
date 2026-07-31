@@ -18,10 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "USERS")
-@Table(indexes = {
-        @Index(name = "idx_user_email", columnList = "email"),
-        @Index(name = "idx_user_provider_id", columnList = "provider_id")
-})
 public class UserEntity {
     @Id
     @GeneratedValue()
@@ -41,9 +37,12 @@ public class UserEntity {
 
     private String gender;
 
+    @Column(name = "time_zone")
+    private String timeZone;
+
     private String provider;
 
-    @Column(name = "provider_id")
+    @Column(name = "provider_id", unique = true)
     private String providerId;
 
     @Column(name = "apple_revoke_token")
@@ -143,6 +142,10 @@ public class UserEntity {
 
     public String getGender() {
         return gender;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
     }
 
     public LocalDateTime getCreatedAt() {

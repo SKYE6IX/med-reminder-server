@@ -63,59 +63,32 @@ public class AuthServiceImpl implements AuthService {
 
         UserEntity newUser = userService.createUser(request, UserProvider.LOCAL);
 
-//      Generate access token for user
-        String accessToken = tokenManager.generateAccessToken(newUser.getEmail(), newUser.getId());
-
-//       Generate refresh token for user
-        String refreshToken = tokenManager.generateRefreshToken();
-
-        newUser.updateLastLoginAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
-
-        tokenManager.storeRefreshToken(refreshToken, newUser);
-
-        userRepository.saveUser(newUser);
-
-        return new AuthResponse(newUser.getId(), newUser.getEmail(), accessToken, refreshToken);
+        return getAuthResponse(newUser);
     }
 
     @Override
     public AuthResponse loginUserWithEmail(LoginRequest loginRequest){
-
         String email = loginRequest.email();
-
         String password = loginRequest.password();
 
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
         );
-
         UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
-
         if (!auth.isAuthenticated() || userPrincipal == null) {
             throw new BadCredentialsException("Email or password is invalid!");
         }
 
-        tokenManager.revokeRefreshToken(userPrincipal.getId());
-//     Generate new token
-        String accessToken = tokenManager.generateAccessToken(userPrincipal.getEmail(), userPrincipal.getId());
-
-        String refreshToken = tokenManager.generateRefreshToken();
-
         UserEntity loginUser = userRepository.findUserById(userPrincipal.getId())
                 .orElseThrow(()-> new UsernameNotFoundException("User not found: " + email));
 
-        loginUser.updateLastLoginAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+        tokenManager.revokeRefreshToken(loginUser.getId());
 
-        tokenManager.storeRefreshToken(refreshToken,loginUser);
-
-        userRepository.saveUser(loginUser);
-
-        return new AuthResponse(userPrincipal.getId(), userPrincipal.getEmail(), accessToken, refreshToken);
+        return getAuthResponse(loginUser);
     }
 
     @Override
     public AuthResponse authorizeUserWithSocial(SocialAuthRequest socialAuthRequest) {
-
         final boolean isAppleTokenValid = tokenManager
                 .validateAppleToken(socialAuthRequest.jwtToken());
 
@@ -146,52 +119,32 @@ public class AuthServiceImpl implements AuthService {
                 userWithEmailExist.setProviderId(socialAuthRequest.providerId());
                 userWithEmailExist.setAppleRevokeToken(revokeToken);
 
-                String accessToken = tokenManager.generateAccessToken(userWithEmailExist.getEmail(),
-                        userWithEmailExist.getId());
-                String refreshToken = tokenManager.generateRefreshToken();
-
-                userWithEmailExist.updateLastLoginAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
-                tokenManager.storeRefreshToken(refreshToken,userWithEmailExist);
-                userRepository.saveUser(userWithEmailExist);
-                return new AuthResponse(userWithEmailExist.getId(), userWithEmailExist.getEmail(), accessToken, refreshToken);
+                tokenManager.revokeRefreshToken(userWithEmailExist.getId());
+                return getAuthResponse(userWithEmailExist);
             } else {
                 RegisterUserRequest registerUserRequest = new RegisterUserRequest(
                         socialAuthRequest.email(),
                         socialAuthRequest.fullName(),
                         null
                 );
-
                 UserEntity newUser = userService.createUser(registerUserRequest,
                         UserProvider.valueOf(socialAuthRequest.provider()));
+
                 newUser.setProviderId(socialAuthRequest.providerId());
                 newUser.setAppleRevokeToken(revokeToken);
-
-                String accessToken = tokenManager.generateAccessToken(newUser.getEmail(),
-                        newUser.getId());
-                String refreshToken = tokenManager.generateRefreshToken();
-
-                newUser.updateLastLoginAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
-                tokenManager.storeRefreshToken(refreshToken,newUser);
-                userRepository.saveUser(newUser);
-                return new AuthResponse(newUser.getId(), newUser.getEmail(), accessToken, refreshToken);
+                return  getAuthResponse(newUser);
             }
         }
 
-//        If user is found with the providerId, then this user exist.
+//        If user is found with the providerId,
+//        then this user exist.
         tokenManager.revokeRefreshToken(user.getId());
-        String accessToken = tokenManager.generateAccessToken(user.getEmail(),
-                user.getId());
-        String refreshToken = tokenManager.generateRefreshToken();
-
-        user.updateLastLoginAt(LocalDateTime.now());
-        tokenManager.storeRefreshToken(refreshToken,user);
-        userRepository.saveUser(user);
-        return new AuthResponse(user.getId(), user.getEmail(), accessToken, refreshToken);
+        return getAuthResponse(user);
     }
 
     @Override
-    public AuthResponse refreshToken(String token) {
-     return tokenManager.refreshToken(token);
+    public AuthResponse refreshAccessToken(String token) {
+     return tokenManager.refreshAccessToken(token);
     }
 
     @Override
@@ -310,5 +263,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void logoutUser(UserPrincipal userPrincipal) {
       tokenManager.revokeRefreshToken(userPrincipal.getId());
+    }
+
+    private AuthResponse getAuthResponse(UserEntity user) {
+        String accessToken = tokenManager.generateAccessToken(user.getEmail(), user.getId());
+        String refreshToken = tokenManager.generateRawRefreshToken();
+        tokenManager.saveHashRefreshToken(refreshToken, user);
+
+        user.updateLastLoginAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+        userRepository.saveUser(user);
+        return new AuthResponse(user.getId(), user.getEmail(), accessToken, refreshToken);
     }
 }

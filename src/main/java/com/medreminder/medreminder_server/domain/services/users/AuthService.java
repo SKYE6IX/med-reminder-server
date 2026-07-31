@@ -2,7 +2,6 @@ package com.medreminder.medreminder_server.domain.services.users;
 
 import com.medreminder.medreminder_server.application.dtos.user.*;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
-import com.medreminder.medreminder_server.domain.services.UseCase;
 
 import java.util.Map;
 
@@ -14,7 +13,7 @@ public interface AuthService {
 
     AuthResponse authorizeUserWithSocial(SocialAuthRequest socialAuthRequest);
 
-    AuthResponse refreshToken(String token);
+    AuthResponse refreshAccessToken(String token);
 
     ResetPasswordResponse changePassword(String userId, String oldPassword, String newPassword);
 

@@ -38,20 +38,18 @@ public class TokenManager {
 
     public String generateAccessToken(String userEmail, String userId) {
         long now = System.currentTimeMillis();
-
-        return jwtUtil.generateToken(userEmail, userId,
-                "access", new Date(now + 1000 * 60 * 30) );
+        Date expire = new Date(now + 1000 * 60 * 30);
+        return jwtUtil.generateToken(userEmail, userId, "access", expire);
     }
 
-    public String generateRefreshToken() {
+    public String generateRawRefreshToken() {
         return generateRandomToken();
     }
 
-    public void storeRefreshToken(String refreshToken, UserEntity userEntity) {
+    public void saveHashRefreshToken(String refreshToken, UserEntity userEntity) {
         RefreshTokenEntity refreshTokenEntity = createRefreshTokenEntity(refreshToken, userEntity);
         jpaRefreshTokenRepository.save(refreshTokenEntity);
     }
-
 
     public void revokeRefreshToken(String userId) {
         List <RefreshTokenEntity> refreshTokens = jpaRefreshTokenRepository
@@ -62,11 +60,12 @@ public class TokenManager {
                 refreshTokenEntity.setRevoked(true);
                 refreshTokenEntity.updateExpiredAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
             });
+
             jpaRefreshTokenRepository.saveAll(refreshTokens);
         }
     }
 
-    public AuthResponse refreshToken(String token) {
+    public AuthResponse refreshAccessToken(String token) {
         String hashToken = hashToken(token);
 
         RefreshTokenEntity existingRefreshToken =
@@ -85,16 +84,14 @@ public class TokenManager {
         UserEntity userEntity = existingRefreshToken.getUser();
 
         long now = System.currentTimeMillis();
+        Date expire = new Date(now + 1000 * 60 * 30);
         String accessToken = jwtUtil.generateToken(userEntity.getEmail(),
-                userEntity.getId(),
-                "access", new Date(now + 1000 * 60 * 30) );
+                userEntity.getId(), "access",expire);
 
         String refreshToken = generateRandomToken();
 
         RefreshTokenEntity newRefreshToken = createRefreshTokenEntity(refreshToken, userEntity);
-
         jpaRefreshTokenRepository.save(newRefreshToken);
-
         return new AuthResponse(userEntity.getId(), userEntity.getEmail(), accessToken, refreshToken);
     }
 

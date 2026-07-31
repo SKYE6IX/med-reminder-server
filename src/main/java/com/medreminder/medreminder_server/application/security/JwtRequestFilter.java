@@ -36,6 +36,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String email = null;
         String token = null;
 
+
         if(authHeader != null && authHeader.startsWith("Bearer ")){
             token = authHeader.substring(7);
             try {
@@ -59,7 +60,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
-
 
         filterChain.doFilter(request, response);
     }
