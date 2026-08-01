@@ -2,7 +2,6 @@ package com.medreminder.medreminder_server.domain.services.users;
 
 import com.medreminder.medreminder_server.application.dtos.user.*;
 import com.medreminder.medreminder_server.domain.models.users.UserProvider;
-import com.medreminder.medreminder_server.domain.services.UseCase;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,7 +10,9 @@ import java.util.Map;
 
 public interface UserService {
 
-    UserEntity createUser(RegisterUserRequest registerUserRequest, UserProvider userProvider);
+    UserEntity createUser(RegisterUserRequest registerUserRequest,
+                          String hashedPassword,
+                          UserProvider userProvider);
 
     UserResponse getUser(String userId);
 

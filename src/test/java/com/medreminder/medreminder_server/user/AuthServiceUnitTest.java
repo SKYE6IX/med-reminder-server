@@ -23,6 +23,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -80,7 +81,10 @@ public class AuthServiceUnitTest {
         String hashedPassword = passwordEncoder.encode("testhashpassword");
 
         User testUser = new User(userId.toString(), "test@email.com",
-                "test user", hashedPassword, UserProvider.LOCAL);
+                "test user", hashedPassword, UserProvider.LOCAL,
+                ZoneId.of("Europe/Moscow").toString());
+
+
         Profile testProfile = new Profile(profileId.toString(),
                 testUser.getName(), Relation.SELF, true);
 

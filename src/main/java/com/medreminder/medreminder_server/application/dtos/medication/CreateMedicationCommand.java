@@ -15,6 +15,7 @@ public class CreateMedicationCommand {
     private String medicationMeasurement;
     private String medicationNote;
     private String medicationReason;
+    private String timeZone;
     private CreateMedSchedule schedule;
     private CreateMedicationPack medicationPack;
 
@@ -56,6 +57,10 @@ public class CreateMedicationCommand {
         return medicationReason;
     }
 
+    public String getTimeZone() {
+        return timeZone;
+    }
+
     public CreateMedSchedule getSchedule() {
         return schedule;
     }
@@ -72,9 +77,9 @@ public class CreateMedicationCommand {
         private String medicationMeasurement;
         private String medicationNote;
         private String medicationReason;
+        private String timeZone;
         private CreateMedSchedule schedule;
         private CreateMedicationPack medicationPack;
-
 
         public Builder profileId(String profileId) {
             this.profileId = profileId;
@@ -103,6 +108,11 @@ public class CreateMedicationCommand {
 
         public Builder medicationReason(String medicationReason) {
             this.medicationReason = medicationReason;
+            return this;
+        }
+
+        public Builder timeZone(String timeZone) {
+            this.timeZone = timeZone;
             return this;
         }
 

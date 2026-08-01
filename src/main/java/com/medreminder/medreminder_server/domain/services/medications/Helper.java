@@ -12,6 +12,7 @@ import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEnt
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,35 +26,35 @@ public class Helper {
     }
 
     public static MedicationSchedule createMedicationSchedule(CreateMedSchedule schedule) {
-        final Locale locale = Locale.of("ru-RU");
 
-        final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-                .localizedBy(locale);
+        LocalDate startDate = LocalDate.parse(schedule.startDate(), DateTimeFormatter.BASIC_ISO_DATE);
+        LocalDate endDate = schedule.endDate() != null ?
+                LocalDate.parse(schedule.endDate(), DateTimeFormatter.BASIC_ISO_DATE) : null;
 
-        final LocalDate startDate = LocalDate.parse(schedule.startDate(), dateFormatter);
-
-        final LocalDate endDate = schedule.endDate() != null ? LocalDate.parse(schedule.endDate(), dateFormatter) : null;
-
-        return new MedicationSchedule(null,
+        return new MedicationSchedule(
+                null,
                 new BigDecimal(schedule.dosage()),
                 schedule.recurrenceRule(),
                 startDate,
                 endDate,
-                schedule.timeZone(),
                 new BigDecimal("0"),
                 null);
     }
 
-   public static Optional<MedicationPack> createMedicationPack(CreateMedicationPack pack) {
-
+   public static Optional<MedicationPack> createMedicationPack(CreateMedicationPack pack,
+                                                               String timeZone) {
         if( pack == null) {
             return Optional.empty();
         }
-        MedicationPack medicationPack = new MedicationPack(null,
+
+        ZoneId zoneId = ZoneId.of(timeZone);
+
+        MedicationPack medicationPack = new MedicationPack(
+                null,
                 new BigDecimal(pack.totalQuantity()),
                 new BigDecimal(pack.totalQuantity()),
                 pack.reminderDays(),
-                LocalDateTime.now(),
+                LocalDateTime.now(zoneId),
                 null,
                 MedicationPackStatus.ACTIVE,
                 false);

@@ -67,6 +67,8 @@ public class MedicationScheduleEventBatchConfig {
                     SELECT ms
                     FROM MEDICATION_SCHEDULES ms
                     JOIN ms.medicationProfile mp
+                    JOIN mp.profile p
+                    JOIN p.user
                     WHERE mp.isActive = true
                         AND ms.lastExpandedUntil <= :targetDate
                         AND ms.endDate IS NULL

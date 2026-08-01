@@ -39,9 +39,9 @@ public interface JpaScheduleEventRepo extends BaseJpaRepository<ScheduleEventEnt
         AND se.status = 'PENDING'
         ORDER BY se.scheduleAt ASC
         """)
-    List<ScheduleEventEntity> findUpcomingScheduleEvents(@Param("userId") String userId,
-                                                         @Param("eventDayFrom") LocalDateTime eventDayFrom,
-                                                         Pageable pageable
+    List<ScheduleEventEntity> findUpcomingEvents(@Param("userId") String userId,
+                                                 @Param("eventDayFrom") LocalDateTime eventDayFrom,
+                                                 Pageable pageable
                                                          );
     @Query("""
     SELECT se FROM SCHEDULE_EVENTS se
@@ -53,8 +53,8 @@ public interface JpaScheduleEventRepo extends BaseJpaRepository<ScheduleEventEnt
     AND se.status = 'PENDING'
     AND se.scheduleAt < :eventDayUntil
     """)
-    List<ScheduleEventEntity> findOverdueScheduleEvents(@Param("userId") String userId,
-                                                        @Param("eventDayUntil") LocalDateTime eventDayUntil);
+    List<ScheduleEventEntity> findOverdueEvents(@Param("userId") String userId,
+                                                @Param("eventDayUntil") LocalDateTime eventDayUntil);
 
     @Query("""
     SELECT se FROM SCHEDULE_EVENTS se

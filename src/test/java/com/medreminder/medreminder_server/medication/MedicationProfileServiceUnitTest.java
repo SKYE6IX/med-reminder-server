@@ -21,7 +21,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -45,14 +47,12 @@ public class MedicationProfileServiceUnitTest {
     private ScheduleEventService scheduleEventService;
 
     private final MedicationMapper medicationMapper = new MedicationMapper();
-
     private final UserMapper userMapper = new UserMapper();
 
     @BeforeEach
     void setUp(){
         scheduleEventService =
                 new ScheduleEventServiceImpl(medicationRepository, medicationMapper);
-
         medicationProfileService = new MedicationProfileServiceImpl(
                 medicationRepository,
                 profileRepository,
@@ -67,9 +67,10 @@ public class MedicationProfileServiceUnitTest {
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
 
         final String rrule = "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0";
+        LocalDate startDate = LocalDate.now();
 
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                rrule, "10.06.2026", null);
+                rrule, startDate.format(DateTimeFormatter.BASIC_ISO_DATE), null);
 
         when(profileRepository.findProfileById(any(String.class)))
                 .thenReturn(Optional.of(snubProfileEntity));
@@ -93,11 +94,13 @@ public class MedicationProfileServiceUnitTest {
     void shouldCreateFixedDuration_MedicationSchedule_thenSaveIt() {
 
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
-
         final String rrule = "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0";
 
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(15);
+
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                rrule, "10.06.2026", "15.06.2026");
+                rrule, startDate.format(DateTimeFormatter.BASIC_ISO_DATE),endDate.format(DateTimeFormatter.BASIC_ISO_DATE));
 
         when(profileRepository.findProfileById(any(String.class)))
                 .thenReturn(Optional.of(snubProfileEntity));
@@ -116,13 +119,13 @@ public class MedicationProfileServiceUnitTest {
     void shouldCreateMedication_Profile_WithPack(){
 
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
-
         CreateMedicationPack pack = new CreateMedicationPack("30",7);
 
         final String rrule = "FREQ=DAILY;BYHOUR=8;BYMINUTE=0;BYSECOND=0";
+        LocalDate startDate = LocalDate.now();
 
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommandWithPack(snubProfileEntity.getId(),
-                rrule,"15.06.2026", pack);
+                rrule,startDate.format(DateTimeFormatter.BASIC_ISO_DATE), pack);
 
         when(profileRepository.findProfileById(any(String.class)))
                 .thenReturn(Optional.of(snubProfileEntity));
@@ -143,8 +146,11 @@ public class MedicationProfileServiceUnitTest {
 
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
         final String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
+        LocalDate startDate = LocalDate.now();
+
+
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                rrule,"10.06.2026", null);
+                rrule,startDate.format(DateTimeFormatter.BASIC_ISO_DATE), null);
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -155,7 +161,7 @@ public class MedicationProfileServiceUnitTest {
                 .thenReturn(stubMedicationProfileEntity);
 
         UpdateMedicationCommand updateCmd = new UpdateMedicationCommand(false,
-                null, null, "We have just update the medication profile");
+                null, null, "We have just update the medication profile", null);
 
         MedicationProfileResponse response = medicationProfileService
                 .updateMedicationProfile(stubMedicationProfileEntity.getId(), updateCmd);
@@ -173,8 +179,11 @@ public class MedicationProfileServiceUnitTest {
 
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
         final String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
+        LocalDate startDate = LocalDate.now();
+
+
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                rrule,"15.06.2026", null);
+                rrule,startDate.format(DateTimeFormatter.BASIC_ISO_DATE), null);
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -186,7 +195,7 @@ public class MedicationProfileServiceUnitTest {
 
         final String updateRrule = "FREQ=DAILY;BYHOUR=10,16,20;BYMINUTE=0;BYSECOND=0";
         UpdateMedicationCommand updateCmd = new UpdateMedicationCommand(null,
-                updateRrule, null, null);
+                updateRrule, null, null, null);
 
         MedicationProfileResponse response = medicationProfileService
                 .updateMedicationProfile(stubMedicationProfileEntity.getId(), updateCmd);
@@ -204,8 +213,12 @@ public class MedicationProfileServiceUnitTest {
     @Test
     void shouldUpdateDosage_thenSaveIt(){
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
+        final String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
+        LocalDate startDate = LocalDate.now();
+
+
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0","15.06.2026", null);
+                rrule,startDate.format(DateTimeFormatter.BASIC_ISO_DATE), null);
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -216,7 +229,7 @@ public class MedicationProfileServiceUnitTest {
                 .thenReturn(stubMedicationProfileEntity);
 
         UpdateMedicationCommand updateCmd = new UpdateMedicationCommand(null,
-                null, "5.5", null);
+                null, "5.5", null, null);
 
         MedicationProfileResponse response = medicationProfileService
                 .updateMedicationProfile(stubMedicationProfileEntity.getId(), updateCmd);
@@ -231,8 +244,12 @@ public class MedicationProfileServiceUnitTest {
     void shouldDeleteMedicationProfile(){
 
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
+        final String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
+        LocalDate startDate = LocalDate.now();
+
+
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0","15.06.2026", null);
+                rrule,startDate.format(DateTimeFormatter.BASIC_ISO_DATE), null);
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =
@@ -260,8 +277,10 @@ public class MedicationProfileServiceUnitTest {
         ProfileEntity snubProfileEntity = UserStubData.createStubProfileEntity();
 
         final String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
+        LocalDate startDate = LocalDate.now();
+
         CreateMedicationCommand cmd = MedicationStubFactory.createMedicationCommand(snubProfileEntity.getId(),
-                rrule,"10.06.2026",null);
+                rrule,startDate.format(DateTimeFormatter.BASIC_ISO_DATE),null);
 
         UUID uuid = UUID.randomUUID();
         MedicationProfileEntity stubMedicationProfileEntity =

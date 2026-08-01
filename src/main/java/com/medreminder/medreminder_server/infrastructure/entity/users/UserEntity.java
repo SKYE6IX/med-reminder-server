@@ -112,12 +112,14 @@ public class UserEntity {
                       String email,
                       String name,
                       String hashPassword,
-                      String provider) {
+                      String provider,
+                      String timeZone) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.hashPassword = hashPassword;
         this.provider = provider;
+        this.timeZone = timeZone;
     }
 
     public String getId() {

@@ -50,8 +50,8 @@ public class UserServiceUnitTest {
                 .thenReturn(userMapper.toEntity(snubUser));
 
         UserEntity user = userService.createUser(
-                new RegisterUserRequest("test11@mail.com","test user", "12345678")
-                ,UserProvider.LOCAL);
+                new RegisterUserRequest("test11@mail.com","test user", "12345678", null)
+                , null, UserProvider.LOCAL);
 
         assertThat(user.getId()).isNotNull().isEqualTo(snubUser.getId());
 

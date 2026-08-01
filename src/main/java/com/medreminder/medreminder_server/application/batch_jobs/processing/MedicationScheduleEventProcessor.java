@@ -5,6 +5,7 @@ import com.medreminder.medreminder_server.domain.services.medications.ScheduleEv
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationScheduleEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.ScheduleEventEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
 
 import java.util.List;
@@ -12,7 +13,6 @@ import java.util.List;
 
 public class MedicationScheduleEventProcessor implements ItemProcessor<MedicationScheduleEntity,
         MedicationScheduleEntity> {
-
     private final ScheduleEventService scheduleEventService;
     private final MedicationMapper medicationMapper;
 
@@ -24,11 +24,15 @@ public class MedicationScheduleEventProcessor implements ItemProcessor<Medicatio
 
     @Override
     public MedicationScheduleEntity process(MedicationScheduleEntity scheduleEntity) {
+        UserEntity user = scheduleEntity
+                .getMedicationProfile().getProfile().getUser();
+
+        String timeZone = user.getTimeZone() != null ? user.getTimeZone() : "Europe/Moscow";
 
         MedicationSchedule domainMedicationSchedule = medicationMapper.toDomain(scheduleEntity);
 
         List<ScheduleEventEntity> newWindowEvents = scheduleEventService
-                .createScheduleEvents(domainMedicationSchedule)
+                .createScheduleEvents(domainMedicationSchedule, timeZone)
                 .stream()
                 .map(localEvent -> medicationMapper.toEntity(localEvent,
                         scheduleEntity))

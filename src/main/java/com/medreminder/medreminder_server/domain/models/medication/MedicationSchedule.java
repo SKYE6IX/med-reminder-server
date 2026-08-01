@@ -17,7 +17,6 @@ public class MedicationSchedule {
     private final LocalDate startDate;
     private final LocalDate endDate;
     private LocalDateTime lastExpandedUntil;
-    private final String timeZone;
     private MedicationProfile medicationProfile;
     private final List<ScheduleEvent> scheduleEvents = new ArrayList<>();
 
@@ -26,7 +25,6 @@ public class MedicationSchedule {
                               String recurrenceRule,
                               LocalDate startDate,
                               LocalDate endDate,
-                              String timeZone,
                               BigDecimal takenQuantity,
                               LocalDateTime lastExpandedUntil) {
         this.id = id;
@@ -34,7 +32,6 @@ public class MedicationSchedule {
         this.recurrenceRule = recurrenceRule;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.timeZone = timeZone;
         this.takenQuantity = takenQuantity;
         this.lastExpandedUntil = lastExpandedUntil;
     }
@@ -66,10 +63,6 @@ public class MedicationSchedule {
 
     public LocalDateTime getLastExpandedUntil() {
         return lastExpandedUntil;
-    }
-
-    public String getTimeZone() {
-        return timeZone;
     }
 
     public MedicationProfile getMedicationProfile() {

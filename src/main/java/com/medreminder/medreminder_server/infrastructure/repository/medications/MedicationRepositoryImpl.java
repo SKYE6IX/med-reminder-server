@@ -68,12 +68,12 @@ public class MedicationRepositoryImpl implements MedicationRepository {
                                                                LocalDateTime eventDateFrom,
                                                                int limit) {
         return jpaScheduleEventRepo
-                .findUpcomingScheduleEvents(userId, eventDateFrom, PageRequest.of(0, limit));
+                .findUpcomingEvents(userId, eventDateFrom, PageRequest.of(0, limit));
     }
 
     @Override
     public List<ScheduleEventEntity> getOverdueScheduleEvents(String userId, LocalDateTime eventDateFrom) {
-        return jpaScheduleEventRepo.findOverdueScheduleEvents(userId, eventDateFrom);
+        return jpaScheduleEventRepo.findOverdueEvents(userId, eventDateFrom);
     }
 
     @Override

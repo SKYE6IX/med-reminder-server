@@ -112,29 +112,35 @@ public class QuartzJobsExecutionTest {
 
     @Test
     void medicationJobShouldExecuteWhenTriggeredManually() throws Exception {
-
         scheduleEventRepo.deleteAll();
 
-        Profile snubProfile = UserStubData.createProfileWithId("John",
+        User stubUser = UserStubData.createUser(
+                null, "stub@mail.com","Stub",null
+        );
+        Profile snubProfile = UserStubData.createProfile(null,"John",
                 Relation.BROTHER.toString(), false);
 
-        LocalDate today = LocalDate.now(ZoneId.of("Europe/Moscow"));
-        LocalDate startDate = today.minusDays(14);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        stubUser.addProfiles(snubProfile);
+
+        UserEntity user = userRepository.saveUser(userMapper.toEntity(stubUser));
+        var profile = user.getProfiles().getLast();
+
+        LocalDate startDate = LocalDate.now(ZoneId.of("Europe/Moscow"));
+        String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
 
         CreateMedicationCommand cmd = MedicationStubFactory
-                .createMedicationCommand(snubProfile.getId(),
-                        "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0", formatter.format(startDate), null);
+                .createMedicationCommand(profile.getId(), rrule,
+                        startDate.format(DateTimeFormatter.BASIC_ISO_DATE), null);
 
         Medication stubMed = MedicationStubFactory.createMedication(cmd);
         MedicationSchedule stubMedicationSchedule = MedicationStubFactory.createMedicationSchedule(cmd);
-        stubMedicationSchedule.updateLastExpandedUntil(today.minusDays(1).atTime(14,10));
+        stubMedicationSchedule.updateLastExpandedUntil(startDate.plusDays(3).atStartOfDay());
         MedicationProfileEntity stubMedicationProfile = new MedicationProfileEntity(
                 null,
                 true,
                 cmd.getMedicationNote(),
                 null,
-                null
+                profile
         );
         stubMedicationProfile.setMedication(medicationMapper.toEntity(stubMed,stubMedicationProfile));
         stubMedicationProfile.setMedicationSchedule(medicationMapper.toEntity(stubMedicationSchedule, stubMedicationProfile));
@@ -142,6 +148,7 @@ public class QuartzJobsExecutionTest {
         medicationRepository.saveMedicationProfile(stubMedicationProfile);
 
         long totalEventsBeforeJob = scheduleEventRepo.count();
+
         System.out.println("Total events before job: " + totalEventsBeforeJob);
 
         medScheduleEventScheduler.triggerJob(JobKey.jobKey("medication_schedule_event_job_detail"));

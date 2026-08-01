@@ -39,7 +39,6 @@ public class UserServiceImpl implements UserService {
                            SubscriptionMapper subscriptionMapper,
                            S3Service s3Service,
                            AppleAuth appleAuth) {
-
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.subscriptionMapper = subscriptionMapper;
@@ -49,23 +48,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity createUser(RegisterUserRequest registerUserRequest,
-                           UserProvider userProvider) {
+                                 String hashedPassword, UserProvider userProvider) {
 //        To make sure we don't try to create user that
 //        already exist with a particular email, we should
 //        check early and then return the right error.
         var existUser = userRepository
-                .findUserByEmail(registerUserRequest.getEmail())
+                .findUserByEmail(registerUserRequest.email())
                 .orElse(null);
 
         if (existUser != null) {
-            throw new UserAlreadyExistsException(registerUserRequest.getEmail());
+            throw new UserAlreadyExistsException(registerUserRequest.email());
         }
 
         User user = new User(null,
-                registerUserRequest.getEmail(),
-                registerUserRequest.getName(),
-                registerUserRequest.getPassword(),
-                userProvider);
+                registerUserRequest.email(),
+                registerUserRequest.name(),
+                hashedPassword,
+                userProvider,
+                registerUserRequest.timeZone());
 
 //        Create a self profile for new user.
         Profile profile = new Profile(null, user.getName(), Relation.SELF, true);

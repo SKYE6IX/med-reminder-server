@@ -20,15 +20,17 @@ public class UserMapper {
                 user.getEmail(),
                 user.getName(),
                 user.getHashPassword(),
-                user.getProvider().toString());
+                user.getProvider().toString(),
+                user.getTimeZone());
 
         List<ProfileEntity> profileEntities = user
                 .getProfiles()
                 .stream()
-                .map(profile ->  toEntity(profile, userEntity))
+                .map(profile -> toEntity(profile, userEntity))
                 .toList();
 
         userEntity.getProfiles().addAll(profileEntities);
+
        return userEntity;
     }
 

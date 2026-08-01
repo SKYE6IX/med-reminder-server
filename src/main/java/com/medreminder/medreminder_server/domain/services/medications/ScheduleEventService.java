@@ -9,9 +9,9 @@ import java.util.Map;
 
 public interface ScheduleEventService {
 
-    List<ScheduleEvent> createScheduleEvents(MedicationSchedule schedule);
+    List<ScheduleEvent> createScheduleEvents(MedicationSchedule schedule, String timeZone);
 
-    List<ScheduleEvent> updateScheduleEventsRule(MedicationSchedule schedule);
+    List<ScheduleEvent> updateScheduleEventsRule(MedicationSchedule schedule, String timeZone);
 
     ScheduleEventResponse logScheduleEvent(String scheduleEventId, Map<String, String> eventBody);
 

@@ -59,14 +59,11 @@ public class MedicationStubFactory {
     }
 
     public static MedicationSchedule createMedicationSchedule(CreateMedicationCommand cmd) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-
         LocalDateTime mockLastUntilWindow = LocalDateTime.now().plusDays(1);
-
-        final LocalDate startDate = LocalDate.parse(cmd.getSchedule().startDate(), formatter);
+        final LocalDate startDate = LocalDate.parse(cmd.getSchedule().startDate(), DateTimeFormatter.BASIC_ISO_DATE);
 
         final LocalDate endDate = cmd.getSchedule().endDate() != null ?
-                LocalDate.parse(cmd.getSchedule().endDate(), formatter) : null;
+                LocalDate.parse(cmd.getSchedule().endDate(), DateTimeFormatter.BASIC_ISO_DATE) : null;
 
         MedicationSchedule medicationSchedule = new MedicationSchedule(
                 null,
@@ -74,7 +71,6 @@ public class MedicationStubFactory {
                 cmd.getSchedule().recurrenceRule(),
                 startDate,
                 endDate,
-                cmd.getSchedule().timeZone(),
                 new BigDecimal("0"),
                 mockLastUntilWindow
         );
@@ -113,8 +109,7 @@ public class MedicationStubFactory {
                 "1.2",
                 rrule,
                 startDate,
-                endDate,
-                "Europe/Moscow"
+                endDate
         );
     }
 

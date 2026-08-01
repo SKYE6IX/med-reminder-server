@@ -24,9 +24,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
     private final MedicationRepository medicationRepository;
     private final MedicationMapper medicationMapper;
 
-    private final Locale locale = Locale.of("ru-RU");
-    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-            .localizedBy(locale);
+    private static final int DEFAULT_EXPANSION_WINDOW = 14;
 
     public ScheduleEventServiceImpl(MedicationRepository medicationRepository,
                                     MedicationMapper medicationMapper) {
@@ -35,44 +33,24 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
     }
 
     @Override
-    public List<ScheduleEvent> createScheduleEvents(MedicationSchedule schedule) {
-
-        LocalDateTime now = LocalDateTime.now(ZoneId.of(schedule.getTimeZone()));
+    public List<ScheduleEvent> createScheduleEvents(MedicationSchedule schedule, String timeZone) {
+        ZoneId zoneId = ZoneId.of(timeZone);
 
         final long MAX_EXPANSION_DAY = schedule.getEndDate() != null ?
                 ChronoUnit.DAYS.between(schedule.getStartDate(), schedule.getEndDate())
-                : 14;
+                : DEFAULT_EXPANSION_WINDOW;
 
 //        When creating, we need to check if we are expanding or starting new.
         final LocalDateTime dateTimeFrom = schedule.getLastExpandedUntil()
                 != null ? schedule.getLastExpandedUntil().toLocalDate().atStartOfDay()
                 : schedule.getStartDate().atStartOfDay();
 
-        List<LocalDateTime> events = generateSchedulesEventDateTime(
-                schedule.getRecurrenceRule(),
-                dateTimeFrom,
-                schedule.getTimeZone(),
-                MAX_EXPANSION_DAY
-        ).stream().sorted().toList();
-
-        //  Get the first event from the list and use it as the start time.
-        schedule.updateStartTime(events.getFirst());
-
-//        Get the last event from the list at the LastExpandedUntil.
-        schedule.updateLastExpandedUntil(events.getLast());
-
-        return events
-        .stream()
-        .filter(dateTime -> dateTime.isAfter(now))
-                .map((date)-> new ScheduleEvent(null,
-                        schedule.getDoseQuantity(),
-                        date))
-        .toList();
+        return getScheduleEventsResult(schedule,dateTimeFrom,zoneId,MAX_EXPANSION_DAY);
     }
 
     @Override
-    public List<ScheduleEvent> updateScheduleEventsRule(MedicationSchedule schedule) {
-        LocalDateTime now = LocalDateTime.now(ZoneId.of(schedule.getTimeZone()));
+    public List<ScheduleEvent> updateScheduleEventsRule(MedicationSchedule schedule, String timeZone) {
+        ZoneId zoneId = ZoneId.of(timeZone);
 
 //      Collect all the pending event into list for deletion.
         Set<ScheduleEvent> pendingEvents = schedule
@@ -92,56 +70,36 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 .map(event -> event.getScheduleAt().toLocalDate().atStartOfDay())
                 .orElse(schedule.getStartDate().atStartOfDay());
 
-        List<LocalDateTime> updatedEvents = generateSchedulesEventDateTime(
-                schedule.getRecurrenceRule(),
-                dateTimeFrom,
-                schedule.getTimeZone(),
-                MAX_EXPANSION_DAY
-        ).stream().sorted().toList();
-
-        //  Get the first event from the list and use it as the start time.
-        schedule.updateStartTime(updatedEvents.getFirst());
-
-//        Get the last event from the list at the LastExpandedUntil.
-        schedule.updateLastExpandedUntil(updatedEvents.getLast());
-
-        return updatedEvents
-                .stream()
-                .filter(dateTime -> dateTime.isAfter(now))
-                .map((date)-> new ScheduleEvent(null,
-                        schedule.getDoseQuantity(),
-                        date))
-                .toList();
+        return getScheduleEventsResult(schedule,dateTimeFrom,zoneId,MAX_EXPANSION_DAY);
     }
 
     @Override
     public ScheduleEventResponse logScheduleEvent(String scheduleEventId, Map<String, String> eventBody) {
 
-        ScheduleEventEntity managedScheduleEvent = medicationRepository
+        ScheduleEventEntity scheduleEvent = medicationRepository
                 .getScheduleEventById(scheduleEventId);
 
-        if(managedScheduleEvent == null) {
+        if( scheduleEvent == null) {
             throw new ResourceNotFoundException("Event is not found!");
         }
 
-        if(!managedScheduleEvent.getStatus().equals("PENDING")) {
+        if(!scheduleEvent.getStatus().equals("PENDING")) {
             return null;
         }
 
-        MedicationProfileEntity managedMedicationProfile = managedScheduleEvent
+        String timeZone = eventBody.get("timeZone") != null ? eventBody.get("timeZone") : "Europe/Moscow";
+        ZoneId zoneId = ZoneId.of(timeZone);
+
+        MedicationProfileEntity managedMedicationProfile = scheduleEvent
                 .getMedicationSchedule().getMedicationProfile();
 
-        ScheduleEvent domainScheduleEvent = medicationMapper.toDomain(managedScheduleEvent);
+        ScheduleEvent domainScheduleEvent = medicationMapper.toDomain(scheduleEvent);
         domainScheduleEvent.updateStatus(eventBody.get(("action")));
 
         MedicationSchedule domainMedicationSchedule = medicationMapper
                 .toDomain(managedMedicationProfile.getMedicationSchedule());
 
         if(domainScheduleEvent.getStatus().equals("TAKEN")){
-            final String timeZone = managedScheduleEvent
-                    .getMedicationSchedule()
-                    .getTimeZone();
-
 //          Track the amount that get taken and update medication schedule.
             BigDecimal amountTaken = domainMedicationSchedule.getTakenQuantity()
                     .add(domainScheduleEvent.getDosage());
@@ -154,7 +112,8 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 //            flip to in_active if the currentQuantity is lower than the
 //            incoming dosage.
             if(!managedMedicationProfile.getMedicationPacks().isEmpty()){
-                MedicationPack activeMedicationPack = Helper.getMedicationPackByStatus(managedMedicationProfile,
+                MedicationPack activeMedicationPack = Helper
+                        .getMedicationPackByStatus(managedMedicationProfile,
                         MedicationPackStatus.ACTIVE.toString(), medicationMapper);
 
                 if(activeMedicationPack != null){
@@ -168,11 +127,12 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
                         activeMedicationPack.updateCurrentQuantity(BigDecimal.ZERO);
                         activeMedicationPack.updateStatus(MedicationPackStatus.COMPLETED);
-                        activeMedicationPack.updateEndedAt(LocalDateTime.now(ZoneId.of(timeZone)));
+                        activeMedicationPack.updateEndedAt(LocalDateTime.now(zoneId));
                         Helper.syncMedicationPack(managedMedicationProfile, activeMedicationPack);
 
 //                        Get a pending pack from the list if available
-                        MedicationPack pendingMedicationPack = Helper.getMedicationPackByStatus(managedMedicationProfile,
+                        MedicationPack pendingMedicationPack = Helper
+                                .getMedicationPackByStatus(managedMedicationProfile,
                                 MedicationPackStatus.PENDING.toString(), medicationMapper);
 
                         if( pendingMedicationPack != null){
@@ -180,7 +140,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                                     .getCurrentQuantity().subtract(overflow);
                             pendingMedicationPack.updateStatus(MedicationPackStatus.ACTIVE);
                             pendingMedicationPack.updateCurrentQuantity(pendingPackRemainingQty);
-                            pendingMedicationPack.updateStartedAt(LocalDateTime.now(ZoneId.of(timeZone)));
+                            pendingMedicationPack.updateStartedAt(LocalDateTime.now(zoneId));
                             Helper.syncMedicationPack(managedMedicationProfile, pendingMedicationPack);
                         }
                     } else {
@@ -190,27 +150,26 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 }
             }
 
-            final LocalDateTime takenAt = LocalDateTime.now(ZoneId.of(timeZone));
+            final LocalDateTime takenAt = LocalDateTime.now(zoneId);
             domainScheduleEvent.updateTakenAt(takenAt);
         }
 
-        managedScheduleEvent.updateScheduleEvent(domainScheduleEvent);
-        medicationRepository.saveScheduleEvent(managedScheduleEvent);
+        scheduleEvent.updateScheduleEvent(domainScheduleEvent);
+        medicationRepository.saveScheduleEvent(scheduleEvent);
         medicationRepository.saveMedicationProfile(managedMedicationProfile);
 
-        return getScheduleEventResponse(managedScheduleEvent);
+        return getScheduleEventResponse(scheduleEvent);
     }
 
     @Override
     public void logOverdueScheduleEvent(String userId, Map<String, String> eventBody) {
-
         String eventDateUntil = eventBody.get(("eventDateUntil"));
         if(eventDateUntil == null) {
             throw new IllegalArgumentException("Event date until cannot be empty!");
         }
 
-        LocalDateTime until = LocalDate.parse(eventDateUntil, dateFormatter)
-                .atStartOfDay();
+        LocalDate eventDate = LocalDate.parse(eventDateUntil, DateTimeFormatter.BASIC_ISO_DATE);
+        LocalDateTime until = eventDate.atStartOfDay();
 
         List<ScheduleEventEntity> eventEntities = medicationRepository
                 .getOverdueScheduleEvents(userId, until);
@@ -226,8 +185,10 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
     @Override
     public List<ScheduleEventResponse> getScheduleEvents(String userId, String eventDate) {
-        LocalDateTime startOfDay = LocalDate.parse(eventDate, dateFormatter).atStartOfDay();
-        LocalDateTime endOfDay = LocalDate.parse(eventDate, dateFormatter).atTime(LocalTime.MAX);
+        LocalDate date = LocalDate.parse(eventDate, DateTimeFormatter.BASIC_ISO_DATE);
+
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
         List<ScheduleEventEntity> scheduleEvents = medicationRepository
                 .getScheduleEvents(userId, startOfDay, endOfDay);
@@ -242,15 +203,11 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
     public List<ScheduleEventResponse> getUpcomingScheduleEvents(String userId,
                                                          String eventDateFrom,
                                                          int limit) {
-        OffsetDateTime offsetDateTime = OffsetDateTime
-                .parse(eventDateFrom, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-
-        LocalDateTime utcDateTime = offsetDateTime
-                .withOffsetSameInstant(ZoneOffset.UTC)
-                .toLocalDateTime();
+        LocalDate date = LocalDate.parse(eventDateFrom, DateTimeFormatter.BASIC_ISO_DATE);
+        LocalDateTime dateFrom = date.atStartOfDay();
 
         List<ScheduleEventEntity> upcoming = medicationRepository
-                .getUpcomingScheduleEvents(userId, utcDateTime, limit);
+                .getUpcomingScheduleEvents(userId, dateFrom, limit);
 
         return upcoming
                 .stream()
@@ -291,10 +248,8 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
 
     private List<LocalDateTime> generateSchedulesEventDateTime(String rrule,
                                                                LocalDateTime eventDateFrom,
-                                                               String timeZone,
+                                                               ZoneId zoneId,
                                                                long expansionWindowDays) {
-        ZoneId zoneId = ZoneId.of(timeZone);
-
         LocalDateTime windowStart = eventDateFrom
                 .toLocalDate().atStartOfDay().atZone(zoneId).toLocalDateTime();
 
@@ -305,5 +260,33 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
         Recur<LocalDateTime> recur = new Recur<>(rrule);
 
         return recur.getDates(windowStart, windowStart, windowEnd);
+    }
+
+    private List<ScheduleEvent> getScheduleEventsResult(MedicationSchedule schedule,
+                                                  LocalDateTime dateTimeFrom,
+                                                  ZoneId zoneId,
+                                                  long windowExpansion){
+        LocalDateTime now = LocalDateTime.now(zoneId);
+
+        List<LocalDateTime> events = generateSchedulesEventDateTime(
+                schedule.getRecurrenceRule(),
+                dateTimeFrom,
+                zoneId,
+                windowExpansion
+        ).stream().sorted().toList();
+
+        //  Get the first event from the list and use it as the start time.
+        schedule.updateStartTime(events.getFirst());
+
+//        Get the last event from the list at the LastExpandedUntil.
+        schedule.updateLastExpandedUntil(events.getLast());
+
+        return events
+                .stream()
+                .filter(dateTime -> dateTime.isAfter(now))
+                .map((date)-> new ScheduleEvent(null,
+                        schedule.getDoseQuantity(),
+                        date))
+                .toList();
     }
 }

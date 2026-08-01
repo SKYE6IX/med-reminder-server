@@ -50,18 +50,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse registerUserWithEmail(RegisterUserRequest request){
 
-        UserEntity existingUser = userRepository.findUserByEmail(request.getEmail())
+        UserEntity existingUser = userRepository.findUserByEmail(request.email())
                 .orElse(null);
 
         if( existingUser != null ) {
            throw new UserAlreadyExistsException(existingUser.getEmail());
         }
 
-        String hashPassword = passwordEncoder.encode(request.getPassword());
+        String hashPassword = passwordEncoder.encode(request.password());
 
-        request.updatePasswordToHash(hashPassword);
-
-        UserEntity newUser = userService.createUser(request, UserProvider.LOCAL);
+        UserEntity newUser = userService.createUser(request, hashPassword, UserProvider.LOCAL);
 
         return getAuthResponse(newUser);
     }
@@ -125,10 +123,11 @@ public class AuthServiceImpl implements AuthService {
                 RegisterUserRequest registerUserRequest = new RegisterUserRequest(
                         socialAuthRequest.email(),
                         socialAuthRequest.fullName(),
-                        null
+                        null,
+                        socialAuthRequest.timeZone()
                 );
                 UserEntity newUser = userService.createUser(registerUserRequest,
-                        UserProvider.valueOf(socialAuthRequest.provider()));
+                        null, UserProvider.valueOf(socialAuthRequest.provider()));
 
                 newUser.setProviderId(socialAuthRequest.providerId());
                 newUser.setAppleRevokeToken(revokeToken);

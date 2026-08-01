@@ -7,6 +7,7 @@ import com.medreminder.medreminder_server.domain.models.users.UserProvider;
 import com.medreminder.medreminder_server.infrastructure.entity.users.ProfileEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 
+import java.time.ZoneId;
 import java.util.UUID;
 
 public class UserStubData {
@@ -17,6 +18,7 @@ public class UserStubData {
 
         User snubUser = UserStubData
                 .createUser(userId.toString(), email, name, password);
+
         snubUser.addProfiles(UserStubData
                 .createProfile(profileId.toString(), snubUser.getName(), "SELF", true));
         return snubUser;
@@ -45,7 +47,8 @@ public class UserStubData {
                 email,
                 name,
                 password,
-                UserProvider.LOCAL);
+                UserProvider.LOCAL,
+                ZoneId.of("Europe/Moscow").toString());
     }
 
     public static Profile createProfile(

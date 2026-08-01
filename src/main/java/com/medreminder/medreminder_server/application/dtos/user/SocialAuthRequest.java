@@ -5,5 +5,6 @@ public record SocialAuthRequest(String providerId,
                                 String provider,
                                 String jwtToken,
                                 String fullName,
-                                String email) {
+                                String email,
+                                String timeZone) {
 }

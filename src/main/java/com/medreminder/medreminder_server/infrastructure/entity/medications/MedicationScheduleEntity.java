@@ -40,9 +40,6 @@ public class MedicationScheduleEntity {
     @Column(name = "last_expanded_until")
     private LocalDateTime lastExpandedUntil;
 
-    @Column(name = "time_zone")
-    private String timeZone;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medication_profile_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -73,7 +70,6 @@ public class MedicationScheduleEntity {
                                     LocalDateTime startTime,
                                     LocalDate startDate,
                                     LocalDate endDate,
-                                    String timeZone,
                                     LocalDateTime lastExpandedUntil,
                                     MedicationProfileEntity medicationProfile
                                     ) {
@@ -84,7 +80,6 @@ public class MedicationScheduleEntity {
         this.startTime = startTime;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.timeZone = timeZone;
         this.lastExpandedUntil = lastExpandedUntil;
         this.medicationProfile = medicationProfile;
     }
@@ -119,10 +114,6 @@ public class MedicationScheduleEntity {
 
     public LocalDateTime getLastExpandedUntil() {
         return lastExpandedUntil;
-    }
-
-    public String getTimeZone() {
-        return timeZone;
     }
 
     public MedicationProfileEntity getMedicationProfile() {

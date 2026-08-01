@@ -8,6 +8,7 @@ public class UpdateMedicationCommand {
     private String recurrenceRule;
     private String doseQuantity;
     private String note;
+    private String timeZone;
 
     public UpdateMedicationCommand() {
     }
@@ -15,11 +16,13 @@ public class UpdateMedicationCommand {
     public UpdateMedicationCommand(Boolean isActive,
                                    String recurrenceRule,
                                    String doseQuantity,
-                                   String note) {
+                                   String note,
+                                   String timeZone) {
         this.isActive = isActive;
         this.recurrenceRule = recurrenceRule;
         this.doseQuantity = doseQuantity;
         this.note = note;
+        this.timeZone = timeZone;
     }
 
     public Optional<Boolean> getStatus() {
@@ -47,5 +50,9 @@ public class UpdateMedicationCommand {
         if (note == null)
             return Optional.empty();
         return Optional.of(note);
+    }
+
+    public String getTimeZone() {
+        return timeZone;
     }
 }

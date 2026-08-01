@@ -19,6 +19,7 @@ public class User  {
     private String name;
     private LocalDate dateOfBirth;
     private String gender;
+    private String timeZone;
     private final UserProvider provider;
     private String providerId;
     private LocalDateTime lastLoginAt;
@@ -29,12 +30,14 @@ public class User  {
                 String email,
                 String name,
                 String hashPassword,
-                UserProvider provider) {
+                UserProvider provider,
+                String timeZone) {
         this.id = id;
         this.email = Objects.requireNonNull(email, "Email cannot be null");
         this.name = Objects.requireNonNull(name, "Name cannot be null");
         this.hashPassword = hashPassword;
         this.provider = provider;
+        this.timeZone = timeZone;
     }
 
     public User(String id,
@@ -75,6 +78,10 @@ public class User  {
 
     public String getGender() {
         return gender;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
     }
 
     public List<Profile> getProfiles() {

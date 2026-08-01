@@ -22,6 +22,8 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
     private final ScheduleEventService scheduleEventService;
     private final UserMapper userMapper;
 
+    private static final String FALLBACK_TIME_ZONE = "Europe/Moscow";
+
     public MedicationProfileServiceImpl(MedicationRepository medicationRepository,
                                         ProfileRepository profileRepository,
                                         MedicationMapper medicationMapper,
@@ -36,19 +38,21 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
 
     @Override
     public MedicationProfileResponse createMedicationProfile(CreateMedicationCommand cmd) {
-
-        ProfileEntity managedProfileEntity = profileRepository
+        ProfileEntity profile = profileRepository
                 .findProfileById(cmd.getProfileId())
                 .orElse(null);
 
-        if (managedProfileEntity == null) {
+        if (profile == null) {
             throw new ResourceNotFoundException("Profile not found!");
         }
 
-        List<MedicationProfileEntity> mpe = managedProfileEntity.getMedicationProfile();
+        String timeZone = cmd.getTimeZone() != null ?
+                cmd.getTimeZone() : FALLBACK_TIME_ZONE;
 
+        List<MedicationProfileEntity> mpe = profile.getMedicationProfile();
 //        Convert profile entity to domain, and add the medication profile into it
-        Profile domainProfile = userMapper.toDomain(managedProfileEntity);
+        Profile domainProfile = userMapper.toDomain(profile);
+
 //        We populate the domainProfile with an existing medprofiles if
 //        they exist
         if (!mpe.isEmpty()){
@@ -57,32 +61,37 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                     .forEach(domainProfile::addMedicationProfile);
         }
 
-//        Start Creating New Medication Profile
+//      Start Creating New Medication Profile
         MedicationProfile medicationProfile = new MedicationProfile(null,
                 true, cmd.getMedicationNote(), cmd.getMedicationReason());
 
         Medication medication = Helper.createMedication(cmd);
 
-        MedicationSchedule medicationSchedule = Helper.createMedicationSchedule(cmd.getSchedule());
+        MedicationSchedule medicationSchedule = Helper
+                .createMedicationSchedule(cmd.getSchedule());
 
 //        Create schedule events
-        List<ScheduleEvent> scheduleEvents = scheduleEventService.createScheduleEvents(medicationSchedule);
+        List<ScheduleEvent> scheduleEvents = scheduleEventService
+                .createScheduleEvents(medicationSchedule, timeZone);
 
 //        Mapped all the schedule events.
         scheduleEvents.forEach(medicationSchedule::addScheduleEvent);
 
 //        Put them all together in the medication profile.
         medicationProfile.addMedication(medication);
+
         medicationProfile.addMedicationSchedule(medicationSchedule);
-        Helper.createMedicationPack(cmd.getMedicationPack()).ifPresent(medicationProfile::addMedicationPack);
+
+        Helper.createMedicationPack(cmd.getMedicationPack(), timeZone)
+                .ifPresent(medicationProfile::addMedicationPack);
 
 //        Add the medication profile to user profile.
         domainProfile.addMedicationProfile(medicationProfile);
 
 //        Sync the data
-        Helper.syncMedicationProfiles(domainProfile.getMedicationProfiles(), managedProfileEntity);
+        Helper.syncMedicationProfiles(domainProfile.getMedicationProfiles(), profile);
 
-        ProfileEntity savedProfileEntity = profileRepository.saveProfile(managedProfileEntity);
+        ProfileEntity savedProfileEntity = profileRepository.saveProfile(profile);
 
         MedicationProfileEntity smp = savedProfileEntity.getMedicationProfile().getLast();
 
@@ -92,15 +101,19 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
     @Override
     public MedicationProfileResponse updateMedicationProfile(String medicationProfileId,
                                                              UpdateMedicationCommand cmd) {
-        MedicationProfileEntity managedMedicationProfile =
+        MedicationProfileEntity medicationProfile =
                 medicationRepository.getMedicationProfileById(medicationProfileId);
 
-        if (managedMedicationProfile == null) {
+        String timeZone = cmd.getTimeZone() != null ?
+                cmd.getTimeZone() : FALLBACK_TIME_ZONE;
+
+
+        if (medicationProfile == null) {
           throw new ResourceNotFoundException("Medication Profile not found!");
         }
 
         MedicationProfile domainMedicationProfile = medicationMapper
-                .toDomain(managedMedicationProfile);
+                .toDomain(medicationProfile);
 
         cmd.getStatus().ifPresent(domainMedicationProfile::updateActive);
 
@@ -118,22 +131,22 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
             medicationSchedule.updateRecurrenceRule(newRules);
 
             List<ScheduleEvent> updatedEvents = scheduleEventService
-                    .updateScheduleEventsRule(medicationSchedule);
+                    .updateScheduleEventsRule(medicationSchedule, timeZone);
 
 //            Update medication Schedules
-            managedMedicationProfile
+            medicationProfile
                     .getMedicationSchedule()
                     .updateMedicationSchedule(medicationSchedule);
 
 //            Remove all the pending event and reapply the newly created events
 //            with new rules.
-            managedMedicationProfile
+            medicationProfile
                     .getMedicationSchedule()
                     .getScheduleEvents()
                     .removeIf(event ->
                             event.getStatus().equals("PENDING"));
 
-            managedMedicationProfile
+            medicationProfile
                     .getMedicationSchedule()
                     .getScheduleEvents()
                     .addAll(
@@ -141,7 +154,7 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                                     .stream()
                                     .map(event ->
                                             medicationMapper.toEntity(event,
-                                            managedMedicationProfile.getMedicationSchedule())).toList()
+                                            medicationProfile.getMedicationSchedule())).toList()
                     );
         });
 
@@ -150,22 +163,22 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
             MedicationSchedule medicationSchedule = domainMedicationProfile.getMedicationSchedule();
             medicationSchedule.updateDoseQuantity(new BigDecimal(newDoseQuantity));
 //          Update medication Schedules.
-            managedMedicationProfile
+            medicationProfile
                     .getMedicationSchedule()
                     .updateMedicationSchedule(medicationSchedule);
 
 //            Update the dosage for all the pending events.
-            managedMedicationProfile
+            medicationProfile
                     .getMedicationSchedule()
                     .getScheduleEvents()
                     .stream()
                     .filter(event -> event.getStatus().equals("PENDING"))
                     .forEach(event -> event.updateDosage(new BigDecimal(newDoseQuantity)));
         });
-        managedMedicationProfile.updateMedicationProfile(domainMedicationProfile);
-        medicationRepository.saveMedicationProfile(managedMedicationProfile);
+        medicationProfile.updateMedicationProfile(domainMedicationProfile);
+        medicationRepository.saveMedicationProfile(medicationProfile);
 
-        return Helper.getMedicationProfileResponse(managedMedicationProfile);
+        return Helper.getMedicationProfileResponse(medicationProfile);
     }
 
     @Override
@@ -228,50 +241,57 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
     }
 
     @Override
-    public MedicationPackResponse createMedicationPack(NewMedicationPackRequest newMedicationPackRequest) {
-        MedicationProfileEntity managedMedicationProfile =
-                medicationRepository.getMedicationProfileById(newMedicationPackRequest.medicationProfileId());
+    public MedicationPackResponse createMedicationPack(NewMedicationPackRequest request) {
+        MedicationProfileEntity medicationProfile =
+                medicationRepository.getMedicationProfileById(request.medicationProfileId());
 
-        if (managedMedicationProfile == null) {
+        String timeZone = request.timeZone() != null ? request.timeZone() : FALLBACK_TIME_ZONE;
+        ZoneId zoneId = ZoneId.of(timeZone);
+
+        if (medicationProfile == null) {
             throw new ResourceNotFoundException("Medication Profile not found!");
         }
 
-        MedicationPack pack = new MedicationPack(null,
-                new BigDecimal(newMedicationPackRequest.totalQuantity()),
-                new BigDecimal(newMedicationPackRequest.totalQuantity()),
-                newMedicationPackRequest.reminderDays(),
-                LocalDateTime.now(ZoneId.of(managedMedicationProfile.getMedicationSchedule().getTimeZone())),
+        MedicationPack pack = new MedicationPack(
+                null,
+                new BigDecimal(request.totalQuantity()),
+                new BigDecimal(request.totalQuantity()),
+                request.reminderDays(),
+                LocalDateTime.now(zoneId),
                 null,
                 MedicationPackStatus.ACTIVE,
                 false
         );
 
-        managedMedicationProfile
+        medicationProfile
                 .getMedicationPacks()
-                .add(medicationMapper.toEntity(pack, managedMedicationProfile));
+                .add(medicationMapper.toEntity(pack, medicationProfile));
 
         var newPack = medicationRepository
-                .saveMedicationProfile(managedMedicationProfile)
+                .saveMedicationProfile(medicationProfile)
                 .getMedicationPacks().getLast();
 
         return Helper.getMedicationPackResponse(newPack);
     }
 
     @Override
-    public MedicationPackResponse refillMedicationPack(RefillMedicationPackRequest refillMedicationPackRequest) {
-        MedicationProfileEntity managedMedicationProfile =
-                medicationRepository.getMedicationProfileById(refillMedicationPackRequest.medicationProfileId());
+    public MedicationPackResponse refillMedicationPack(RefillMedicationPackRequest request) {
+        MedicationProfileEntity medicationProfile =
+                medicationRepository.getMedicationProfileById(request.medicationProfileId());
 
-        if (managedMedicationProfile == null) {
+        String timeZone = request.timeZone() != null ? request.timeZone() : FALLBACK_TIME_ZONE;
+        ZoneId zoneId = ZoneId.of(timeZone);
+
+        if (medicationProfile == null) {
             throw new ResourceNotFoundException("Medication Profile not found!");
         }
 
 //        Get the pack we want to refill.
-        MedicationPack existingPack = managedMedicationProfile
+        MedicationPack existingPack = medicationProfile
                 .getMedicationPacks()
                 .stream()
                 .filter(packEntity ->
-                        packEntity.getId().equals(refillMedicationPackRequest.medicationPackId()))
+                        packEntity.getId().equals(request.medicationPackId()))
                 .findFirst()
                 .map(medicationMapper::toDomain)
                 .orElse(null);
@@ -283,15 +303,16 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
             throw new ResourceNotFoundException("Medication Pack not found!, Can't be refilled");
         }
 
-        boolean isExistingActive = existingPack.getStatus().equals(MedicationPackStatus.ACTIVE);
+        boolean isExistingActive = existingPack
+                .getStatus().equals(MedicationPackStatus.ACTIVE);
 
 //       We start to create a new pack.
         MedicationPack newPack = new MedicationPack(
                 null,
-                new BigDecimal(refillMedicationPackRequest.totalQuantity()),
-                new BigDecimal(refillMedicationPackRequest.totalQuantity()),
-                refillMedicationPackRequest.reminderDays(),
-                isExistingActive ? null : LocalDateTime.now(ZoneId.of(managedMedicationProfile.getMedicationSchedule().getTimeZone())),
+                new BigDecimal(request.totalQuantity()),
+                new BigDecimal(request.totalQuantity()),
+                request.reminderDays(),
+                isExistingActive ? null : LocalDateTime.now(zoneId),
                 null,
                 isExistingActive ? MedicationPackStatus.PENDING : MedicationPackStatus.ACTIVE,
                 false
@@ -299,18 +320,18 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
 
 //        Update the existing pack.
         existingPack.updateIsRefilled(true);
-        managedMedicationProfile.getMedicationPacks()
+        medicationProfile.getMedicationPacks()
                 .stream()
                 .filter(packEntity -> packEntity.getId().equals(existingPack.getId()))
                 .findFirst()
                 .ifPresent(medicationPack -> medicationPack.updateMedicationPack(existingPack));
 
-        managedMedicationProfile
+        medicationProfile
                 .getMedicationPacks()
-                .add(medicationMapper.toEntity(newPack, managedMedicationProfile));
+                .add(medicationMapper.toEntity(newPack, medicationProfile));
 
         var refilledPack = medicationRepository
-                .saveMedicationProfile(managedMedicationProfile)
+                .saveMedicationProfile(medicationProfile)
                 .getMedicationPacks().getLast();
 
         return Helper.getMedicationPackResponse(refilledPack);
@@ -320,14 +341,12 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
     public List<MedicationPackResponse> getMedicationPacks(String userId) {
         List<MedicationPackEntity> packEntities = medicationRepository
                 .getAllMedicationPacksByUserId(userId);
-
         if(!packEntities.isEmpty()){
             return packEntities
                     .stream()
                     .map(Helper::getMedicationPackResponse)
                     .toList();
         }
-
         return List.of();
     }
 }
