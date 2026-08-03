@@ -7,7 +7,6 @@ import org.springframework.boot.persistence.autoconfigure.EntityScan;
 @SpringBootApplication
 @EntityScan(basePackages = "com.medreminder.medreminder_server.infrastructure.entity")
 public class MedReminderServerApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(MedReminderServerApplication.class, args);
 	}

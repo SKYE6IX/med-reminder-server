@@ -230,13 +230,13 @@ public class UserEntity {
         this.paymentMethodId = paymentMethodId;
     }
 
-    public void issuePasswordResetToken(String token) {
+    public void issuePasswordResetToken(String token, String timeZone) {
         this.passwordResetToken = token;
-        this.passwordResetIssuedAt = LocalDateTime.now(ZoneId.of("Europe/Moscow"));
+        this.passwordResetIssuedAt = LocalDateTime.now(ZoneId.of(timeZone));
     }
 
-    public void redeemPasswordResetToken() {
-        this.passwordResetRedeemedAt = LocalDateTime.now(ZoneId.of("Europe/Moscow"));
+    public void redeemPasswordResetToken(String timeZone) {
+        this.passwordResetRedeemedAt = LocalDateTime.now(ZoneId.of(timeZone));
         this.passwordResetToken = null;
     }
 

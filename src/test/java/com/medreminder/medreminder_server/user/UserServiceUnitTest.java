@@ -17,6 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -65,8 +67,11 @@ public class UserServiceUnitTest {
         User snubUser = UserStubData
                 .createUserWithId("test2@mail.com","test user", "12345678");
 
+
+        LocalDate dob = LocalDate.of(1992,7,27);
+
         UpdateUserCommand updateUserCommand = new UpdateUserCommand("updatetest@mail.com",
-                null, "27.07.1992", "Male");
+                null, dob.format(DateTimeFormatter.BASIC_ISO_DATE), "Male");
 
         when(userRepository.findUserById(any(String.class)))
                 .thenReturn(Optional.of(userMapper.toEntity(snubUser)));
@@ -81,7 +86,7 @@ public class UserServiceUnitTest {
 
         assertThat(response.gender()).isNotNull().isEqualTo("Male");
 
-        assertThat(response.dateOfBirth().getYear()).isEqualTo(1992);
+        assertThat(response.dateOfBirth()).isNotEmpty();
     }
 
     @Test

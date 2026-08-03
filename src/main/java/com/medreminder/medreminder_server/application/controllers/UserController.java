@@ -88,8 +88,6 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-
-
     @PostMapping(value = "/profiles/images")
     public ResponseEntity<Map<String, String>> uploadProfileImage(
             @AuthenticationPrincipal UserDetails userDetails,

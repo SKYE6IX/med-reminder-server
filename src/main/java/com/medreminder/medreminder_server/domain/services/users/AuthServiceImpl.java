@@ -194,8 +194,10 @@ public class AuthServiceImpl implements AuthService {
 
         domainUser.updatePassword(newPasswordHash);
 
+        String timeZone = getTimeZone(existingUser);
+
         existingUser.syncUserData(domainUser);
-        existingUser.redeemPasswordResetToken();
+        existingUser.redeemPasswordResetToken(timeZone);
 
         // Revoked the existing token
         tokenManager.revokeRefreshToken(domainUser.getId());
@@ -214,7 +216,9 @@ public class AuthServiceImpl implements AuthService {
         final int token = tokenManager.generatePasswordResetRawToken();
         final String hashToken = tokenManager.getPasswordResetHashToken(String.valueOf(token));
 
-        existingUser.issuePasswordResetToken(hashToken);
+
+        String timeZone = getTimeZone(existingUser);
+        existingUser.issuePasswordResetToken(hashToken, timeZone);
 
         final String EMAIL_SUBJECT = "Ваш код подтверждения";
         final String EMAIL_TEMPLATE= "otp-email-template.ftl";
@@ -245,7 +249,8 @@ public class AuthServiceImpl implements AuthService {
         boolean isValidToken = tokenManager.validatePasswordResetToken(String.valueOf(token),
                 existingUser.getPasswordResetToken());
 
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Moscow"));
+        String timeZone = getTimeZone(existingUser);
+        LocalDateTime now = LocalDateTime.now(ZoneId.of(timeZone));
         boolean isExpired = existingUser.getPasswordResetIssuedAt()
                 .plusMinutes(EXPIRE_MINUTES).isBefore(now);
 
@@ -269,8 +274,15 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = tokenManager.generateRawRefreshToken();
         tokenManager.saveHashRefreshToken(refreshToken, user);
 
-        user.updateLastLoginAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+        String timeZone = getTimeZone(user);
+
+        user.updateLastLoginAt(LocalDateTime.now(ZoneId.of(timeZone)));
         userRepository.saveUser(user);
         return new AuthResponse(user.getId(), user.getEmail(), accessToken, refreshToken);
+    }
+
+    private String getTimeZone(UserEntity user) {
+        String FALLBACK_TIME_ZONE = "Europe/Moscow";
+        return user.getTimeZone() != null ? user.getTimeZone(): FALLBACK_TIME_ZONE;
     }
 }

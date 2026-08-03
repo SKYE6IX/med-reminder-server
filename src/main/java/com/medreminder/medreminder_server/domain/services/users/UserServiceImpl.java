@@ -20,6 +20,7 @@ import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,10 +99,14 @@ public class UserServiceImpl implements UserService {
 
         userRepository.saveUser(managedUser);
 
+
+        String dob = domainUser.getDateOfBirth() != null
+                ? domainUser.getDateOfBirth().format(DateTimeFormatter.BASIC_ISO_DATE) : null;
+
         return new UserResponse(domainUser.getId(),
                 domainUser.getEmail(),
                 domainUser.getName(),
-                domainUser.getDateOfBirth(),
+                dob,
                 domainUser.getGender());
     }
 
@@ -223,7 +228,6 @@ public class UserServiceImpl implements UserService {
                 .filter((profileEntity -> profileEntity.getId().equals(profileId)))
                 .findFirst()
                 .ifPresent(profileEntity -> {
-                    System.out.println("Found profile tot delete: " + profileEntity.getName());
                     if(profileEntity.getAvatarUrl() != null) {
                         s3Service.deleteFile(profileEntity.getAvatarUrl());
                         profileEntity.setAvatarUrl(null);
@@ -236,11 +240,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse getUser(String userId) {
         UserEntity userEntity = findUserById(userId);
+
+        String dob = userEntity.getDateOfBirth() != null
+                ? userEntity.getDateOfBirth().format(DateTimeFormatter.BASIC_ISO_DATE) : null;
+
         return new UserResponse(
                 userEntity.getId(),
                 userEntity.getEmail(),
                 userEntity.getName(),
-                userEntity.getDateOfBirth(),
+                dob,
                 userEntity.getGender());
     }
 
