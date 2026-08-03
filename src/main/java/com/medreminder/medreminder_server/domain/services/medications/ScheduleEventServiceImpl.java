@@ -1,6 +1,7 @@
 package com.medreminder.medreminder_server.domain.services.medications;
 
 
+import com.medreminder.medreminder_server.application.dtos.medication.LogScheduleEventRequest;
 import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
 import com.medreminder.medreminder_server.application.dtos.user.ProfileResponse;
 import com.medreminder.medreminder_server.application.exceptions.ResourceNotFoundException;
@@ -74,7 +75,7 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
     }
 
     @Override
-    public ScheduleEventResponse logScheduleEvent(String scheduleEventId, Map<String, String> eventBody) {
+    public ScheduleEventResponse logScheduleEvent(String scheduleEventId, LogScheduleEventRequest eventBody) {
 
         ScheduleEventEntity scheduleEvent = medicationRepository
                 .getScheduleEventById(scheduleEventId);
@@ -87,14 +88,14 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
             return null;
         }
 
-        String timeZone = eventBody.get("timeZone") != null ? eventBody.get("timeZone") : "Europe/Moscow";
+        String timeZone = eventBody.timeZone() != null ? eventBody.timeZone() : "Europe/Moscow";
         ZoneId zoneId = ZoneId.of(timeZone);
 
         MedicationProfileEntity managedMedicationProfile = scheduleEvent
                 .getMedicationSchedule().getMedicationProfile();
 
         ScheduleEvent domainScheduleEvent = medicationMapper.toDomain(scheduleEvent);
-        domainScheduleEvent.updateStatus(eventBody.get(("action")));
+        domainScheduleEvent.updateStatus(eventBody.action());
 
         MedicationSchedule domainMedicationSchedule = medicationMapper
                 .toDomain(managedMedicationProfile.getMedicationSchedule());

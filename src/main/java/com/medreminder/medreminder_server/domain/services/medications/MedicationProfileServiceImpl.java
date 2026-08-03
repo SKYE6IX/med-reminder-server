@@ -270,7 +270,6 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
         var newPack = medicationRepository
                 .saveMedicationProfile(medicationProfile)
                 .getMedicationPacks().getLast();
-
         return Helper.getMedicationPackResponse(newPack);
     }
 

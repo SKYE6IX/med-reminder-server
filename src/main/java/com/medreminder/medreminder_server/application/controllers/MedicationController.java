@@ -38,7 +38,7 @@ public class MedicationController {
     }
 
     @GetMapping(value = "/{medicationProfileId}")
-    public ResponseEntity<MedicationProfileResponse> getAllMedicationProfile(
+    public ResponseEntity<MedicationProfileResponse> getMedicationProfile(
             @PathVariable String medicationProfileId) {
 
         MedicationProfileResponse response = medicationProfileService
@@ -80,8 +80,8 @@ public class MedicationController {
     }
 
     @PutMapping(value = "/schedules/event/{eventId}")
-    public ResponseEntity<ScheduleEventResponse> updateScheduleEvent(@PathVariable String eventId,
-                                                                     @RequestBody Map<String, String> eventBody) {
+    public ResponseEntity<ScheduleEventResponse> logScheduleEvent(@PathVariable String eventId,
+                                                                  @RequestBody LogScheduleEventRequest eventBody) {
         var response = scheduleEventService.logScheduleEvent(eventId, eventBody);
 
         return ResponseEntity.ok(response);
@@ -115,8 +115,8 @@ public class MedicationController {
     }
 
     @PutMapping(value = "/schedules/overdue")
-    public ResponseEntity<?> updateOverdueScheduleEvents(@AuthenticationPrincipal UserDetails userDetails,
-                                                         @RequestBody Map<String, String> eventBody ){
+    public ResponseEntity<?> logOverdueScheduleEvents(@AuthenticationPrincipal UserDetails userDetails,
+                                                      @RequestBody Map<String, String> eventBody ){
         UserPrincipal principal = (UserPrincipal) userDetails;
 
         scheduleEventService.logOverdueScheduleEvent(principal.getId(),eventBody);

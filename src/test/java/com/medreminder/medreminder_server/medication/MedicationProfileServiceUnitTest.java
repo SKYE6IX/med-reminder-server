@@ -293,8 +293,8 @@ public class MedicationProfileServiceUnitTest {
         when(medicationRepository.getScheduleEventById(any()))
                 .thenReturn(stubScheduleEvent);
 
-        Map<String, String> updateEventInput = new HashMap<>();
-        updateEventInput.put("action", "TAKEN");
+        LogScheduleEventRequest updateEventInput = new LogScheduleEventRequest("taken", "Europe/Moscow");
+
 
         ScheduleEventResponse response = scheduleEventService
                 .logScheduleEvent(stubScheduleEvent.getId(), updateEventInput);

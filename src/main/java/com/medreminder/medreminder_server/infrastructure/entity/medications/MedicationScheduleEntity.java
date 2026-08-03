@@ -23,7 +23,7 @@ public class MedicationScheduleEntity {
     private BigDecimal doseQuantity;
 
     @Column(name = "taken_quantity")
-    private BigDecimal  takenQuantity;
+    private BigDecimal takenQuantity;
 
     @Column(name = "recurrence_rule")
     private String recurrenceRule;

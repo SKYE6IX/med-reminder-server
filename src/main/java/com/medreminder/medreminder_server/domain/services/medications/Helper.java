@@ -128,7 +128,7 @@ public class Helper {
 //        Acquire the schedule and create an object and attached it to the response
         MedicationScheduleEntity schedule = smp.getMedicationSchedule();
 
-        final String endDate = schedule.getEndDate() != null ? schedule.getEndDate().toString() : null;
+        final String endDate = schedule.getEndDate() != null ? schedule.getEndDate().format(DateTimeFormatter.BASIC_ISO_DATE) : null;
 
         response.setSchedule(new MedScheduleResponse(
                 schedule.getId(),
@@ -136,7 +136,7 @@ public class Helper {
                 smp.getMedication().getMeasurement(),
                 schedule.getRecurrenceRule(),
                 schedule.getStartTime().toString(),
-                schedule.getStartDate().toString(),
+                schedule.getStartDate().format(DateTimeFormatter.BASIC_ISO_DATE),
                 endDate,
                 schedule.getTakenQuantity().stripTrailingZeros().toPlainString())
         );
@@ -179,8 +179,8 @@ public class Helper {
 
         var medicationProfile = medicationPack.getMedicationProfile();
 
-        String startedAt = medicationPack.getStartedAt() != null ? medicationPack.getStartedAt().toString() : null;
-        String endedAt = medicationPack.getEndedAt() != null ? medicationPack.getEndedAt().toString() : null;
+        String startedAt = medicationPack.getStartedAt() != null ? medicationPack.getStartedAt().format(DateTimeFormatter.BASIC_ISO_DATE) : null;
+        String endedAt = medicationPack.getEndedAt() != null ? medicationPack.getEndedAt().format(DateTimeFormatter.BASIC_ISO_DATE) : null;
 
         return new MedicationPackResponse(
                 medicationPack.getId(),

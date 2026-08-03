@@ -1,5 +1,6 @@
 package com.medreminder.medreminder_server.domain.services.medications;
 
+import com.medreminder.medreminder_server.application.dtos.medication.LogScheduleEventRequest;
 import com.medreminder.medreminder_server.application.dtos.medication.ScheduleEventResponse;
 import com.medreminder.medreminder_server.domain.models.medication.MedicationSchedule;
 import com.medreminder.medreminder_server.domain.models.medication.ScheduleEvent;
@@ -13,7 +14,7 @@ public interface ScheduleEventService {
 
     List<ScheduleEvent> updateScheduleEventsRule(MedicationSchedule schedule, String timeZone);
 
-    ScheduleEventResponse logScheduleEvent(String scheduleEventId, Map<String, String> eventBody);
+    ScheduleEventResponse logScheduleEvent(String scheduleEventId, LogScheduleEventRequest eventBody);
 
     void logOverdueScheduleEvent(String userId, Map<String, String> eventBody);
 
