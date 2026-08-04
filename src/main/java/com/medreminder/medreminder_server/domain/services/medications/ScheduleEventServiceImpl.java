@@ -65,13 +65,9 @@ public class ScheduleEventServiceImpl implements ScheduleEventService {
                 ));
 
         final int MAX_EXPANSION_DAY = pendingEvents.size();
-        final LocalDateTime dateTimeFrom = pendingEvents
-                .stream()
-                .findFirst()
-                .map(event -> event.getScheduleAt().toLocalDate().atStartOfDay())
-                .orElse(schedule.getStartDate().atStartOfDay());
+        final LocalDateTime dateTimeFrom = LocalDate.now(zoneId).atStartOfDay();
 
-        return getScheduleEventsResult(schedule,dateTimeFrom,zoneId,MAX_EXPANSION_DAY);
+        return getScheduleEventsResult(schedule, dateTimeFrom, zoneId, MAX_EXPANSION_DAY);
     }
 
     @Override

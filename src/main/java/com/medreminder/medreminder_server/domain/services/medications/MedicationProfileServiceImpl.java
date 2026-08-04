@@ -107,7 +107,6 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
         String timeZone = cmd.getTimeZone() != null ?
                 cmd.getTimeZone() : FALLBACK_TIME_ZONE;
 
-
         if (medicationProfile == null) {
           throw new ResourceNotFoundException("Medication Profile not found!");
         }
@@ -116,7 +115,6 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
                 .toDomain(medicationProfile);
 
         cmd.getStatus().ifPresent(domainMedicationProfile::updateActive);
-
         cmd.getNote().ifPresent(note -> {
             if(note.isEmpty()){
                 domainMedicationProfile.updateNote(null);
@@ -125,7 +123,7 @@ public class MedicationProfileServiceImpl implements MedicationProfileService {
             }
         });
 
-//        If user change their events schedules
+//        If user change their schedules events
         cmd.getRecurrenceRule().ifPresent(newRules -> {
             MedicationSchedule medicationSchedule = domainMedicationProfile.getMedicationSchedule();
             medicationSchedule.updateRecurrenceRule(newRules);
