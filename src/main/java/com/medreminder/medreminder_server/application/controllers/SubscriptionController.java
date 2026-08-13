@@ -2,9 +2,7 @@ package com.medreminder.medreminder_server.application.controllers;
 
 
 import com.medreminder.medreminder_server.application.dtos.subscription.PaidSubscriptionRequest;
-import com.medreminder.medreminder_server.application.dtos.subscription.SubscriptionPlanResponse;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
-import com.medreminder.medreminder_server.application.services.PaymentService;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,33 +16,32 @@ import java.util.Map;
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
-    private final PaymentService paymentService;
 
-    public SubscriptionController(SubscriptionService subscriptionService, PaymentService paymentService) {
+    public SubscriptionController(SubscriptionService subscriptionService) {
         this.subscriptionService = subscriptionService;
-        this.paymentService = paymentService;
     }
 
     @GetMapping()
-    public ResponseEntity<SubscriptionPlanResponse> getSubscriptionPlan(
+    public ResponseEntity<Map<String, String>> getSubscriptionPlan(
             @AuthenticationPrincipal UserDetails userDetails) {
 
         var principal = getPrincipal(userDetails);
 
-        SubscriptionPlanResponse response = subscriptionService.getSubscriptionPlanByUserId(principal.getId());
+        Map<String, String> response = subscriptionService
+                .getSubscriptionPlanByUserId(principal.getId());
 
         return ResponseEntity.ok(response);
     }
 
     @PostMapping()
-    public ResponseEntity<SubscriptionPlanResponse> createSubscriptionPlan(
+    public ResponseEntity<Map<String, String>> createSubscriptionPlan(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody PaidSubscriptionRequest requestBody) {
 
         var principal = getPrincipal(userDetails);
 
-       SubscriptionPlanResponse response =
-               subscriptionService.createPaidSubscriptionPlan(requestBody, principal.getId());
+        Map<String, String> response = subscriptionService
+                .createPaidSubscriptionPlan(requestBody, principal.getId());
 
         return ResponseEntity.ok(response);
     }
@@ -52,15 +49,13 @@ public class SubscriptionController {
     @PutMapping()
     public ResponseEntity<Map<String, String>> cancelSubscriptionPlan(
             @AuthenticationPrincipal UserDetails userDetails){
+//        var principal = getPrincipal(userDetails);
+//        Map<String,String> response =
+//                subscriptionService.cancelPaidSubscriptionPlan(principal.getId());
+//        return ResponseEntity.ok(response);
 
-        var principal = getPrincipal(userDetails);
-
-        Map<String,String> response =
-                subscriptionService.cancelPaidSubscriptionPlan(principal.getId());
-
-        return ResponseEntity.ok(response);
+        return null;
     }
-
 
     private UserPrincipal getPrincipal(UserDetails userDetails) {
         return (UserPrincipal) userDetails;

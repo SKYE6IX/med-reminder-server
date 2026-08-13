@@ -18,6 +18,8 @@ public class SubscriptionEntity {
     @UuidGenerator
     private String id;
 
+    private String store;
+
     private String status;
 
     @Column(name = "started_at")
@@ -25,18 +27,6 @@ public class SubscriptionEntity {
 
     @Column(name = "canceled_at")
     private LocalDateTime canceledAt;
-
-    @Column(name = "billing_cycle")
-    private String billingCycle;
-
-    @Column(name = "time_zone")
-    private String timeZone;
-
-    @Column(name = "is_billing_retry")
-    private Boolean isBillingRetry;
-
-    @Column(name = "next_retry_billing_at")
-    private LocalDateTime nextRetryBillingAt;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -68,23 +58,25 @@ public class SubscriptionEntity {
     }
 
     public SubscriptionEntity(String id,
+                              String store,
                               String status,
                               LocalDateTime startedAt,
-                              String billingCycle,
-                              Boolean isBillingRetry,
                               UserEntity user,
                               PlanEntity plan) {
         this.id = id;
+        this.store = store;
         this.status = status;
         this.startedAt = startedAt;
-        this.billingCycle = billingCycle;
-        this.isBillingRetry = isBillingRetry;
         this.user = user;
         this.plan = plan;
     }
 
     public String getId() {
         return id;
+    }
+
+    public String getStore() {
+        return store;
     }
 
     public String getStatus() {
@@ -103,28 +95,12 @@ public class SubscriptionEntity {
         return canceledAt;
     }
 
-    public String getBillingCycle() {
-        return billingCycle;
-    }
-
-    public String getTimeZone() {
-        return timeZone;
-    }
-
     public UserEntity getUser() {
         return user;
     }
 
     public PlanEntity getPlan() {
         return plan;
-    }
-
-    public Boolean getBillingRetry() {
-        return isBillingRetry;
-    }
-
-    public LocalDateTime getNextRetryBillingAt() {
-        return nextRetryBillingAt;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -145,21 +121,5 @@ public class SubscriptionEntity {
 
     public void updateCanceledAt(LocalDateTime canceledAt) {
         this.canceledAt = canceledAt;
-    }
-
-    public void updateBillingCycle(String billingCycle) {
-        this.billingCycle = billingCycle;
-    }
-
-    public void updateTimeZone(String timeZone) {
-        this.timeZone = timeZone;
-    }
-
-    public void updateIsBillingRetry(Boolean isBillingRetry) {
-        this.isBillingRetry = isBillingRetry;
-    }
-
-    public void updateNextRetryBillingAt(LocalDateTime nextRetryBillingAt) {
-        this.nextRetryBillingAt = nextRetryBillingAt;
     }
 }

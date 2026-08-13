@@ -1,12 +1,8 @@
 package com.medreminder.medreminder_server.subscription;
 
-import com.medreminder.medreminder_server.domain.models.billing.BillingCycle;
 import com.medreminder.medreminder_server.domain.models.subscription.*;
-import ru.loolzaaa.youkassa.model.Payment;
-import ru.loolzaaa.youkassa.pojo.Amount;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public class SubscriptionServiceStubFactory {
 
@@ -24,10 +20,9 @@ public class SubscriptionServiceStubFactory {
     public static Subscription createSubscription(String id) {
         return new Subscription(
                 id,
+                "TEST_STORE",
                 SubscriptionStatus.ACTIVE,
-                null,
-                BillingCycle.ANNUAL,
-                false
+                LocalDateTime.now()
         );
     }
 
@@ -38,45 +33,7 @@ public class SubscriptionServiceStubFactory {
                 id,
                 start,
                 end,
-                SubscriptionPeriodStatus.ACTIVE,
-                SubscriptionPeriodPaymentStatus.PAID
+                SubscriptionPeriodStatus.ACTIVE
         );
-    }
-
-    public static Payment createMockSuccessfulPayment() {
-        Amount amount = Amount.builder()
-                .currency("RUB")
-                .value("3050.00")
-                .build();
-
-        Payment.PaymentMethod paymentMethod = Payment.PaymentMethod.builder()
-                .id(UUID.randomUUID().toString())
-                .status(Payment.Status.SUCCEEDED)
-                .type("BANK_CARD")
-                .build();
-
-        return Payment.builder()
-                .amount(amount)
-                .status(Payment.Status.SUCCEEDED)
-                .paymentMethod(paymentMethod)
-                .build();
-    }
-
-    public static Payment createMockUnSuccessfulPayment() {
-        Amount amount = Amount.builder()
-                .currency("RUB")
-                .value("3050.00")
-                .build();
-        Payment.PaymentMethod paymentMethod = Payment.PaymentMethod.builder()
-                .id(UUID.randomUUID().toString())
-                .status(Payment.Status.CANCELED)
-                .type("BANK_CARD")
-                .build();
-
-        return Payment.builder()
-                .amount(amount)
-                .status(Payment.Status.CANCELED)
-                .paymentMethod(paymentMethod)
-                .build();
     }
 }

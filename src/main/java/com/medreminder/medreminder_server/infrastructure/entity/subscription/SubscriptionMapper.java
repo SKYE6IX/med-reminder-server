@@ -1,6 +1,5 @@
 package com.medreminder.medreminder_server.infrastructure.entity.subscription;
 
-import com.medreminder.medreminder_server.domain.models.billing.BillingCycle;
 import com.medreminder.medreminder_server.domain.models.subscription.*;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import org.springframework.stereotype.Component;
@@ -29,10 +28,9 @@ public class SubscriptionMapper {
         }
         return new SubscriptionEntity(
                 subscription.getId(),
+                subscription.getStore(),
                 subscription.getStatus().toString(),
                 subscription.getStartedAt(),
-                subscription.getBillingCycle().toString(),
-                subscription.getBillingRetry(),
                 user,
                 user.getPlan()
         );
@@ -45,10 +43,9 @@ public class SubscriptionMapper {
         }
         return new SubscriptionPeriodEntity(
                 subscriptionPeriod.getId(),
-                subscriptionPeriod.getStartTime(),
-                subscriptionPeriod.getEndTime(),
+                subscriptionPeriod.getStartAt(),
+                subscriptionPeriod.getEndAt(),
                 subscriptionPeriod.getStatus().toString(),
-                subscriptionPeriod.getPaymentStatus().toString(),
                 subscriptionEntity
         );
     }

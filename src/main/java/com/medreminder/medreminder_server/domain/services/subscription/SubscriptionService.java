@@ -1,16 +1,14 @@
 package com.medreminder.medreminder_server.domain.services.subscription;
 
 import com.medreminder.medreminder_server.application.dtos.subscription.PaidSubscriptionRequest;
-import com.medreminder.medreminder_server.application.dtos.subscription.SubscriptionPlanResponse;
-import com.medreminder.medreminder_server.domain.services.UseCase;
 
 import java.util.Map;
 
 public interface SubscriptionService {
 
-    SubscriptionPlanResponse createPaidSubscriptionPlan(PaidSubscriptionRequest request, String userId);
+    Map<String, String> createPaidSubscriptionPlan(PaidSubscriptionRequest request, String userId);
 
-    Map<String, String> cancelPaidSubscriptionPlan(String userId);
+    Map<String, String> syncSubscriptionWithStore(String userId);
 
-    SubscriptionPlanResponse getSubscriptionPlanByUserId(String userId);
+    Map<String, String> getSubscriptionPlanByUserId(String userId);
 }

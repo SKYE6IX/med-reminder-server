@@ -6,21 +6,18 @@ public class SubscriptionPeriod {
 
     private final String id;
     private Subscription subscription;
-    private final LocalDateTime startTime;
-    private final LocalDateTime endTime;
+    private final LocalDateTime startAt;
+    private final LocalDateTime endAt;
     private final SubscriptionPeriodStatus status;
-    private final SubscriptionPeriodPaymentStatus paymentStatus;
 
     public SubscriptionPeriod(String id,
-                              LocalDateTime startTime,
-                              LocalDateTime endTime,
-                              SubscriptionPeriodStatus status,
-                              SubscriptionPeriodPaymentStatus paymentStatus) {
+                              LocalDateTime startAt,
+                              LocalDateTime endAt,
+                              SubscriptionPeriodStatus status) {
         this.id = id;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.startAt = startAt;
+        this.endAt = endAt;
         this.status = status;
-        this.paymentStatus = paymentStatus;
     }
 
     public String getId() {
@@ -31,16 +28,12 @@ public class SubscriptionPeriod {
         return subscription;
     }
 
-    public LocalDateTime getStartTime() {
-        return startTime;
+    public LocalDateTime getStartAt() {
+        return startAt;
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public SubscriptionPeriodPaymentStatus getPaymentStatus() {
-        return paymentStatus;
+    public LocalDateTime getEndAt() {
+        return endAt;
     }
 
     public SubscriptionPeriodStatus getStatus() {

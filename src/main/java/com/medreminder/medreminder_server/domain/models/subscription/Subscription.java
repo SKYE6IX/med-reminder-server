@@ -1,6 +1,5 @@
 package com.medreminder.medreminder_server.domain.models.subscription;
 
-import com.medreminder.medreminder_server.domain.models.billing.BillingCycle;
 import com.medreminder.medreminder_server.domain.models.users.User;
 
 import java.time.LocalDateTime;
@@ -10,29 +9,30 @@ import java.util.List;
 public class Subscription {
 
     private final String id;
+    private final String store;
     private final SubscriptionStatus status;
     private final List<SubscriptionPeriod> periods = new ArrayList<>();
     private final LocalDateTime startedAt;
     private LocalDateTime canceledAt;
-    private final BillingCycle billingCycle;
-    private final Boolean isBillingRetry;
     private Plan plan;
     private User user;
 
     public Subscription(String id,
+                        String store,
                         SubscriptionStatus status,
-                        LocalDateTime startedAt,
-                        BillingCycle billingCycle,
-                        Boolean isBillingRetry) {
+                        LocalDateTime startedAt) {
         this.id = id;
+        this.store = store;
         this.status = status;
         this.startedAt = startedAt;
-        this.billingCycle = billingCycle;
-        this.isBillingRetry = isBillingRetry;
     }
 
     public String getId() {
         return id;
+    }
+
+    public String getStore() {
+        return store;
     }
 
     public SubscriptionStatus getStatus() {
@@ -49,14 +49,6 @@ public class Subscription {
 
     public LocalDateTime getCanceledAt() {
         return canceledAt;
-    }
-
-    public BillingCycle getBillingCycle() {
-        return billingCycle;
-    }
-
-    public Boolean getBillingRetry() {
-        return isBillingRetry;
     }
 
     public Plan getPlan() {

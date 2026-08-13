@@ -8,9 +8,13 @@ import com.medreminder.medreminder_server.domain.models.medication.Medication;
 import com.medreminder.medreminder_server.domain.models.medication.MedicationSchedule;
 import com.medreminder.medreminder_server.domain.models.users.Profile;
 import com.medreminder.medreminder_server.domain.models.users.Relation;
+import com.medreminder.medreminder_server.domain.models.users.User;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
+import com.medreminder.medreminder_server.domain.services.users.UserRepository;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationProfileEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
+import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import com.medreminder.medreminder_server.medication.MedicationStubFactory;
 import com.medreminder.medreminder_server.user.UserStubData;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +61,13 @@ public class MedicationScheduleEventsJobUnitTest {
     private MedicationRepository medicationRepository;
 
     @Autowired
+    UserRepository userRepository;
+
+    @Autowired
     private MedicationMapper medicationMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @BeforeEach
     void setup() {
@@ -66,27 +76,37 @@ public class MedicationScheduleEventsJobUnitTest {
 
     @Test
     void jobShouldProcessOnlyEligibleAndCompleteSuccessfully() throws Exception {
-        Profile snubProfile = UserStubData.createProfileWithId("John",
+
+        User stubUser = UserStubData.createUser(
+                null, "stub@mail.com","Stub",null
+        );
+        Profile snubProfile = UserStubData.createProfile(null,"John",
                 Relation.BROTHER.toString(), false);
+        stubUser.addProfiles(snubProfile);
+
+        UserEntity user = userRepository.saveUser(userMapper.toEntity(stubUser));
+        var profile = user.getProfiles().getLast();
 
         LocalDate today = LocalDate.now(ZoneId.of("Europe/Moscow"));
         LocalDate startDate = today.minusDays(14);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        String rrule = "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0";
 
         CreateMedicationCommand cmd = MedicationStubFactory
-                .createMedicationCommand(snubProfile.getId(),
-                        "FREQ=DAILY;BYHOUR=8,20;BYMINUTE=0;BYSECOND=0", formatter.format(startDate),
+                .createMedicationCommand(
+                        profile.getId(),
+                        rrule,
+                        startDate.format(DateTimeFormatter.BASIC_ISO_DATE),
                         null);
 
         Medication stubMed = MedicationStubFactory.createMedication(cmd);
         MedicationSchedule stubMedicationSchedule = MedicationStubFactory.createMedicationSchedule(cmd);
-        stubMedicationSchedule.updateLastExpandedUntil(today.minusDays(7).atTime(14,10));
+        stubMedicationSchedule.updateLastExpandedUntil(today.minusDays(7).atTime(10,10));
         MedicationProfileEntity stubMedicationProfile = new MedicationProfileEntity(
                 null,
                 true,
                 cmd.getMedicationNote(),
                 null,
-                null
+                profile
         );
 
         stubMedicationProfile.setMedication(medicationMapper.toEntity(stubMed,stubMedicationProfile));

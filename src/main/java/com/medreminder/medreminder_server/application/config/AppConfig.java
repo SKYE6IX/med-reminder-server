@@ -4,7 +4,6 @@ package com.medreminder.medreminder_server.application.config;
 import com.medreminder.medreminder_server.application.security.AppleAuth;
 import com.medreminder.medreminder_server.application.security.JwtUtil;
 import com.medreminder.medreminder_server.application.services.EmailService;
-import com.medreminder.medreminder_server.application.services.PaymentService;
 import com.medreminder.medreminder_server.application.services.S3Service;
 import com.medreminder.medreminder_server.domain.services.users.TokenManager;
 import com.medreminder.medreminder_server.domain.services.medications.*;
@@ -22,7 +21,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.interceptor.*;
 import org.springframework.web.client.RestClient;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -95,11 +93,10 @@ public class AppConfig {
     @Bean
     public SubscriptionService subscriptionService(SubscriptionRepository subscriptionRepository,
                                             UserRepository userRepository,
-                                            PaymentService paymentService,
                                             SubscriptionMapper subscriptionMapper){
 
         return new SubscriptionServiceImpl(subscriptionRepository,
-                userRepository, paymentService, subscriptionMapper);
+                userRepository, subscriptionMapper);
     }
 
     @Bean

@@ -39,43 +39,43 @@ public class QuartzSchedulerConfig {
                         .inTimeZone(TimeZone.getTimeZone(timeZone)))
                 .build();
     }
-    @Bean
-    public JobDetail downgradePlanJobDetail() {
-        return JobBuilder.newJob(DowngradePlanScheduler.class)
-                .withIdentity("downgrade_plan_job_detail")
-                .storeDurably()
-                .build();
-    }
+//    @Bean
+//    public JobDetail downgradePlanJobDetail() {
+//        return JobBuilder.newJob(DowngradePlanScheduler.class)
+//                .withIdentity("downgrade_plan_job_detail")
+//                .storeDurably()
+//                .build();
+//    }
 
-    @Bean
-    public Trigger downgradePlanTrigger(@Qualifier("downgradePlanJobDetail") JobDetail detail) {
-        return TriggerBuilder.newTrigger()
-                .forJob(detail)
-                .withIdentity("downgrade_plan_trigger")
-                .withSchedule(CronScheduleBuilder
-                        .cronSchedule("0 0 2 * * ?")
-                        .inTimeZone(TimeZone.getTimeZone(timeZone)))
-                .build();
-    }
+//    @Bean
+//    public Trigger downgradePlanTrigger(@Qualifier("downgradePlanJobDetail") JobDetail detail) {
+//        return TriggerBuilder.newTrigger()
+//                .forJob(detail)
+//                .withIdentity("downgrade_plan_trigger")
+//                .withSchedule(CronScheduleBuilder
+//                        .cronSchedule("0 0 2 * * ?")
+//                        .inTimeZone(TimeZone.getTimeZone(timeZone)))
+//                .build();
+//    }
 
-    @Bean
-    public JobDetail renewPaidPlanJobDetail() {
-        return JobBuilder.newJob(RenewPaidPlanScheduler.class)
-                .withIdentity("renew_paid_plan_job_detail")
-                .storeDurably()
-                .build();
-    }
-
-    @Bean
-    public Trigger renewPaidPlanTrigger(@Qualifier("renewPaidPlanJobDetail") JobDetail detail) {
-        return TriggerBuilder.newTrigger()
-                .forJob(detail)
-                .withIdentity("renew_paid_plan_trigger")
-                .withSchedule(CronScheduleBuilder
-                        .cronSchedule("0 0 7 * * ?")
-                        .inTimeZone(TimeZone.getTimeZone(timeZone)))
-                .build();
-    }
+//    @Bean
+//    public JobDetail renewPaidPlanJobDetail() {
+//        return JobBuilder.newJob(RenewPaidPlanScheduler.class)
+//                .withIdentity("renew_paid_plan_job_detail")
+//                .storeDurably()
+//                .build();
+//    }
+//
+//    @Bean
+//    public Trigger renewPaidPlanTrigger(@Qualifier("renewPaidPlanJobDetail") JobDetail detail) {
+//        return TriggerBuilder.newTrigger()
+//                .forJob(detail)
+//                .withIdentity("renew_paid_plan_trigger")
+//                .withSchedule(CronScheduleBuilder
+//                        .cronSchedule("0 0 7 * * ?")
+//                        .inTimeZone(TimeZone.getTimeZone(timeZone)))
+//                .build();
+//    }
 
     @Bean
     public JobDetail purgeStaleTokenJobDetail() {

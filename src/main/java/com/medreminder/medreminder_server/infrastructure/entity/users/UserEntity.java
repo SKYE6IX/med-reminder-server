@@ -2,7 +2,6 @@ package com.medreminder.medreminder_server.infrastructure.entity.users;
 
 
 import com.medreminder.medreminder_server.domain.models.users.User;
-import com.medreminder.medreminder_server.infrastructure.entity.billing.BillingEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.PlanEntity;
 import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionEntity;
 import jakarta.persistence.*;
@@ -87,16 +86,6 @@ public class UserEntity {
             orphanRemoval = true
     )
     private SubscriptionEntity subscription;
-
-    @OneToMany(
-            mappedBy = "user",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    private List<BillingEntity> billings = new ArrayList<>();
-
-    @Column(name = "payment_method_id")
-    private String paymentMethodId;
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -194,14 +183,6 @@ public class UserEntity {
         return subscription;
     }
 
-    public List<BillingEntity> getBillings() {
-        return billings;
-    }
-
-    public String getPaymentMethodId() {
-        return paymentMethodId;
-    }
-
     public void setPlan(PlanEntity plan) {
         this.plan = plan;
     }
@@ -224,10 +205,6 @@ public class UserEntity {
 
     public void updateLastLoginAt(LocalDateTime lastLoginAt) {
         this.lastLoginAt = lastLoginAt;
-    }
-
-    public void updatePaymentMethodId(String paymentMethodId) {
-        this.paymentMethodId = paymentMethodId;
     }
 
     public void issuePasswordResetToken(String token, String timeZone) {

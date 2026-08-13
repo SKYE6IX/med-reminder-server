@@ -2,16 +2,13 @@ package com.medreminder.medreminder_server;
 
 
 import com.medreminder.medreminder_server.application.batch_jobs.listener.*;
-import com.medreminder.medreminder_server.application.services.PaymentService;
 import com.medreminder.medreminder_server.batch_jobs.config.*;
 import com.medreminder.medreminder_server.domain.services.medications.MedicationRepository;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventService;
 import com.medreminder.medreminder_server.domain.services.medications.ScheduleEventServiceImpl;
 import com.medreminder.medreminder_server.infrastructure.entity.medications.MedicationMapper;
-import com.medreminder.medreminder_server.infrastructure.entity.subscription.SubscriptionMapper;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserMapper;
 import jakarta.persistence.EntityManagerFactory;
-import org.mockito.Mockito;
 import org.springframework.context.annotation.*;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -30,8 +27,6 @@ import java.util.Properties;
 @ComponentScan("com.medreminder.medreminder_server.infrastructure.repository")
 @Import({
         MedScheduleEventSchedulerTestConfig.class,
-        DowngradePlanSchedulerTestConfig.class,
-        RenewPaidPlanSchedulerTestConfig.class,
         PurgeStaleTokenSchedulerTestConfig.class,
 })
 @ActiveProfiles("test")
@@ -72,24 +67,8 @@ public class TestConfig {
     }
 
     @Bean
-    @Primary
-    public PaymentService paymentService() {
-        return Mockito.mock(PaymentService.class);
-    }
-
-    @Bean
     public MedicationScheduleEventJobListener medicationScheduleEventListener(){
         return new MedicationScheduleEventJobListener();
-    }
-
-    @Bean
-    public DowngradePlanJobListener downgradePlanListener(){
-        return new DowngradePlanJobListener();
-    }
-
-    @Bean
-    public RenewPaidPlanJobListener renewPaidPlanListener(){
-        return new RenewPaidPlanJobListener();
     }
 
     @Bean
@@ -106,11 +85,6 @@ public class TestConfig {
     @Bean
     public UserMapper userMapper() {
         return new UserMapper();
-    }
-
-    @Bean
-    public SubscriptionMapper subscriptionMapper() {
-        return new SubscriptionMapper();
     }
 
 }
