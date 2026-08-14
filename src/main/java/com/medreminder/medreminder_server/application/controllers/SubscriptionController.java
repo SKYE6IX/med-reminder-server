@@ -2,6 +2,7 @@ package com.medreminder.medreminder_server.application.controllers;
 
 
 import com.medreminder.medreminder_server.application.dtos.subscription.PaidSubscriptionRequest;
+import com.medreminder.medreminder_server.application.dtos.subscription.SyncSubscriptionRequest;
 import com.medreminder.medreminder_server.application.security.UserPrincipal;
 import com.medreminder.medreminder_server.domain.services.subscription.SubscriptionService;
 import org.springframework.http.ResponseEntity;
@@ -47,14 +48,16 @@ public class SubscriptionController {
     }
 
     @PutMapping()
-    public ResponseEntity<Map<String, String>> cancelSubscriptionPlan(
-            @AuthenticationPrincipal UserDetails userDetails){
-//        var principal = getPrincipal(userDetails);
-//        Map<String,String> response =
-//                subscriptionService.cancelPaidSubscriptionPlan(principal.getId());
-//        return ResponseEntity.ok(response);
+    public ResponseEntity<Map<String, String>> syncSubscriptionPlan(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody SyncSubscriptionRequest requestBody){
 
-        return null;
+        var principal = getPrincipal(userDetails);
+
+        Map<String,String> response = subscriptionService
+                .syncSubscriptionWithStore(requestBody, principal.getId());
+
+        return ResponseEntity.ok(response);
     }
 
     private UserPrincipal getPrincipal(UserDetails userDetails) {

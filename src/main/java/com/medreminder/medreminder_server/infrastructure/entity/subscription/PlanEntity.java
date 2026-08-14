@@ -1,7 +1,6 @@
 package com.medreminder.medreminder_server.infrastructure.entity.subscription;
 
 import com.medreminder.medreminder_server.domain.models.subscription.Plan;
-import com.medreminder.medreminder_server.domain.models.subscription.PlanType;
 import com.medreminder.medreminder_server.infrastructure.entity.users.UserEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
@@ -103,7 +102,7 @@ public class PlanEntity {
         return subscription;
     }
 
-    public void syncPlanData(Plan domainPlan) {
+    public void syncPlanEntity(Plan domainPlan) {
         this.planType = domainPlan.getPlanType().toString();
         this.maxMedications = domainPlan.getMaxMedications();
         this.managedRelation = domainPlan.isManagedRelation();

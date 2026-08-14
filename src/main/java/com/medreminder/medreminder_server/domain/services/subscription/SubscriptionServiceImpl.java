@@ -1,6 +1,7 @@
 package com.medreminder.medreminder_server.domain.services.subscription;
 
 import com.medreminder.medreminder_server.application.dtos.subscription.PaidSubscriptionRequest;
+import com.medreminder.medreminder_server.application.dtos.subscription.SyncSubscriptionRequest;
 import com.medreminder.medreminder_server.application.exceptions.ResourceNotFoundException;
 import com.medreminder.medreminder_server.domain.models.subscription.*;
 import com.medreminder.medreminder_server.domain.services.users.UserRepository;
@@ -33,7 +34,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public Map<String, String> createPaidSubscriptionPlan(PaidSubscriptionRequest request,
                                                                String userId) {
-
         UserEntity userEntity = userRepository.findUserById(userId)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
 
@@ -50,13 +50,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
 //      Create a period for the subscription
         SubscriptionPeriodEntity periodEntity = SubscriptionServiceHelper.createSubscriptionPeriod(
-                subscription,request.latestPurchaseDate(),request.expirationDate(),request.zoneId()
+                subscription,request.latestPurchaseDate(), request.expirationDate(), request.zoneId()
         );
 
 //     Update the subscription plan
         Plan plan = subscriptionMapper.toDomain(subscription.getPlan());
         plan.toProPlan();
-        subscription.getPlan().syncPlanData(plan);
+        subscription.getPlan().syncPlanEntity(plan);
 
         if(subscription.getStatus().equals(SubscriptionStatus.CANCELED.toString())){
             subscription.updateStatus(SubscriptionStatus.ACTIVE.toString());
@@ -70,33 +70,63 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public Map<String, String> syncSubscriptionWithStore(String userId) {
-//        UserEntity userEntity = userRepository.findUserById(userId)
-//                .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
-//
-//        SubscriptionEntity subscriptionEntity = subscriptionRepository
-//                .getSubscriptionByUserId(userEntity.getId())
-//                .orElseThrow(()-> new ResourceNotFoundException("Subscription not found!"));
-//
-//        subscriptionEntity.updateStatus(SubscriptionStatus.CANCELED.toString());
-//        subscriptionEntity.updateStartedAt(null);
-//        subscriptionEntity.updateCanceledAt(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
-//
-//        userEntity.updatePaymentMethodId(null);
-//
-//        subscriptionRepository.saveSubscription(subscriptionEntity);
-//        userRepository.saveUser(userEntity);
-//
-//        Map<String, String> result = new HashMap<>();
-//        result.put("status", "success");
-//
-//        return result;
-        return  null;
+    public Map<String, String> syncSubscriptionWithStore(SyncSubscriptionRequest request, String userId) {
+        UserEntity userEntity = userRepository.findUserById(userId)
+                .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
+
+        SubscriptionEntity subscriptionEntity = subscriptionRepository
+                .getSubscriptionByUserId(userEntity.getId())
+                .orElseThrow(()-> new ResourceNotFoundException("Subscription not found!"));
+
+        ZoneId zoneId = ZoneId.of(request.zoneId());
+
+//        IF WILL_RENEW IS FALSE, USER HAS CANCELLED THEIR
+//        SUBSCRIPTION, SO WE MOVE FORWARD WITH CANCEL IT HERE TOO.
+        if(!request.willRenew()){
+            subscriptionEntity.updateStatus(SubscriptionStatus.CANCELED.toString());
+            subscriptionEntity.updateStartedAt(null);
+            subscriptionEntity.updateCanceledAt(LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(request.unsubscribeDetectedAt()),
+                    zoneId
+            ));
+        }
+
+        LocalDateTime now = LocalDateTime.now(zoneId);
+        LocalDateTime expirationDate = LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(request.expirationDate()),
+                zoneId
+        );
+        SubscriptionPeriodEntity latestPeriod = subscriptionEntity.getPeriods().getLast();
+
+//        IF EXPIRATION DATE IS BEFORE THE CURRENT DATE,
+//        MEANING THE CURRENT PERIOD OF THEIR SUBSCRIPTION HAS EXPIRED,
+//        WE DO THE SAME FOR THEIR DATA HERE.
+        if(expirationDate.isBefore(now)) {
+            Plan plan = subscriptionMapper.toDomain(subscriptionEntity.getPlan());
+            plan.toFreePlan();
+            subscriptionEntity.getPlan().syncPlanEntity(plan);
+            latestPeriod.updateStatus(SubscriptionStatus.CANCELED.toString());
+        }
+
+//        IF THE EXPIRATION DATE REQUEST HAS BEEN SHIFT FORWARD
+//        MEANING, USER SUBSCRIPTION HAS BEEN RENEW, WE CRREATE
+//        A NEW PERIOD FOR USER.
+        if(expirationDate.isAfter(latestPeriod.getEndAt())){
+            SubscriptionPeriodEntity newPeriod = SubscriptionServiceHelper.createSubscriptionPeriod(
+                    subscriptionEntity, request.latestPurchaseDate(), request.expirationDate(), request.zoneId()
+            );
+            subscriptionEntity.getPeriods().add(newPeriod);
+        }
+
+
+        subscriptionRepository.saveSubscription(subscriptionEntity);
+        HashMap<String, String> response = new HashMap<>();
+        response.put("status", "success");
+        return response;
     }
 
     @Override
     public Map<String, String> getSubscriptionPlanByUserId(String userId) {
-
         PlanEntity planEntity = subscriptionRepository.getPlanByUserId(userId)
                 .orElseThrow(()-> new ResourceNotFoundException("Plan not found!"));
 
